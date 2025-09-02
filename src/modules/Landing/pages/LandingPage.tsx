@@ -37,7 +37,7 @@ const App = () => {
       <Header setShowLogin={setShowLogin} />
 
       {/* Hero Section */}
-      <section className="relative z-10 h-full flex flex-col sm:items-center md:items-start justify-center sm:text-center md:text-left text-neutral px-6 ">
+      <section className="relative z-10 h-full flex flex-col sm:items-center md:items-start justify-center sm:text-center md:text-left text-neutral px-6  ">
         <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold mb-4 drop-shadow-2xl animate-fade-in-up">
           Welcome to Our Denomination
         </h1>
