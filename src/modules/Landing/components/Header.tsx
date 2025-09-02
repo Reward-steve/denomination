@@ -19,11 +19,7 @@ export function Header({ setShowLogin }: HeaderProps) {
 
       {/* Actions */}
       <div className="flex items-center gap-3">
-        <Button
-          variant="primary"
-          textSize="xs"
-          onClick={() => setShowLogin(true)}
-        >
+        <Button variant="primary" onClick={() => setShowLogin(true)}>
           Login
         </Button>
       </div>

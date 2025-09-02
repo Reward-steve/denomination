@@ -35,9 +35,9 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
   // 🎨 Variants using theme colors instead of hard-coded values
   const variants: Record<string, string> = {
-    primary: `bg-primary text-text hover:bg-primary/80 shadow-sm`,
-    secondary: `bg-secondary text-surface hover:bg-secondary/80 shadow-sm`,
-    outline: `border border-subText text-subText hover:bg-gray`,
+    primary: `bg-primary text-neutral hover:bg-primary/80 shadow-sm`,
+    secondary: `bg-secondary text-text hover:bg-secondary/80 shadow-sm`,
+    outline: `border border-subText text-neutral hover:bg-gray`,
     ghost: `text-text hover:bg-background/50`,
     danger: "bg-red-500 text-white hover:bg-red-600",
     link: `text-secondary underline-offset-4 hover:underline bg-transparent`,
