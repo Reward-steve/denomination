@@ -28,8 +28,8 @@ export default {
         subText: "var(--color-subText)",
         gray: "var(--color-gray)",
         border: "var(--color-borderColor)",
-        black: "var(--color-black)",
-        white: "var(--color-white)",
+        // black: "var(--color-black)",
+        // white: "var(--color-white)",
 
         // Kept your existing custom error color
         error: "#e3342f",

@@ -1,5 +1,5 @@
 // src/types/emotion.d.ts
-import "@emotion/react"; // Required to augment Emotion's types
+import "@emotion/react";
 import type { Theme } from "@emotion/react";
 
 declare module "@emotion/react" {
@@ -10,10 +10,9 @@ declare module "@emotion/react" {
       background: string;
       dashboard: string;
       text: string;
-      black: string;
       subText: string;
       gray: string;
-      [key: string]: string; // Allow for additional colors
+      [key: string]: string;
     };
     typography: {
       fontFamily: string;
@@ -28,7 +27,6 @@ declare module "@emotion/react" {
       lg: string;
       xl: string;
     };
-    // Add more categories as needed (e.g., breakpoints, borders, shadows)
     breakpoints: {
       sm: string;
       md: string;
@@ -37,24 +35,23 @@ declare module "@emotion/react" {
   }
 }
 
+// Worship Soothing Light Theme
 export const lightTheme: Theme = {
   colors: {
-    primary: "#3F83F8", //base-color (blue)
-    secondary: "#364261", // text-colour
-    subText: "#848A98", // sub-text-colour
-    gray: "#667085", //Gray-500
-    borderColor: "#E5E5E5", //line-color
-    black: "#111928", // my-black
-    dashboard: "#f8f8ff", // white
-    background: "#ffffff", // white
-    white: "#ffffff", // white
-    text: "#111928", // my-black
+    primary: "#FF7900", // soft golden (faith/hope highlight)
+    secondary: "#2563EB", // gentle blue (trust/peace)
+    subText: "#6B7280", // muted gray
+    gray: "#9CA3AF", // neutral utility
+    borderColor: "#E5E7EB", // light gray border
+    dashboard: "#F9FAFB", // soft off-white background
+    background: "#FFFFFF", // clean white canvas
+    text: "#1F2937", // dark slate gray for readability
   },
   typography: {
     fontFamily: "'Inter', sans-serif",
-    fontSizeBase: "14px",
-    headingColor: "#111928",
-    bodyColor: "#364261",
+    fontSizeBase: "15px",
+    headingColor: "#111827", // slightly darker for emphasis
+    bodyColor: "#374151", // calm deep gray
   },
   spacing: {
     xs: "4px",
@@ -70,25 +67,23 @@ export const lightTheme: Theme = {
   },
 };
 
-// Dark theme definition
+// Worship Soothing Dark Theme
 export const darkTheme: Theme = {
   colors: {
-    primary: "#6389f4", // A slightly lighter blue for better contrast on a dark background
-    secondary: "#D1D5DB", // Light gray for main text
-    subText: "#9CA3AF", // Medium gray for subtext
-    gray: "#6B7280", // A utility gray for various elements
-    borderColor: "#4B5563", // Dark gray for borders
-    black: "#E5E7EB", // A light gray
-    dashboard: "#1F2937", //  A very dark blue-gray
-    background: "#1F2937", // A very dark blue-gray
-    white: "#374151", // A dark gray for elements that were white
-    text: "#E5E7EB", // A light gray for main text
+    primary: "#FACC15", // glowing warm gold
+    secondary: "#60A5FA", // softer sky blue
+    subText: "#9CA3AF", // muted gray
+    gray: "#6B7280", // utility gray
+    borderColor: "#374151", // subtle border
+    dashboard: "#111827", // deep slate background
+    background: "#1F2937", // dark calming tone
+    text: "#F3F4F6", // soft near-white text
   },
   typography: {
     fontFamily: "'Inter', sans-serif",
-    fontSizeBase: "14px",
-    headingColor: "#E5E7EB", // Light gray for headings
-    bodyColor: "#D1D5DB", // Lighter gray for body text
+    fontSizeBase: "15px",
+    headingColor: "#F9FAFB", // brighter for headers
+    bodyColor: "#D1D5DB", // soft light gray body
   },
   spacing: {
     xs: "4px",
