@@ -3,6 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "description": "A school management system",
+  "homepage": "https://github.com/Reward-steve/denomination#readme",
+  "bugs": {
+    "url": "https://github.com/Reward-steve/denomination/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Reward-steve/denomination.git"
+  },
   "license": "ISC",
   "author": "reward stephen",
   "type": "module",
