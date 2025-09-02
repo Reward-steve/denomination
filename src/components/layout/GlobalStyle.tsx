@@ -7,21 +7,27 @@ const GlobalStyles = () => {
     <Global
       styles={css`
         :root {
+          /* Colors */
           --color-primary: ${theme.colors.primary};
           --color-secondary: ${theme.colors.secondary};
-          --color-subText: ${theme.colors.subText};
-          --color-borderColor: ${theme.colors.borderColor};
-          --color-dashboard: ${theme.colors.dashboard};
-          --color-background: ${theme.colors.background};
-          --color-white: ${theme.colors.white};
+          --color-accent: ${theme.colors.accent};
           --color-text: ${theme.colors.text};
-          --color-headingColor: ${theme.typography.headingColor};
+          --color-text-secondary: ${theme.colors.textSecondary};
+          --color-text-placeholder: ${theme.colors.textPlaceholder};
+          --color-background: ${theme.colors.background};
+          --color-surface: ${theme.colors.surface};
+          --color-border: ${theme.colors.border};
+          --color-neutral: ${theme.colors.neutral};
         }
+
         body {
           font-family: ${theme.typography.fontFamily};
-          font-size: ${theme.typography.fontSizeBase};
+          font-size: ${theme.typography.fontSize.base};
+          line-height: ${theme.typography.lineHeight};
           background-color: var(--color-background);
           color: var(--color-text);
+          margin: 0;
+          padding: 0;
         }
       `}
     />

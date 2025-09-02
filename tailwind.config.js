@@ -22,16 +22,16 @@ export default {
       colors: {
         primary: "var(--color-primary)",
         secondary: "var(--color-secondary)",
-        dashboard: "var(--color-dashboard)",
-        background: "var(--color-background)",
+        accent: "var(--color-accent)",
         text: "var(--color-text)",
-        subText: "var(--color-subText)",
-        gray: "var(--color-gray)",
-        border: "var(--color-borderColor)",
-        // black: "var(--color-black)",
-        // white: "var(--color-white)",
+        textSecondary: "var(--color-text-secondary)",
+        textPlaceholder: "var(--color-text-placeholder)",
+        background: "var(--color-background)",
+        surface: "var(--color-surface)",
+        border: "var(--color-border)",
+        neutral: "var(--color-neutral)",
 
-        // Kept your existing custom error color
+        // Kept your existing custom error color for consistency
         error: "#e3342f",
       },
     },

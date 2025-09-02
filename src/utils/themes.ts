@@ -7,25 +7,39 @@ declare module "@emotion/react" {
     colors: {
       primary: string;
       secondary: string;
-      background: string;
-      dashboard: string;
+      accent: string;
       text: string;
-      subText: string;
-      gray: string;
-      [key: string]: string;
+      textSecondary: string;
+      textPlaceholder: string;
+      background: string;
+      surface: string;
+      border: string;
+      neutral: string;
     };
     typography: {
       fontFamily: string;
-      fontSizeBase: string;
-      headingColor: string;
-      bodyColor: string;
+      fontSize: {
+        xs: string;
+        sm: string;
+        base: string;
+        lg: string;
+        xl: string;
+      };
+      fontWeight: {
+        regular: number;
+        medium: number;
+        bold: number;
+      };
+      lineHeight: string;
     };
     spacing: {
-      xs: string;
-      sm: string;
-      md: string;
-      lg: string;
-      xl: string;
+      unit: number;
+      xs: number;
+      sm: number;
+      md: number;
+      lg: number;
+      xl: number;
+      xxl: number;
     };
     breakpoints: {
       sm: string;
@@ -35,66 +49,94 @@ declare module "@emotion/react" {
   }
 }
 
-// Worship Soothing Light Theme
+// 🌤️ Modern & Serene Light Theme
 export const lightTheme: Theme = {
   colors: {
-    primary: "#FF7900", // soft golden (faith/hope highlight)
-    secondary: "#2563EB", // gentle blue (trust/peace)
-    subText: "#6B7280", // muted gray
-    gray: "#9CA3AF", // neutral utility
-    borderColor: "#E5E7EB", // light gray border
-    dashboard: "#F9FAFB", // soft off-white background
-    background: "#FFFFFF", // clean white canvas
-    text: "#1F2937", // dark slate gray for readability
+    primary: "#6366F1", // Spiritual and calming blue
+    secondary: "#FACC15", // Hopeful yellow
+    accent: "#10B981", // Calming green for success states
+    text: "#1F2937", // Readable dark gray
+    textSecondary: "#4B5563", // Muted text for less important info
+    textPlaceholder: "#9CA3AF", // Light gray for form placeholders
+    background: "#F9FAFB", // Soft off-white background
+    surface: "#FFFFFF", // Clean white for cards and elements
+    border: "#E5E7EB", // Subtle dividers and borders
+    neutral: "#D1D5DB", // General neutral gray
   },
   typography: {
     fontFamily: "'Inter', sans-serif",
-    fontSizeBase: "15px",
-    headingColor: "#111827", // slightly darker for emphasis
-    bodyColor: "#374151", // calm deep gray
+    fontSize: {
+      xs: "0.75rem",
+      sm: "0.875rem",
+      base: "1rem",
+      lg: "1.125rem",
+      xl: "1.25rem",
+    },
+    fontWeight: {
+      regular: 400,
+      medium: 500,
+      bold: 700,
+    },
+    lineHeight: "1.5",
   },
   spacing: {
-    xs: "4px",
-    sm: "8px",
-    md: "16px",
-    lg: "24px",
-    xl: "32px",
+    unit: 8,
+    xs: 0.5,
+    sm: 1,
+    md: 2,
+    lg: 3,
+    xl: 4,
+    xxl: 6,
   },
   breakpoints: {
-    sm: "600px",
-    md: "960px",
-    lg: "1280px",
+    sm: "640px",
+    md: "768px",
+    lg: "1024px",
   },
 };
 
-// Worship Soothing Dark Theme
+// 🌙 Modern & Serene Dark Theme
 export const darkTheme: Theme = {
   colors: {
-    primary: "#FACC15", // glowing warm gold
-    secondary: "#60A5FA", // softer sky blue
-    subText: "#9CA3AF", // muted gray
-    gray: "#6B7280", // utility gray
-    borderColor: "#374151", // subtle border
-    dashboard: "#111827", // deep slate background
-    background: "#1F2937", // dark calming tone
-    text: "#F3F4F6", // soft near-white text
+    primary: "#818cf8", // Lighter primary for contrast
+    secondary: "#FCD34D", // Glowing secondary
+    accent: "#34D399", // Calming green
+    text: "#E5E7EB", // Gentle off-white
+    textSecondary: "#9CA3AF", // Muted text
+    textPlaceholder: "#4B5563", // Darker placeholder text
+    background: "#111827", // Deep navy for less eye strain
+    surface: "#1F2937", // Dark gray for cards and elements
+    border: "#374151", // Soft borders
+    neutral: "#4B5563", // General neutral gray
   },
   typography: {
     fontFamily: "'Inter', sans-serif",
-    fontSizeBase: "15px",
-    headingColor: "#F9FAFB", // brighter for headers
-    bodyColor: "#D1D5DB", // soft light gray body
+    fontSize: {
+      xs: "0.75rem",
+      sm: "0.875rem",
+      base: "1rem",
+      lg: "1.125rem",
+      xl: "1.25rem",
+    },
+    fontWeight: {
+      regular: 400,
+      medium: 500,
+      bold: 700,
+    },
+    lineHeight: "1.5",
   },
   spacing: {
-    xs: "4px",
-    sm: "8px",
-    md: "16px",
-    lg: "24px",
-    xl: "32px",
+    unit: 8,
+    xs: 0.5,
+    sm: 1,
+    md: 2,
+    lg: 3,
+    xl: 4,
+    xxl: 6,
   },
   breakpoints: {
-    sm: "600px",
-    md: "960px",
-    lg: "1280px",
+    sm: "640px",
+    md: "768px",
+    lg: "1024px",
   },
 };

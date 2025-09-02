@@ -37,21 +37,21 @@ const App = () => {
       <Header setShowLogin={setShowLogin} />
 
       {/* Hero Section */}
-      <section className="relative z-10 h-full flex flex-col items-center md:items-start justify-center text-center md:text-left text-white px-6">
+      <section className="relative z-10 h-full flex flex-col items-center md:items-start justify-center text-center md:text-left text-neutral px-6">
         <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold mb-4 drop-shadow-2xl animate-fade-in-up">
           Welcome to Our Denomination
         </h1>
-        <p className="text-base sm:text-lg md:text-xl max-w-xl animate-fade-in-up animation-delay-300 text-slate-300">
+        <p className="text-base sm:text-lg md:text-xl max-w-xl animate-fade-in-up animation-delay-300 text-neutral">
           Experience faith, community, and growth like never before.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 mt-6">
-          <Button variant="default" size="lg" className="rounded-xl font-bold">
+          <Button variant="primary" size="lg" className="">
             Start Application
           </Button>
           <Button
             variant="secondary"
             size="lg"
-            className="rounded-xl hover:bg-slate-200 hover:text-black font-bold"
+            className=""
             onClick={() => setShowLogin(true)}
           >
             Existing User? Login
