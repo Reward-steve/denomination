@@ -24,7 +24,4 @@ node_modules
 *.sln
 *.sw?
 
-
-# ignore build outputs
-build/
-dist/
+ 
