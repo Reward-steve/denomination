@@ -42,18 +42,17 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
   // 🎨 Variants using theme colors instead of hard-coded values
   const variants: Record<string, string> = {
-    primary: `bg-primary text-neutral hover:bg-primary/80 shadow-sm`,
-    secondary: `bg-secondary text-text hover:bg-secondary/80 shadow-sm`,
-    outline: `border border-subText text-neutral hover:bg-gray`,
-    ghost: `text-text hover:bg-background/50`,
+    primary: "bg-primary text-white hover:bg-primary/80 shadow-sm",
+    secondary: "bg-secondary text-white hover:bg-secondary/80 shadow-sm",
+    outline: "border border-subText text-text hover:bg-gray-100",
+    ghost: "text-text hover:bg-gray-50",
     danger: "bg-red-500 text-white hover:bg-red-600",
-    link: `text-secondary underline-offset-4 hover:underline bg-transparent`,
-    // ✅ Auth-specific button
+    link: "text-secondary underline-offset-4 hover:underline bg-transparent",
     auth: `
-    w-full flex justify-center
-    bg-primary hover:bg-secondary
-    text-white hover:text-white
-    items-center transition-all
+    w-full flex justify-center items-center
+    bg-primary text-white
+    hover:bg-secondary hover:text-white
+    transition-all
     h-[52px] rounded-lg m-0
   `,
   };

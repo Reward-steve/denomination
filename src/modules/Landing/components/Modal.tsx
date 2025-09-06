@@ -1,4 +1,4 @@
-import Login from "../../auth/pages/LoginModal";
+import { Login } from "../../auth/pages/LoginModal";
 
 interface ModalProps {
   showLogin: boolean;

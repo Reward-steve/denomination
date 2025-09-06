@@ -9,10 +9,8 @@ import { Dropdown } from "../../../components/ui/Dropdown";
 import { Button } from "../../../components/ui/Button";
 import { Loader } from "../../../components/ui/Loader";
 import type { PersonalInfoFormData } from "../../../types/auth.types";
-import { createUCCAUser } from "../services/auth";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { getFromStore } from "../../../utils/appHelpers";
 
 // The UCCAInfo component
 export function UCCAInfo() {
@@ -24,19 +22,11 @@ export function UCCAInfo() {
     control,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<PersonalInfoFormData>({
-    defaultValues: {
-      previous_pew: "",
-      date_ucca: "",
-      promotion_method: "",
-      inducted: false,
-      induction_date: "",
-    },
-  });
+  } = useForm<PersonalInfoFormData>();
 
   // Watch for changes in the 'inducted' and 'promotion_method' fields
-  const inducted = watch("inducted");
-  const promotionEvidence = watch("promotion_method");
+  const inducted = watch("bio.inducted");
+  const promotionEvidence = watch("bio.promotion_method");
 
   useEffect(() => {
     setStep(4);
@@ -45,26 +35,18 @@ export function UCCAInfo() {
 
   const onSubmit = async (formData: PersonalInfoFormData) => {
     try {
-      const userId = getFromStore("user_id", "session");
-
       const payload = {
-        user_id: Number(userId),
-        previous_pew: formData.previous_pew || null,
-        date_ucca: formData.date_ucca || null,
-        promotion_method: formData.promotion_method || null,
-        inducted: !!formData.inducted, // force boolean
-        induction_date: formData.induction_date || null,
+        bio: {
+          ...formData.bio,
+          inducted: formData.bio?.inducted ? 1 : 0,
+        },
       };
 
-      const res = await createUCCAUser(payload);
-      console.log(res.data?.id, res.data);
-      if (res.success) {
-        updateData(formData);
-        toast.success(res.message);
-        navigate("/auth/prev-position");
-      } else {
-        toast.error(res.message);
-      }
+      // ✅ Just update context — no API call yet
+      updateData(payload);
+
+      toast.success("UCCA details saved!");
+      navigate("/auth/prev-position"); // move to next step
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "An unexpected error occurred."
@@ -87,22 +69,22 @@ export function UCCAInfo() {
         label="Previous Pew"
         placeholder="Enter previous pew (e.g., UCCA Zone 1)"
         icon={FaHome}
-        register={register("previous_pew")}
+        register={register("bio.previous_pew")}
         optional={true}
-        error={errors.previous_pew}
+        error={errors?.bio?.previous_pew}
       />
       <FormInput
         label="Date of Promotion to UCCA"
         placeholder="YYYY-MM-DD"
         type="date"
         icon={FaCalendar}
-        register={register("date_ucca", {
+        register={register("bio.date_ucca", {
           required: "Date of promotion is required",
         })}
-        error={errors.date_ucca}
+        error={errors?.bio?.date_ucca}
       />
       <Controller
-        name="promotion_method"
+        name="bio.promotion_method"
         control={control}
         rules={{ required: "Promotion evidence is required" }}
         render={({ field }) => (
@@ -113,8 +95,8 @@ export function UCCAInfo() {
             displayValueKey="name"
             size="big"
             onSelect={(item) => field.onChange(item.name)}
-            isError={!!errors.promotion_method}
-            errorMsg={errors.promotion_method?.message}
+            isError={!!errors?.bio?.promotion_method}
+            errorMsg={errors?.bio?.promotion_method?.message}
             value={field.value}
           />
         )}
@@ -132,7 +114,7 @@ export function UCCAInfo() {
           type="checkbox"
           id="inducted"
           className="form-checkbox text-blue-600 rounded-md"
-          {...register("inducted")}
+          {...register("bio.inducted")}
         />
         <label htmlFor="inducted" className="text-gray-700 flex items-center">
           Inducted?
@@ -144,10 +126,10 @@ export function UCCAInfo() {
           placeholder="YYYY-MM-DD"
           type="date"
           icon={FaCalendar}
-          register={register("induction_date", {
+          register={register("bio.induction_date", {
             required: "Induction date is required",
           })}
-          error={errors.induction_date}
+          error={errors?.bio?.induction_date}
         />
       )}
       <Button

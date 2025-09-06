@@ -9,10 +9,8 @@ import { Loader } from "../../../components/ui/Loader";
 import { FaHome } from "react-icons/fa";
 import { FaPhone, FaUser } from "react-icons/fa6";
 import type { PersonalInfoFormData } from "../../../types/auth.types";
-import { createUCCAUser } from "../services/auth";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { getFromStore } from "../../../utils/appHelpers";
 
 // The NOKInfo component
 export default function NOKInfo() {
@@ -32,22 +30,15 @@ export default function NOKInfo() {
 
   const onSubmit = async (formData: PersonalInfoFormData) => {
     try {
-      const userId = getFromStore("user_id", "session");
-
       const payload = {
-        user_id: Number(userId),
         nok: formData.nok,
       };
 
-      const res = await createUCCAUser(payload);
-      console.log(res.data?.id, res.data);
-      if (res.success) {
-        updateData(formData);
-        toast.success(res.message);
-        navigate("/auth/ucca-info");
-      } else {
-        toast.error(res.message);
-      }
+      // ✅ Just update context — no API call here
+      updateData(payload);
+
+      toast.success("Next of kin details saved!");
+      navigate("/auth/ucca-info"); // proceed to step 4
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "An unexpected error occurred."

@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import type { PersonalInfoFormData } from "../../../types/auth.types";
+import { type PersonalInfoFormData } from "../../../types/auth.types";
 import { useNavigate } from "react-router-dom";
 import { useRegistration } from "../../../hooks/useReg";
 import { toast } from "react-toastify";
-import { createUCCAUser } from "../services/auth";
-import { formatDate, saveInStore } from "../../../utils/appHelpers";
 import Form from "../../../components/layout/Form";
 import ImageUploader from "../components/ImageUploader";
 import FormInput from "../../../components/ui/FormInput";
@@ -23,10 +21,6 @@ import { Dropdown } from "../../../components/ui/Dropdown";
 import { FaHome } from "react-icons/fa";
 import { Button } from "../../../components/ui/Button";
 import { Loader } from "../../../components/ui/Loader";
-// gender: genderOptions.find((opt) => opt.id === data.gender) || null,
-//     marital_status:
-//       maritalStatusOptions.find((opt) => opt.id === data.marital_status) ||
-//
 
 interface DropdownOption {
   id: string;
@@ -57,27 +51,23 @@ function PersonalInfo() {
     register,
     handleSubmit,
     control,
-    setValue,
+
     watch,
     formState: { errors, isSubmitting },
   } = useForm<PersonalInfoFormData>();
   const password = watch("bio.password");
 
   const navigate = useNavigate();
-  const { data, setStep, setPrev, updateData } = useRegistration();
-  const { email } = data;
+  const { setStep, setPrev, updateData } = useRegistration();
+
   const watchedMaritalStatus = watch("bio.marital_status");
   const watchedGender = watch("bio.gender");
-  const watchedPriestStatus = watch("priest_status_id");
+  const watchedPriestStatus = watch("bio.priest_status");
 
   useEffect(() => {
     setStep(1);
     setPrev(false);
   }, [setStep, setPrev]);
-
-  useEffect(() => {
-    if (email) setValue("email", email);
-  }, [email, setValue]);
 
   const onSubmit = async (formData: PersonalInfoFormData) => {
     if (!watchedGender) {
@@ -94,25 +84,12 @@ function PersonalInfo() {
     }
 
     try {
-      const payload = {
-        ...formData,
-        bio: {
-          ...formData.bio,
-          dob: formatDate(formData.bio.dob, "yyyy-mm-dd"), // enforce format
-        },
-      };
+      const payload = { ...formData, photo: imageFile! };
+      //✅ Save form data + image file in context for later
+      updateData(payload);
 
-      const res = await createUCCAUser(payload, imageFile!);
-      console.log(res.data?.id, res.data);
-      if (res.success && res.data) {
-        saveInStore("user_id", res.data?.id, "session");
-        saveInStore("phone", payload.bio.phone, "session");
-        updateData(formData);
-        toast.success(res.message);
-        navigate("/auth/education-data");
-      } else {
-        toast.error(res.message);
-      }
+      toast.success("Personal information saved!");
+      navigate("/auth/education-data");
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "An unexpected error occurred."
@@ -233,32 +210,32 @@ function PersonalInfo() {
               optional={true}
               label="Secondary Mobile Number"
               placeholder="Secondary mobile number"
-              error={errors.secondary_phone}
+              error={errors?.bio?.secondary_phone}
               icon={FaPhone}
-              register={register("secondary_phone")}
+              register={register("bio.secondary_phone")}
             />
             <FormInput
               label="Home Address"
               placeholder="Enter Home Address"
-              error={errors.residential_address}
+              error={errors?.bio?.residential_address}
               icon={FaHome}
-              register={register("residential_address", {
+              register={register("bio.residential_address", {
                 required: "Home address is required",
               })}
             />
             <FormInput
               type="email"
               label="Email"
-              placeholder="your.email@example.com"
+              placeholder="youremail@example.com"
               icon={GoMail}
-              register={register("email", {
+              register={register("bio.email", {
                 required: "Email is required",
                 pattern: {
                   value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                   message: "Enter a valid email",
                 },
               })}
-              error={errors.email}
+              error={errors?.bio?.email}
             />
           </div>
         </div>
@@ -273,9 +250,9 @@ function PersonalInfo() {
             <FormInput
               label="Nationality"
               placeholder="Enter Nationality"
-              error={errors.nationality}
+              error={errors?.bio?.nationality}
               icon={FaGlobe}
-              register={register("nationality", {
+              register={register("bio.nationality", {
                 required: "Nationality is required",
               })}
             />
@@ -352,7 +329,7 @@ function PersonalInfo() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Controller
-              name="priest_status_id"
+              name="bio.priest_status"
               control={control}
               rules={{ required: "Priest status is required" }}
               render={({ field, fieldState: { error } }) => (
@@ -372,9 +349,9 @@ function PersonalInfo() {
               optional={true}
               label="Hobbies"
               placeholder="Comma separated names of hobbies"
-              error={errors.hobbies}
+              error={errors?.bio?.hobbies}
               icon={FaHeart}
-              register={register("hobbies")}
+              register={register("bio.hobbies")}
             />
           </div>
         </div>
@@ -403,9 +380,9 @@ function PersonalInfo() {
               label="Confirm Password"
               placeholder="Confirm your password"
               type="password"
-              error={errors.confirm_password}
+              error={errors?.bio?.confirm_password}
               icon={FaLock}
-              register={register("confirm_password", {
+              register={register("bio.confirm_password", {
                 required: "Confirm password is required",
                 validate: (value) =>
                   value === password || "Passwords do not match",

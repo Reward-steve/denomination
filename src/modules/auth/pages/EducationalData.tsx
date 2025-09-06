@@ -7,10 +7,8 @@ import { FaGraduationCap, FaStar } from "react-icons/fa";
 import { Button } from "../../../components/ui/Button";
 import { Loader } from "../../../components/ui/Loader";
 import type { PersonalInfoFormData } from "../../../types/auth.types";
-import { createUCCAUser } from "../services/auth";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { getFromStore } from "../../../utils/appHelpers";
 
 // Keep backend payload as string[], but use an object array internally for robust FieldArray control.
 type FormValues = Omit<PersonalInfoFormData, "skills"> & {
@@ -94,25 +92,18 @@ export function EducationData() {
 
   const onSubmit = async (formData: FormValues) => {
     try {
-      // Map to the backend contract: string[]
       const skillsAsStrings = (formData.skills || []).map((s) => s.value);
-      const userId = getFromStore("user_id", "session");
 
       const payload = {
-        user_id: Number(userId),
         education: { ...formData.education },
         skills: skillsAsStrings,
       };
 
-      const res = await createUCCAUser(payload);
-      console.log(res.data?.id, res.data);
-      if (res.success) {
-        updateData(payload);
-        toast.success(res.message);
-        navigate("/auth/next-of-kin");
-      } else {
-        toast.error(res.message);
-      }
+      // ✅ Store data in context for final submit
+      updateData(payload);
+
+      toast.success("Education details saved!");
+      navigate("/auth/next-of-kin"); // move to step 3
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "An unexpected error occurred."

@@ -6,7 +6,7 @@ import { FaBriefcase, FaCalendar, FaPlus, FaTrash } from "react-icons/fa6";
 import FormInput from "../../../components/ui/FormInput";
 import { Button } from "../../../components/ui/Button";
 import { Loader } from "../../../components/ui/Loader";
-import type { PersonalInfoFormData } from "../../../types/auth.types";
+import { type PersonalInfoFormData } from "../../../types/auth.types";
 import { createUCCAUser } from "../services/auth";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -14,19 +14,14 @@ import { getFromStore } from "../../../utils/appHelpers";
 
 // The PrevPosition component
 export function PrevPosition() {
-  const { setStep, setPrev, updateData } = useRegistration();
+  const { setStep, setPrev, updateData, data } = useRegistration();
   const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     control,
     formState: { errors, isSubmitting },
-  } = useForm<PersonalInfoFormData>({
-    defaultValues: {
-      prev_positions: [],
-      bcs_position: "",
-    },
-  });
+  } = useForm<PersonalInfoFormData>();
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -38,28 +33,52 @@ export function PrevPosition() {
     setPrev(true);
   }, [setStep, setPrev]);
 
-  const onSubmit = async (formData: PersonalInfoFormData) => {
+  const onSubmit = async (formData: Partial<PersonalInfoFormData>) => {
     try {
       const userId = getFromStore("user_id", "session");
 
-      const payload = {
-        user_id: Number(userId),
-        prev_positions: { ...formData.prev_positions },
-        bcs_position: formData.bcs_position,
+      if (!userId) {
+        toast.error("User session lost. Please restart registration.");
+        return;
+      }
+      // Save step 5 data into context
+      updateData({
+        prev_positions: formData.prev_positions,
+        bio: {
+          ...(data.bio || {}),
+          bcs_position:
+            formData.bio?.bcs_position || data.bio?.bcs_position || "",
+        },
+      });
+      // Build final payload from all context data
+      const finalPayload = {
+        ...data,
+        prev_positions: formData.prev_positions,
+        bio: {
+          ...(data.bio || {}),
+          bcs_position:
+            formData.bio?.bcs_position || data.bio?.bcs_position || "",
+        },
       };
 
-      const res = await createUCCAUser(payload);
-      console.log(res.data?.id, res.data);
+      console.log(data, finalPayload);
+
+      const res = await createUCCAUser(finalPayload);
+      console.log("Response:", res);
       if (res.success) {
-        updateData(formData);
-        toast.success(res.message);
-        navigate("/auth/prev-position");
+        toast.success("Registration completed successfully!");
+        // 🔥 Clear registration state after success
+        sessionStorage.removeItem("ucca_reg_step");
+        sessionStorage.removeItem("ucca_reg_prev");
+        sessionStorage.removeItem("ucca_reg_data");
+        setStep(6);
+        navigate("/auth/success");
       } else {
-        toast.error(res.message);
+        toast.error(res.message || "Registration failed");
       }
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "An unexpected error occurred."
+        error instanceof Error ? error.message : "An unexpected error occurred"
       );
     }
   };
@@ -140,9 +159,9 @@ export function PrevPosition() {
         label="Current Position held in BCS"
         placeholder="e.g., UCCA President"
         icon={FaBriefcase}
-        register={register("bcs_position")}
+        register={register("bio.bcs_position")}
         optional={true}
-        error={errors.bcs_position}
+        error={errors?.bio?.bcs_position}
       />
 
       <Button
