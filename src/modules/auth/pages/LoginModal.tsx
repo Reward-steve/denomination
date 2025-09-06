@@ -61,7 +61,7 @@ export function Login({ showLogin, handleCloseLogin }: ModalProps) {
         <button
           onClick={handleCloseLogin}
           aria-label="Close login form"
-          className="absolute top-4 right-4 text-primary hover:text-secondary transition-colors"
+          className="absolute z-[200] top-4 right-4 text-primary hover:text-secondary transition-colors"
         >
           <FaTimes className="h-5 w-5" />
         </button>

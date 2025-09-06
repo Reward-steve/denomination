@@ -75,7 +75,7 @@ const App = () => {
         {/* Backdrop */}
         <div
           onClick={handleCloseLogin}
-          className="absolute inset-0 bg-black/70 backdrop-blur-sm cursor-pointer"
+          className="absolute inset-0 cursor-pointer"
         />
 
         {showLogin && (

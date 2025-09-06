@@ -43,7 +43,7 @@ export const SidebarLink = ({ to, label, num, isActive }: SidebarLinkProps) => {
 
   return (
     <button
-      // disabled={true}
+      disabled={true}
       title={label}
       onClick={handleClick}
       className={`w-full text-left my-4 flex justify-between items-center gap-3 p-2 rounded-md transition text-sm ${
