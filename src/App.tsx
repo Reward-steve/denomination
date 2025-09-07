@@ -3,9 +3,10 @@ import { ToastContainer } from "react-toastify";
 import { ThemeProvider } from "./context/ThemeProvider";
 import LandingPage from "./modules/Landing/pages/LandingPage";
 import { RegistrationProvider } from "./context/RegProvider";
-import Settings from "./modules/auth/components/Layout";
-import { auth } from "./routes";
+import Layout from "./modules/auth/components/Layout";
+import { auth, dashboard } from "./routes";
 import ResponsiveProvider from "./context/ResponsiveProvider";
+import { authMenu, dashboardMenu } from "./constant";
 
 // This component will use the theme from our context
 function ThemedAppContent() {
@@ -20,21 +21,27 @@ function ThemedAppContent() {
       />
 
       <Routes>
-        {/* Redirect root to Landing Page */}
         <Route index element={<Navigate to="/landing-page" replace />} />
         {/* Landing Page */}
         <Route path="/landing-page" element={<LandingPage />} />
         {/*Auth-flow - Corrected approach */}
 
-        <Route path="/auth/*" element={<Settings />}>
-          {/* All child routes of /auth/ should be nested here */}
+        <Route
+          path="/auth/*"
+          element={<Layout Items={authMenu} disabled={true} />}
+        >
+          <Route index element={<Navigate to="personal-info" replace />} />
           {auth.map(({ path, element: Element }) => (
             <Route key={path} path={path} element={<Element />} />
           ))}
         </Route>
 
-        {/* 404 Fallback */}
-        {/* <Route path="*" element={<NotFound />} /> */}
+        <Route path="/dashboard/*" element={<Layout Items={dashboardMenu} />}>
+          <Route index element={<Navigate to="home" replace />} />
+          {dashboard.map(({ path, element: Element }) => (
+            <Route key={path} path={path} element={<Element />} />
+          ))}
+        </Route>
       </Routes>
     </RegistrationProvider>
   );

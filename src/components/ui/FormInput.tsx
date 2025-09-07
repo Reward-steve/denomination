@@ -42,12 +42,12 @@ export default function FormInput({
           maxLength={maxLength}
           type={inputType}
           placeholder={placeholder}
-          className={`${className} text-sm w-full outline-none bg-transparent ${
+          className={`${className} accent-accent text-sm w-full outline-none bg-transparent ${
             Icon ? "pl-9" : "pl-4"
           } pr-10 h-[52px] rounded-xl transition-all duration-200 focus:ring-1 ${
             error
               ? "border border-error text-error ring-error animate-shake"
-              : "border border-border text-text focus:border-primary focus:ring-primary"
+              : "border border-border text-text focus:border-accent focus:ring-accent"
           }`}
           {...register}
           style={styles}
@@ -60,9 +60,9 @@ export default function FormInput({
             className="absolute bottom-5 right-3 text-subText focus:outline-none"
           >
             {showPassword ? (
-              <FaEyeSlash className="h-4 w-4" />
+              <FaEyeSlash className="h-4 w-4 text-accent" />
             ) : (
-              <FaEye className="h-4 w-4" />
+              <FaEye className="h-4 w-4 text-accent" />
             )}
           </button>
         )}

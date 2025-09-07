@@ -35,7 +35,7 @@ export default function RegistrationSuccess() {
         </p>
 
         <div className="mt-8 flex flex-col space-y-4">
-          <Button variant="primary" onClick={() => navigate("/dashboard")}>
+          <Button variant="auth" onClick={() => navigate("/dashboard")}>
             Go to Dashboard
           </Button>
           <Button variant="outline" onClick={() => setShowLogin(true)}>

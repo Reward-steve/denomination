@@ -30,7 +30,7 @@ export default function Form({
           {/* Step Progress */}
           {step > 0 && step < 5 ? (
             <div>
-              <p className="text-sm font-medium text-primary mb-2 flex justify-between">
+              <p className="text-sm font-medium text-accent mb-2 flex justify-between">
                 <span className="text-xs font-semibold text-textPlaceholder">
                   Step {step} of 5
                 </span>
@@ -40,7 +40,7 @@ export default function Form({
               </p>
               <div className="w-full h-2 bg-border rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-primary transition-all duration-500"
+                  className="h-full bg-accent transition-all duration-500"
                   style={{ width: `${(step / 5) * 100}%` }}
                 />
               </div>

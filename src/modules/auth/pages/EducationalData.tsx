@@ -172,7 +172,7 @@ export function EducationData() {
             </span>
             <input
               type="text"
-              className="pl-10 h-[52px] rounded-xl transition-all duration-200 focus:ring-1 border border-border text-text focus:border-primary focus:ring-primary text-sm w-full outline-none bg-transparent"
+              className="pl-10 h-[52px] rounded-xl transition-all duration-200 focus:ring-1 border border-border text-text focus:border-accent focus:ring-accent text-sm w-full outline-none bg-transparent"
               placeholder="Type a skill and press Enter (or paste comma-separated)"
               value={skillInput}
               onChange={(e) => setSkillInput(e.target.value)}
@@ -181,14 +181,16 @@ export function EducationData() {
               aria-label="Add a skill"
             />
           </div>
-          <Button
-            type="button"
-            variant="primary"
-            textSize="sm"
-            onClick={() => addSkill(skillInput)}
-          >
-            Add
-          </Button>
+          <div>
+            <Button
+              type="button"
+              variant="auth"
+              textSize="sm"
+              onClick={() => addSkill(skillInput)}
+            >
+              Add +
+            </Button>
+          </div>
         </div>
 
         {/* Hidden input attaches validation to the array */}
@@ -206,7 +208,7 @@ export function EducationData() {
                 <button
                   type="button"
                   onClick={() => removeSkill(idx)}
-                  className="rounded-full px-2 py-0.5 hover:bg-red-50"
+                  className="rounded-full px-2 py-0.5 hover:bg-red-200"
                   aria-label={`Remove ${field.value}`}
                   title="Remove"
                 >

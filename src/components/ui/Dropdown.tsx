@@ -107,7 +107,7 @@ export function Dropdown({
     ".dd-input": {
       border: isError
         ? "1px solid red"
-        : `1px solid ${isOpen ? theme.colors.primary : theme.colors.border}`,
+        : `1px solid ${isOpen ? theme.colors.accent : theme.colors.border}`,
       padding: size === "big" ? "15px 10px" : "10px 40px 10px 10px",
       borderRadius: 12,
       cursor: filterable ? "auto" : "pointer",
@@ -246,7 +246,7 @@ export function Dropdown({
             className={`mx-[-35px] chev ${isOpen ? "rotate" : ""} ${
               rest.disabled ? "cursor-not-allowed" : "cursor-pointer"
             }`}
-            color={loading ? theme.colors.neutral : theme.colors.primary}
+            color={loading ? theme.colors.neutral : theme.colors.accent}
           />
         </div>
         {isError && <small className="text-red-400 pl-2">{errorMsg}</small>}
@@ -285,7 +285,7 @@ export function DropdownItem({
   const theme = useTheme();
   const itemStyles = css({
     padding: "5px 10px",
-    color: active ? `${theme.colors.text}` : `${theme.colors.textSecondary}`,
+    color: active ? `${theme.colors.accent}` : `${theme.colors.textSecondary}`,
     fontWeight: active ? "600" : "normal",
     cursor: "pointer",
     fontSize: "14px",

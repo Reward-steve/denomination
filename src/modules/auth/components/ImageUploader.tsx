@@ -46,7 +46,7 @@ export default function ImageUploader({
         </div>
 
         {/* Plus Icon */}
-        <div className="absolute bottom-[-1px] right-[-2px] w-6 h-6 rounded-full bg-primary border-2 border-white flex items-center justify-center shadow hover:bg-secondary transition-colors duration-200">
+        <div className="absolute bottom-[-1px] right-[-2px] w-6 h-6 rounded-full bg-accent border-2 border-white flex items-center justify-center shadow hover:bg-[#10B981]/80 transition-colors duration-200">
           <FaPlus className="text-white text-xs" />
         </div>
       </label>

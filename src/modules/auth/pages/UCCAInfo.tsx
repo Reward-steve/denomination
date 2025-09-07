@@ -102,7 +102,7 @@ export function UCCAInfo() {
         )}
       />
       {promotionEvidence === "Father's Letter" && (
-        <label className="text-sm w-full hover:bg-neutral hover:text-primary gap-2 outline-none bg-background border border-border rounded-xl flex justify-center items-center  pr-10 h-[52px] transition-all duration-200 focus:ring-1">
+        <label className="text-sm w-full hover:bg-neutral hover:text-accent gap-2 outline-none bg-background border border-border rounded-xl flex justify-center items-center  pr-10 h-[52px] transition-all duration-200 focus:ring-1">
           Upload Promotion Letter
           <FaUpload className="text-sm text-textPlaceholder" />
           <input type="file" className="hidden" />

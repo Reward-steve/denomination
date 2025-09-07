@@ -12,7 +12,7 @@ export default function Logo({ isCollapsed }: { isCollapsed?: boolean }) {
           <img
             src={logo}
             alt="logo"
-            className="w-12 h-12 transition-all duration-500 rounded-full border border-border overflow-x-hidden"
+            className="w-12 h-12 transition-all duration-500 rounded-full border border-accent overflow-x-hidden"
           />
           <span className="text-md whitespace-nowrap">UCCA</span>
         </>

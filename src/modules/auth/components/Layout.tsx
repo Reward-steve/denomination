@@ -1,9 +1,18 @@
 // pages/admin/settings/Settings.tsx
 import { Outlet, useLocation } from "react-router-dom";
 import { useResponsive } from "../../../hooks/useResponsive";
-import SettingsSidebar from "./Sidebar";
+import {
+  SidebarDesktop,
+  type SidebarPros,
+} from "../../../components/ui/Sidebar";
 
-export default function Settings() {
+export default function Layout({
+  Items,
+  disabled,
+}: {
+  Items: SidebarPros[];
+  disabled?: boolean;
+}) {
   const { isMobile } = useResponsive();
   const location = useLocation();
 
@@ -13,14 +22,18 @@ export default function Settings() {
   if (isMobile) {
     return (
       <div className="min-h-screen">
-        {isSettingSelected ? <Outlet /> : <SettingsSidebar />}
+        {isSettingSelected ? (
+          <Outlet />
+        ) : (
+          <SidebarDesktop items={Items} disabled={disabled} />
+        )}
       </div>
     );
   }
 
   return (
     <div className="flex min-h-screen bg-white relative">
-      <SettingsSidebar />
+      <SidebarDesktop items={Items} disabled={disabled} />
 
       <main
         style={{ scrollbarWidth: "none" }}
