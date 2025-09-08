@@ -6,6 +6,11 @@
   scrollbar-width: none;
 }
 
+:root {
+  --sidebar-width: 16rem; /* 64 in Tailwind */
+  --sidebar-collapsed-width: 5rem; /* 20 in Tailwind */
+}
+
 ._fadeOutUp {
   -webkit-animation-duration: 0.2s;
   animation-duration: 0.2s;
@@ -65,7 +70,7 @@
 }
 
 .rotate {
-    transform: rotate(180deg);
+  transform: rotate(180deg);
 }
 
 /* Removes arrows from input type="number" in WebKit-based browsers */
@@ -76,6 +81,6 @@ input::-webkit-inner-spin-button {
 }
 
 /* Removes arrows in Firefox */
-input[type=number] {
+input[type="number"] {
   -moz-appearance: textfield;
 }

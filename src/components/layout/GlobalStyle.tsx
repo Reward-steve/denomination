@@ -11,6 +11,7 @@ const GlobalStyles = () => {
           --color-primary: ${theme.colors.primary};
           --color-secondary: ${theme.colors.secondary};
           --color-accent: ${theme.colors.accent};
+          --color-accent-light: ${theme.colors.accentLight};
           --color-text: ${theme.colors.text};
           --color-text-secondary: ${theme.colors.textSecondary};
           --color-text-placeholder: ${theme.colors.textPlaceholder};

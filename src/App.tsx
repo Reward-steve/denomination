@@ -24,8 +24,8 @@ function ThemedAppContent() {
         <Route index element={<Navigate to="/landing-page" replace />} />
         {/* Landing Page */}
         <Route path="/landing-page" element={<LandingPage />} />
-        {/*Auth-flow - Corrected approach */}
 
+        {/*Auth-flow - Corrected approach */}
         <Route
           path="/auth/*"
           element={<Layout Items={authMenu} disabled={true} />}

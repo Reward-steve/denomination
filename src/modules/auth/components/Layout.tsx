@@ -1,16 +1,17 @@
 // pages/admin/settings/Settings.tsx
 import { Outlet, useLocation } from "react-router-dom";
 import { useResponsive } from "../../../hooks/useResponsive";
-import {
-  SidebarDesktop,
-  type SidebarPros,
-} from "../../../components/ui/Sidebar";
+import { SidebarDesktop } from "../../../components/ui/Sidebar";
+import type {
+  AuthSidebarProps,
+  DashboardSidebarProps,
+} from "../../../constant";
 
 export default function Layout({
   Items,
   disabled,
 }: {
-  Items: SidebarPros[];
+  Items: (AuthSidebarProps | DashboardSidebarProps)[];
   disabled?: boolean;
 }) {
   const { isMobile } = useResponsive();

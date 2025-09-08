@@ -23,6 +23,7 @@ export default {
         primary: "var(--color-primary)",
         secondary: "var(--color-secondary)",
         accent: "var(--color-accent)",
+        accentLight: "var(--color-accent-light)",
         text: "var(--color-text)",
         textSecondary: "var(--color-text-secondary)",
         textPlaceholder: "var(--color-text-placeholder)",

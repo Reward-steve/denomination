@@ -8,6 +8,7 @@ declare module "@emotion/react" {
       primary: string;
       secondary: string;
       accent: string;
+      accentLight: string;
       text: string;
       textSecondary: string;
       textPlaceholder: string;
@@ -54,7 +55,8 @@ export const lightTheme: Theme = {
   colors: {
     primary: "#6366F1", // Spiritual and calming blue
     secondary: "#FACC15", // Hopeful yellow
-    accent: "#10B981", // Calming green for success states
+    accent: "#10B981",
+    accentLight: "#10B98140",
     text: "#1F2937", // Readable dark gray
     textSecondary: "#4B5563", // Muted text for less important info
     textPlaceholder: "#9CA3AF", // Light gray for form placeholders
@@ -100,7 +102,8 @@ export const darkTheme: Theme = {
   colors: {
     primary: "#6366F1", // Spiritual and calming blue
     secondary: "#FACC15", // Hopeful yellow
-    accent: "#10B981", // Calming green for success states
+    accent: "#10B981",
+    accentLight: "#10B98140",
     text: "#1F2937", // Readable dark gray
     textSecondary: "#4B5563", // Muted text for less important info
     textPlaceholder: "#9CA3AF", // Light gray for form placeholders
