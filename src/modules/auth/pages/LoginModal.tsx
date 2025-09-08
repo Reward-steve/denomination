@@ -16,9 +16,12 @@ interface ModalProps {
   handleCloseLogin: () => void;
 }
 import ReactDOM from "react-dom";
+import { useNavigate } from "react-router-dom";
 
 export function Login({ showLogin, handleCloseLogin }: ModalProps) {
   const { setStep } = useRegistration();
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
@@ -48,6 +51,7 @@ export function Login({ showLogin, handleCloseLogin }: ModalProps) {
       return;
     } else {
       toast.success(res.message);
+      navigate("/dashboard");
       return res.data;
     }
   };

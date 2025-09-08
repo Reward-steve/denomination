@@ -39,30 +39,32 @@ const App = () => {
       <Header setShowLogin={setShowLogin} />
 
       {/* Hero Section */}
-      <section className="max-w-md relative z-10 h-full flex flex-col sm:items-center md:items-start justify-center sm:text-center md:text-left text-neutral px-6  ">
-        <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold mb-4 drop-shadow-2xl animate-fade-in-up">
-          Welcome to Our Denomination
-        </h1>
-        <p className="text-base sm:text-lg md:text-xl max-w-xl animate-fade-in-up animation-delay-300 text-neutral">
-          Experience faith, community, and growth like never before.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 mt-6">
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={() => navigate("/auth/personal-info")}
-          >
-            Start Application
-          </Button>
-          <Button
-            variant="secondary"
-            size="lg"
-            onClick={() => setShowLogin(true)}
-          >
-            Existing User? Login
-          </Button>
-        </div>
-      </section>
+      <main className="w-full flex justify-center items-center h-svh lg:justify-start lg:items-start">
+        <section className="relative z-10 h-full flex flex-col sm:items-center md:items-start justify-center sm:text-center md:text-left text-neutral px-6  ">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold mb-4 drop-shadow-2xl animate-fade-in-up">
+            Welcome to Our Denomination
+          </h1>
+          <p className="text-base sm:text-lg md:text-xl max-w-xl animate-fade-in-up animation-delay-300 text-neutral">
+            Experience faith, community, and growth like never before.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 mt-6">
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={() => navigate("/auth/personal-info")}
+            >
+              Start Application
+            </Button>
+            <Button
+              variant="secondary"
+              size="lg"
+              onClick={() => setShowLogin(true)}
+            >
+              Existing User? Login
+            </Button>
+          </div>
+        </section>
+      </main>
 
       {/* Login Modal */}
       <div
