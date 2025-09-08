@@ -4,18 +4,18 @@ import { FaCalendar } from "react-icons/fa";
 import {
   useController,
   type Control,
-  type FieldErrors,
+  type FieldError,
   type FieldPath,
 } from "react-hook-form";
 import { format, isValid, parseISO } from "date-fns";
 import { type FormInputProps } from "../../types/auth.types"; // Adjust path to your types
 
-// Extend FormInputProps but replace 'register' with 'control' for react-hook-form's useController
+// Extend FormInputProps but replace 'register' and 'ref' with 'control' and exclude 'style' for DatePicker
 interface FormInputDateProps<T extends object>
-  extends Omit<FormInputProps, "register" | "ref"> {
+  extends Omit<FormInputProps, "register" | "ref" | "type"> {
   control: Control<T>;
   name: FieldPath<T>;
-  error?: FieldErrors<T>[FieldPath<T>];
+  error?: FieldError; // Use FieldError for correct message access
 }
 
 const FormInputDate = <T extends object>({
@@ -26,8 +26,8 @@ const FormInputDate = <T extends object>({
   error,
   className = "",
   optional = false,
-  styles,
   id = name,
+  styles, // Accept styles prop but apply to wrapper if needed
 }: FormInputDateProps<T>) => {
   const { field } = useController({
     name,
@@ -45,7 +45,9 @@ const FormInputDate = <T extends object>({
   });
 
   return (
-    <label className="w-full block">
+    <label className="w-full block" style={styles}>
+      {" "}
+      {/* Apply styles to the wrapper */}
       {label && (
         <p className="flex">
           <span className="text-sm block font-small mb-2 text-text">
@@ -74,7 +76,7 @@ const FormInputDate = <T extends object>({
           maxDate={new Date()} // Prevent future dates
           yearDropdownItemNumber={100} // Show 100 years
           scrollableYearDropdown
-          className={`${className} accent-accent text-sm w-full outline-none bg-transparent pl-9 pr-10 h-[52px] rounded-xl transition-all duration-200 focus:ring-1 ${
+          className={`${className} accent-accent text-sm w-full outline-none bg-transparent pl-9 pr-10 h-[52px] lg:h-[45px] rounded-xl transition-all duration-200 focus:ring-1 ${
             error
               ? "border border-error text-error ring-error animate-shake"
               : "border border-border text-text focus:border-accent focus:ring-accent"
@@ -82,7 +84,6 @@ const FormInputDate = <T extends object>({
           id={id}
           aria-invalid={!!error}
           aria-describedby={error ? `${id}-error` : undefined}
-          style={styles}
         />
       </div>
       {error && (
