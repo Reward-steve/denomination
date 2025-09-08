@@ -7,14 +7,7 @@ import { toast } from "react-toastify";
 import Form from "../../../components/layout/Form";
 import ImageUploader from "../components/ImageUploader";
 import FormInput from "../../../components/ui/FormInput";
-import {
-  FaGlobe,
-  FaHeart,
-  FaLock,
-  FaMapPin,
-  FaPhone,
-  FaUser,
-} from "react-icons/fa6";
+import { FaHeart, FaLock, FaMapPin, FaPhone, FaUser } from "react-icons/fa6";
 import { GoMail } from "react-icons/go";
 import { Dropdown } from "../../../components/ui/Dropdown";
 import { FaHome } from "react-icons/fa";
@@ -243,15 +236,6 @@ function PersonalInfo() {
             Geographic Information
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormInput
-              label="Nationality"
-              placeholder="Enter Nationality"
-              error={errors?.bio?.nationality}
-              icon={FaGlobe}
-              register={register("bio.nationality", {
-                required: "Nationality is required",
-              })}
-            />
             <FormInput
               label="Local Govt of Origin"
               placeholder="Enter Local Govt of Origin"
