@@ -40,7 +40,7 @@ export default function Layout({
         style={{ scrollbarWidth: "none" }}
         className={`flex-1 transition-all duration-200 overflow-y-auto h-screen md:pr-2`}
       >
-        <section className="w-full h-auto bg-white min-h-screen">
+        <section className="w-full h-auto bg-background min-h-screen">
           <div className="px-4 h-auto min-h-svh animate-fade">
             <Outlet />
           </div>

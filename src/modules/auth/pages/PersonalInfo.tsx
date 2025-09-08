@@ -8,7 +8,6 @@ import Form from "../../../components/layout/Form";
 import ImageUploader from "../components/ImageUploader";
 import FormInput from "../../../components/ui/FormInput";
 import {
-  FaCalendar,
   FaGlobe,
   FaHeart,
   FaLock,
@@ -21,6 +20,7 @@ import { Dropdown } from "../../../components/ui/Dropdown";
 import { FaHome } from "react-icons/fa";
 import { Button } from "../../../components/ui/Button";
 import { Loader } from "../../../components/ui/Loader";
+import FormInputDate from "../../../components/ui/FormInputDate";
 
 interface DropdownOption {
   id: string;
@@ -51,7 +51,6 @@ function PersonalInfo() {
     register,
     handleSubmit,
     control,
-
     watch,
     formState: { errors, isSubmitting },
   } = useForm<PersonalInfoFormData>();
@@ -142,15 +141,12 @@ function PersonalInfo() {
                 required: "Last name is required",
               })}
             />
-            <FormInput
-              type="date"
+
+            <FormInputDate
+              control={control}
+              name="bio.dob"
               label="Date of Birth"
-              placeholder="Select your date of birth"
               error={errors.bio?.dob}
-              icon={FaCalendar}
-              register={register("bio.dob", {
-                required: "Date of Birth is required",
-              })}
             />
             <Controller
               name="bio.gender"
@@ -403,7 +399,7 @@ function PersonalInfo() {
               <Loader /> <span>Submitting...</span>
             </div>
           ) : (
-            "Done"
+            "Next"
           )}
         </Button>
       </Form>

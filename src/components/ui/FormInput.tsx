@@ -42,9 +42,9 @@ export default function FormInput({
           maxLength={maxLength}
           type={inputType}
           placeholder={placeholder}
-          className={`${className} accent-accent text-sm w-full outline-none bg-transparent ${
+          className={`${className} accent-accent text-sm w-full outline-none bg-white ${
             Icon ? "pl-9" : "pl-4"
-          } pr-10 h-[52px] rounded-xl transition-all duration-200 focus:ring-1 ${
+          } pr-10 h-[52px] lg:h-[45px] rounded-xl transition-all duration-200 focus:ring-1 ${
             error
               ? "border border-error text-error ring-error animate-shake"
               : "border border-border text-text focus:border-accent focus:ring-accent"
