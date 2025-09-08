@@ -88,3 +88,29 @@ export function formatDate(
     ? `${year}-${month}-${day}`
     : `${day}-${month}-${year}`;
 }
+
+export const buildFormData = (
+  formData: FormData,
+  data: any,
+  parentKey?: string
+) => {
+  if (data && typeof data === "object" && !(data instanceof File)) {
+    // If it's a nested object, iterate through its keys
+    Object.keys(data).forEach((key) => {
+      buildFormData(
+        formData,
+        data[key],
+        parentKey ? `${parentKey}[${key}]` : key
+      );
+    });
+  } else if (Array.isArray(data)) {
+    // If it's an array, append each element with the correct array notation
+    data.forEach((item, index) => {
+      buildFormData(formData, item, `${parentKey}[${index}]`);
+    });
+  } else {
+    // For primitive values or files, append directly
+    const value = data == null ? "" : data;
+    formData.append(parentKey || "", value);
+  }
+};

@@ -7,6 +7,19 @@ import type { Ref } from "react";
  * Bio section — matches screenshot strictly (fields shown in the screenshot are present).
  * Note: `hobbies` in the screenshot is a comma-separated string, so kept as string.
  */
+
+export interface States {
+  country_id: string;
+  id: number;
+  name: string;
+}
+
+export interface LGA {
+  id: number;
+  name: string;
+  state_id: number; // Links back to state ID
+}
+
 export interface BioData {
   first_name: string;
   middle_name?: string;
@@ -176,4 +189,18 @@ export type CodeInputProps = {
 export interface UserDetails {
   first_name: string;
   last_name: string;
+}
+
+export interface DropdownOption {
+  id: string;
+  name: string;
+}
+
+export interface Position {
+  id: number;
+  name: string;
+  is_enabled: string;
+  created_at: string;
+  updated_at: string;
+  descr: string | null;
 }

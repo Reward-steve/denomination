@@ -2,23 +2,28 @@ import { css } from "@emotion/css";
 import { useTheme } from "@emotion/react";
 import { useEffect, useState } from "react";
 import { GoChevronDown } from "react-icons/go";
+import { type IconType } from "react-icons";
+
+type DSize = "small" | "big";
 
 interface IDropDown {
   items: Array<Record<string, any>> | Array<string>;
+  size?: DSize;
   label?: string;
   errorMsg?: string;
-  filterable?: boolean; //if it allow filtering
+  filterable?: boolean;
   isError?: boolean;
-  displayValueKey?: string; // if items are objects, this is the key to display
-  onSelect?: (item: any, runChange?: () => void) => void; // callback when an item is selected
-  defaultValue?: Record<string, any> | string; // default dropdown value
-  disbled?: boolean; // if true, dropdown is disabled
+  displayValueKey?: string;
+  onSelect?: (item: any, runChange?: () => void) => void;
+  defaultValue?: Record<string, any> | string;
+  disabled?: boolean;
   loading?: boolean;
-  acceptChange?: boolean; // default is true, otherwise a callback will be available for you in the onSelect() Prop to fire the handleChange yourself when you're satisfy
-  [key: string]: unknown; // for other props like onChange, value, etc
+  acceptChange?: boolean;
+  optional?: boolean;
+  icon?: IconType;
+  [key: string]: unknown;
 }
 
-//items
 interface IDropDownItem {
   active?: boolean;
   children: React.ReactNode;
@@ -69,6 +74,7 @@ const loader = (
 
 export function Dropdown({
   items,
+  size = "big",
   label,
   filterable = false,
   isError = false,
@@ -78,11 +84,14 @@ export function Dropdown({
   onSelect,
   loading = false,
   acceptChange = true,
-  optional,
+  optional = false,
+  disabled,
+  icon: Icon,
   ...rest
 }: IDropDown) {
   const theme = useTheme();
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedValue, setSelectedValue] = useState<string>("");
 
   const dropStyles = css({
     width: "100%",
@@ -98,35 +107,35 @@ export function Dropdown({
     ".loader": {
       position: "absolute",
       left: 10,
-      bottom: "16px", // Align with icon
+      bottom: size === "big" ? "16px" : "12px",
       cursor: "not-allowed",
     },
     ".dd-input": {
-      height: "52px", // Match FormInput's h-[52px]
+      height: size === "big" ? "52px" : "40px",
       "@media (min-width: 1024px)": {
-        height: "45px", // Match FormInput's lg:h-[45px]
+        height: size === "big" ? "45px" : "36px",
       },
       border: isError
-        ? `1px solid ${theme.colors.error}` // Match FormInput's border-error
+        ? `1px solid ${theme.colors.error}`
         : `1px solid ${isOpen ? theme.colors.accent : theme.colors.border}`,
-      borderRadius: "0.75rem", // Match rounded-xl (12px)
-      paddingLeft: "2.25rem", // Match pl-9
-      paddingRight: "2.5rem", // Match pr-10
-      fontSize: "0.875rem", // Match text-sm
-      backgroundColor: "white", // Match bg-white
+      borderRadius: "0.75rem",
+      paddingLeft: Icon ? "2.25rem" : "1rem",
+      paddingRight: "2.5rem",
+      fontSize: size === "big" ? "0.875rem" : "0.75rem",
+      backgroundColor: "white",
       outline: "none",
-      transition: "all 0.2s", // Match transition-all duration-200
+      transition: "all 0.2s",
       cursor: filterable ? "auto" : "pointer",
       color: loading ? "transparent" : theme.colors.text,
       boxSizing: "border-box",
       ...(isError && {
-        animation: "shake 0.5s ease-in-out", // Match animate-shake
-        boxShadow: `0 0 0 1px ${theme.colors.error}`, // Match ring-error
-        color: theme.colors.error, // Match text-error
+        animation: "shake 0.5s ease-in-out",
+        boxShadow: `0 0 0 1px ${theme.colors.error}`,
+        color: theme.colors.error,
       }),
       "&:focus": {
-        borderColor: theme.colors.accent, // Match focus:border-accent
-        boxShadow: `0 0 0 1px ${theme.colors.accent}`, // Match focus:ring-1 focus:ring-accent
+        borderColor: theme.colors.accent,
+        boxShadow: `0 0 0 1px ${theme.colors.accent}`,
       },
       "&:disabled": {
         cursor: "not-allowed",
@@ -148,12 +157,17 @@ export function Dropdown({
       overflowY: "auto",
       top: "calc(100% + 3px)",
       left: 0,
+      display: isOpen ? "block" : "none", // Ensure visibility toggle
+      animation: isOpen
+        ? "_fadeInDown 0.3s ease-out"
+        : "_fadeOutUp 0.3s ease-out",
+    },
+    "@keyframes shake": {
+      "0%, 100%": { transform: "translateX(0)" },
+      "10%, 30%, 50%, 70%, 90%": { transform: "translateX(-2px)" },
+      "20%, 40%, 60%, 80%": { transform: "translateX(2px)" },
     },
   });
-
-  // const [selected, setSelected] = useState<Record<string, any> | string>(defaultValue);
-
-  const [selectedValue, setSelectedValue] = useState<string>("");
 
   const filteredItems = Array.isArray(items)
     ? items.filter((item) => {
@@ -176,7 +190,7 @@ export function Dropdown({
     if (onSelect && acceptChange) {
       onSelect(item);
     }
-    toggleDropdown();
+    setIsOpen(false);
   };
 
   const handleChange = (item: Record<string, any> | string) => {
@@ -188,9 +202,7 @@ export function Dropdown({
   };
 
   const toggleDropdown = () => {
-    if (rest.disabled || loading) {
-      return;
-    }
+    if (disabled || loading) return;
     setIsOpen(!isOpen);
   };
 
@@ -202,7 +214,7 @@ export function Dropdown({
           : defaultValue || ""
       );
     }
-  }, [defaultValue]);
+  }, [defaultValue, displayValueKey]);
 
   return (
     <div className={dropStyles}>
@@ -220,15 +232,15 @@ export function Dropdown({
           </p>
         )}
         <div
-          className={`flex items-center cursor-pointer animated ${
-            isError ? "headShake" : ""
-          }`}
-          onClick={toggleDropdown}
+          className="relative w-full"
+          onClick={() => {
+            toggleDropdown();
+          }}
           role="button"
-          tabIndex={-1}
+          tabIndex={0}
         >
           {loading && loader}
-
+          {Icon && <Icon className="absolute bottom-4 left-3 text-neutral" />}
           <input
             type="text"
             value={selectedValue}
@@ -240,7 +252,7 @@ export function Dropdown({
                   }
                 : undefined
             }
-            className="dd-input w-full bg-white outline-none"
+            className="dd-input w-full"
             readOnly={!filterable}
             onBlur={(e) => {
               if (
@@ -251,36 +263,46 @@ export function Dropdown({
                 return;
               if (isOpen) setIsOpen(false);
             }}
+            disabled={disabled}
             {...rest}
           />
-
           <GoChevronDown
             size={20}
-            className={`mx-[-35px] chev ${isOpen ? "rotate" : ""} ${
-              rest.disabled ? "cursor-not-allowed" : "cursor-pointer"
-            }`}
+            className={`absolute bottom-4 right-3 ${
+              isOpen ? "rotate-180" : ""
+            } ${disabled || loading ? "cursor-not-allowed" : "cursor-pointer"}`}
             color={loading ? theme.colors.neutral : theme.colors.accent}
+            onClick={() => {
+              toggleDropdown();
+            }}
           />
         </div>
-        {isError && <small className="text-red-400 pl-2">{errorMsg}</small>}
+        {isError && (
+          <p className="text-xs text-error mt-1 font-light animate-shake">
+            {errorMsg}
+          </p>
+        )}
       </div>
       <div className={`children ${isOpen ? "_fadeInDown" : "_fadeOutUp"}`}>
         {filteredItems.length > 0 ? (
-          filteredItems.map((item, i) => {
-            return (
-              <DropdownItem
-                key={i}
-                onClick={() => handleChange(item)}
-                active={
-                  selectedValue === item[displayValueKey as keyof typeof item]
-                }
-              >
-                {typeof item === "object" && displayValueKey
+          filteredItems.map((item, i) => (
+            <DropdownItem
+              key={i}
+              onClick={() => {
+                handleChange(item);
+              }}
+              active={
+                selectedValue ===
+                (typeof item === "object" && displayValueKey
                   ? item[displayValueKey]
-                  : String(item)}
-              </DropdownItem>
-            );
-          })
+                  : String(item))
+              }
+            >
+              {typeof item === "object" && displayValueKey
+                ? item[displayValueKey]
+                : String(item)}
+            </DropdownItem>
+          ))
         ) : (
           <div className="px-3 py-2 text-gray-400">No results</div>
         )}
@@ -298,14 +320,12 @@ export function DropdownItem({
   const theme = useTheme();
   const itemStyles = css({
     padding: "5px 10px",
-    color: active ? `${theme.colors.accent}` : `${theme.colors.textSecondary}`,
+    color: active ? theme.colors.accent : theme.colors.textSecondary,
     fontWeight: active ? "600" : "normal",
     cursor: "pointer",
     fontSize: "14px",
-    // borderBottom: `1px solid ${theme.colors.border}`,
-
     "&:hover": {
-      backgroundColor: `${theme.colors.border}`,
+      backgroundColor: theme.colors.border,
     },
   });
   return (
