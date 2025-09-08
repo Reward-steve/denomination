@@ -24,7 +24,7 @@ export interface BioData {
   origin_state: string;
   confirm_password: string;
   secondary_phone?: string;
-  nationality: string;
+  nationality?: string;
   residence_state: string;
   priest_status?: string;
   occupation?: string;

@@ -16,6 +16,7 @@ declare module "@emotion/react" {
       surface: string;
       border: string;
       neutral: string;
+      error: string;
     };
     typography: {
       fontFamily: string;
@@ -64,6 +65,7 @@ export const lightTheme: Theme = {
     surface: "#FFFFFF", // Clean white for cards and elements
     border: "#E5E7EB", // Subtle dividers and borders
     neutral: "#D1D5DB", // General neutral gray
+    error: "#e3342f",
   },
   typography: {
     fontFamily: "'Inter', sans-serif",
@@ -111,6 +113,7 @@ export const darkTheme: Theme = {
     surface: "#FFFFFF", // Clean white for cards and elements
     border: "#E5E7EB", // Subtle dividers and borders
     neutral: "#D1D5DB", // General neutral gray
+    error: "#e3342f",
   },
   typography: {
     fontFamily: "'Inter', sans-serif",

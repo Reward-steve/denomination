@@ -3,11 +3,8 @@ import { useTheme } from "@emotion/react";
 import { useEffect, useState } from "react";
 import { GoChevronDown } from "react-icons/go";
 
-type DSize = "small" | "big";
-
 interface IDropDown {
   items: Array<Record<string, any>> | Array<string>;
-  size?: DSize;
   label?: string;
   errorMsg?: string;
   filterable?: boolean; //if it allow filtering
@@ -72,7 +69,6 @@ const loader = (
 
 export function Dropdown({
   items,
-  size = "big",
   label,
   filterable = false,
   isError = false,
@@ -102,16 +98,36 @@ export function Dropdown({
     ".loader": {
       position: "absolute",
       left: 10,
+      bottom: "16px", // Align with icon
       cursor: "not-allowed",
     },
     ".dd-input": {
+      height: "52px", // Match FormInput's h-[52px]
+      "@media (min-width: 1024px)": {
+        height: "45px", // Match FormInput's lg:h-[45px]
+      },
       border: isError
-        ? "1px solid red"
+        ? `1px solid ${theme.colors.error}` // Match FormInput's border-error
         : `1px solid ${isOpen ? theme.colors.accent : theme.colors.border}`,
-      padding: size === "big" ? "15px 10px" : "10px 40px 10px 10px",
-      borderRadius: 12,
+      borderRadius: "0.75rem", // Match rounded-xl (12px)
+      paddingLeft: "2.25rem", // Match pl-9
+      paddingRight: "2.5rem", // Match pr-10
+      fontSize: "0.875rem", // Match text-sm
+      backgroundColor: "white", // Match bg-white
+      outline: "none",
+      transition: "all 0.2s", // Match transition-all duration-200
       cursor: filterable ? "auto" : "pointer",
       color: loading ? "transparent" : theme.colors.text,
+      boxSizing: "border-box",
+      ...(isError && {
+        animation: "shake 0.5s ease-in-out", // Match animate-shake
+        boxShadow: `0 0 0 1px ${theme.colors.error}`, // Match ring-error
+        color: theme.colors.error, // Match text-error
+      }),
+      "&:focus": {
+        borderColor: theme.colors.accent, // Match focus:border-accent
+        boxShadow: `0 0 0 1px ${theme.colors.accent}`, // Match focus:ring-1 focus:ring-accent
+      },
       "&:disabled": {
         cursor: "not-allowed",
       },
@@ -132,9 +148,6 @@ export function Dropdown({
       overflowY: "auto",
       top: "calc(100% + 3px)",
       left: 0,
-    },
-    ".chev": {
-      transition: "transform 0.3s ease",
     },
   });
 
@@ -227,7 +240,7 @@ export function Dropdown({
                   }
                 : undefined
             }
-            className="dd-input w-full bg-transparent outline-none"
+            className="dd-input w-full bg-white outline-none"
             readOnly={!filterable}
             onBlur={(e) => {
               if (

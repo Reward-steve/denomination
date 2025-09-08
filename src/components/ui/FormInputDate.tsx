@@ -10,7 +10,7 @@ import {
 import { format, isValid, parseISO } from "date-fns";
 import { type FormInputProps } from "../../types/auth.types"; // Adjust path to your types
 
-// Extend FormInputProps but replace 'register' and 'ref' with 'control' and exclude 'style' for DatePicker
+// Extend FormInputProps but replace 'register' and 'ref' with 'control' and exclude 'type'
 interface FormInputDateProps<T extends object>
   extends Omit<FormInputProps, "register" | "ref" | "type"> {
   control: Control<T>;
@@ -27,13 +27,13 @@ const FormInputDate = <T extends object>({
   className = "",
   optional = false,
   id = name,
-  styles, // Accept styles prop but apply to wrapper if needed
+  styles, // Apply to wrapper
 }: FormInputDateProps<T>) => {
   const { field } = useController({
     name,
     control,
     rules: {
-      required: optional ? false : "Date of Birth is required",
+      required: optional ? false : `${label} is required`,
       validate: (value) => {
         if (!value) return true; // Skip if empty (handled by required)
         const date = parseISO(value.toString());
@@ -46,8 +46,6 @@ const FormInputDate = <T extends object>({
 
   return (
     <label className="w-full block" style={styles}>
-      {" "}
-      {/* Apply styles to the wrapper */}
       {label && (
         <p className="flex">
           <span className="text-sm block font-small mb-2 text-text">
@@ -58,7 +56,7 @@ const FormInputDate = <T extends object>({
           )}
         </p>
       )}
-      <div className="relative">
+      <div className="relative w-full">
         <FaCalendar className="absolute bottom-4 left-3 text-neutral" />
         <DatePicker
           selected={field.value ? parseISO(field.value.toString()) : null} // Parse YYYY-MM-DD to Date
@@ -76,11 +74,12 @@ const FormInputDate = <T extends object>({
           maxDate={new Date()} // Prevent future dates
           yearDropdownItemNumber={100} // Show 100 years
           scrollableYearDropdown
-          className={`${className} accent-accent text-sm w-full outline-none bg-transparent pl-9 pr-10 h-[52px] lg:h-[45px] rounded-xl transition-all duration-200 focus:ring-1 ${
+          className={`${className} accent-accent text-sm w-full outline-none bg-white pl-9 pr-10 h-[52px] lg:h-[45px] rounded-xl transition-all duration-200 focus:ring-1 border box-border ${
             error
-              ? "border border-error text-error ring-error animate-shake"
-              : "border border-border text-text focus:border-accent focus:ring-accent"
+              ? "border-error text-error ring-error animate-shake"
+              : "border-border text-text focus:border-accent focus:ring-accent"
           }`}
+          wrapperClassName="w-full" // Ensure wrapper takes full width
           id={id}
           aria-invalid={!!error}
           aria-describedby={error ? `${id}-error` : undefined}

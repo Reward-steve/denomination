@@ -4,13 +4,14 @@ import { useRegistration } from "../../../hooks/useReg";
 import Form from "../../../components/layout/Form";
 import FormInput from "../../../components/ui/FormInput";
 import { FaHome } from "react-icons/fa";
-import { FaCalendar, FaUpload } from "react-icons/fa6";
+import { FaUpload } from "react-icons/fa6";
 import { Dropdown } from "../../../components/ui/Dropdown";
 import { Button } from "../../../components/ui/Button";
 import { Loader } from "../../../components/ui/Loader";
 import type { PersonalInfoFormData } from "../../../types/auth.types";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import FormInputDate from "../../../components/ui/FormInputDate";
 
 // The UCCAInfo component
 export function UCCAInfo() {
@@ -73,14 +74,11 @@ export function UCCAInfo() {
         optional={true}
         error={errors?.bio?.previous_pew}
       />
-      <FormInput
+
+      <FormInputDate
+        control={control}
+        name="bio.date_ucca"
         label="Date of Promotion to UCCA"
-        placeholder="YYYY-MM-DD"
-        type="date"
-        icon={FaCalendar}
-        register={register("bio.date_ucca", {
-          required: "Date of promotion is required",
-        })}
         error={errors?.bio?.date_ucca}
       />
       <Controller
@@ -121,17 +119,14 @@ export function UCCAInfo() {
         </label>
       </div>
       {inducted && (
-        <FormInput
+        <FormInputDate
+          control={control}
+          name="bio.induction_date"
           label="Induction Date"
-          placeholder="YYYY-MM-DD"
-          type="date"
-          icon={FaCalendar}
-          register={register("bio.induction_date", {
-            required: "Induction date is required",
-          })}
           error={errors?.bio?.induction_date}
         />
       )}
+
       <Button
         disabled={isSubmitting}
         textSize="sm"

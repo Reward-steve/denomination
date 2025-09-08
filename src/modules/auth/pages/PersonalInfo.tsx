@@ -141,6 +141,7 @@ function PersonalInfo() {
               label="Date of Birth"
               error={errors.bio?.dob}
             />
+
             <Controller
               name="bio.gender"
               control={control}
