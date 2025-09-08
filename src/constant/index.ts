@@ -1,12 +1,6 @@
 import type { IconType } from "react-icons";
-import {
-  FaCoins,
-  FaUser,
-  FaGraduationCap,
-  FaUsers,
-  FaBriefcase,
-} from "react-icons/fa6";
-import { FaFileAlt, FaInfoCircle } from "react-icons/fa";
+import { FaCoins, FaUser } from "react-icons/fa6";
+import { FaFileAlt } from "react-icons/fa";
 import { TbCalendarEventFilled, TbHome2 } from "react-icons/tb";
 
 // Interfaces
@@ -63,31 +57,26 @@ export const authMenu: AuthSidebarProps[] = [
     label: "Personal Information",
     path: validatePath(ROUTES.AUTH.PERSONAL_INFO),
     step: 1,
-    Icon: FaUser,
   },
   {
     label: "Education Data",
     path: validatePath(ROUTES.AUTH.EDUCATION_DATA),
     step: 2,
-    Icon: FaGraduationCap,
   },
   {
     label: "Next of Kin",
     path: validatePath(ROUTES.AUTH.NEXT_OF_KIN),
     step: 3,
-    Icon: FaUsers,
   },
   {
     label: "UCCA Information",
     path: validatePath(ROUTES.AUTH.UCCA_INFO),
     step: 4,
-    Icon: FaInfoCircle,
   },
   {
     label: "Previous Position",
     path: validatePath(ROUTES.AUTH.PREV_POSITION),
     step: 5,
-    Icon: FaBriefcase,
   },
 ];
 
