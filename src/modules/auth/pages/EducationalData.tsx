@@ -111,8 +111,6 @@ export function EducationData() {
     }
   };
 
-  // Register array-level validation: require at least one skill
-  // (hidden input purely to attach validation to the array)
   const skillsArrayValidator = register("skills" as any, {
     validate: (v: { value: string }[]) =>
       (v?.length ?? 0) > 0 || "Please add at least one skill.",
