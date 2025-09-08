@@ -17,6 +17,7 @@ import FormInputDate from "../../../components/ui/FormInputDate";
 export function UCCAInfo() {
   const { setStep, setPrev, updateData } = useRegistration();
   const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,

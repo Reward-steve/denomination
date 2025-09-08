@@ -4,8 +4,6 @@ import {
   type PersonalInfoFormData,
   type LGA,
   type States,
-  type DropdownOption,
-  type Position,
 } from "../../../types/auth.types";
 import { useNavigate } from "react-router-dom";
 import { useRegistration } from "../../../hooks/useReg";
@@ -29,7 +27,12 @@ import { FaHome } from "react-icons/fa";
 import { Button } from "../../../components/ui/Button";
 import { Loader } from "../../../components/ui/Loader";
 import FormInputDate from "../../../components/ui/FormInputDate";
-import { fetchStates, fetchLGA, fetchPosition } from "../services/auth";
+import { fetchStates, fetchLGA } from "../services/auth";
+
+interface DropdownOption {
+  id: string;
+  name: string;
+}
 
 const genderOptions: DropdownOption[] = [
   { id: "male", name: "Male" },
@@ -42,20 +45,20 @@ const maritalStatusOptions: DropdownOption[] = [
   { id: "separated", name: "Separated" },
 ];
 
+const priestStatusOptions: DropdownOption[] = [
+  { id: "posted", name: "Posted" },
+  { id: "yet_to_be_posted", name: "Yet to be Posted" },
+];
+
 function PersonalInfo() {
   const [imagePreview, setImagePreview] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [states, setStates] = useState<States[]>([]);
   const [lgas, setLgas] = useState<LGA[]>([]);
-  const [priestStatusOptions, setPriestStatusOptions] = useState<
-    DropdownOption[]
-  >([]);
   const [isLoadingStates, setIsLoadingStates] = useState(false);
   const [isLoadingLgas, setIsLoadingLgas] = useState(false);
-  const [isLoadingPositions, setIsLoadingPositions] = useState(false);
   const [stateError, setStateError] = useState<string | null>(null);
   const [lgaError, setLgaError] = useState<string | null>(null);
-  const [positionError, setPositionError] = useState<string | null>(null);
   const [selectedStateId, setSelectedStateId] = useState<string>("");
 
   const {
@@ -92,7 +95,6 @@ function PersonalInfo() {
       },
     },
   });
-
   const password = watch("bio.password");
   const watchedMaritalStatus = watch("bio.marital_status");
   const watchedGender = watch("bio.gender");
@@ -138,8 +140,7 @@ function PersonalInfo() {
           setLgaError(res.message || "Failed to load LGAs");
           toast.error(res.message || "Failed to load LGAs");
         }
-      } catch (error) {
-        console.error("Error fetching LGAs:", error);
+      } catch {
         setLgaError("Failed to load LGAs. Please try again.");
         toast.error("Failed to load LGAs");
       } finally {
@@ -148,31 +149,6 @@ function PersonalInfo() {
     };
     loadLgas();
   }, [selectedStateId, setValue]);
-
-  // Fetch priest positions on mount
-  useEffect(() => {
-    const loadPositions = async () => {
-      setIsLoadingPositions(true);
-      try {
-        const res = await fetchPosition();
-        const options: DropdownOption[] = res
-          .data!.filter((pos: Position) => pos.is_enabled === "1")
-          .map((pos: Position) => ({
-            id: pos.id.toString(),
-            name: pos.name,
-          }));
-        setPriestStatusOptions(options);
-        setPositionError(null);
-      } catch (error) {
-        console.error("Error fetching positions:", error);
-        setPositionError("Failed to load priest positions. Please try again.");
-        toast.error("Failed to load priest positions.");
-      } finally {
-        setIsLoadingPositions(false);
-      }
-    };
-    loadPositions();
-  }, []);
 
   useEffect(() => {
     setStep(1);
@@ -369,6 +345,16 @@ function PersonalInfo() {
             })}
           />
           <FormInput
+            label="Nationality"
+            error={errors.bio?.nationality}
+            disabled={true}
+            icon={FaMapPin}
+            value={"Nigeria"}
+            register={register("bio.nationality", {
+              required: "Nationality is required",
+            })}
+          />
+          <FormInput
             label="State of Residence"
             placeholder="Enter State of Residence"
             error={errors.bio?.residence_state}
@@ -466,7 +452,26 @@ function PersonalInfo() {
           Additional Information
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Left Column */}
+          <Controller
+            name="bio.priest_status"
+            control={control}
+            rules={{ required: "Priest status is required" }}
+            render={({ field, fieldState: { error } }) => (
+              <Dropdown
+                isError={!!error}
+                label="Priest Status"
+                placeholder="Select Priest Status"
+                items={priestStatusOptions}
+                displayValueKey="name"
+                size="big"
+                errorMsg={error?.message}
+                onSelect={(item) => field.onChange(item.id)}
+                value={field.value}
+                icon={FaCross}
+                iconSize={20}
+              />
+            )}
+          />
           <FormInput
             optional={true}
             label="Hobbies"
@@ -474,29 +479,6 @@ function PersonalInfo() {
             error={errors?.bio?.hobbies}
             icon={FaHeart}
             register={register("bio.hobbies")}
-          />
-          {/* Right Column */}
-          <Controller
-            name="bio.priest_status"
-            control={control}
-            rules={{ required: "Priest status is required" }}
-            render={({ field, fieldState: { error } }) => (
-              <Dropdown
-                isError={!!error || !!positionError}
-                label="Priest Status"
-                placeholder="Select Priest Status"
-                items={priestStatusOptions}
-                displayValueKey="name"
-                size="big"
-                errorMsg={`${error?.message || positionError}`}
-                onSelect={(item) => field.onChange(item.name)}
-                value={field.value}
-                icon={FaCross}
-                iconSize={20}
-                loading={isLoadingPositions}
-                disabled={isLoadingPositions || !!positionError}
-              />
-            )}
           />
         </div>
       </div>
@@ -535,17 +517,12 @@ function PersonalInfo() {
       </div>
 
       <Button
-        disabled={
-          isSubmitting || isLoadingStates || isLoadingLgas || isLoadingPositions
-        }
+        disabled={isSubmitting || isLoadingStates || isLoadingLgas}
         textSize="sm"
         type="submit"
         variant="auth"
       >
-        {isSubmitting ||
-        isLoadingStates ||
-        isLoadingLgas ||
-        isLoadingPositions ? (
+        {isSubmitting || isLoadingStates || isLoadingLgas ? (
           <div className="flex items-center space-x-2">
             <Loader /> <span>Submitting...</span>
           </div>

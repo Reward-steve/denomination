@@ -1,21 +1,38 @@
 import { useEffect, useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { useRegistration } from "../../../hooks/useReg";
 import Form from "../../../components/layout/Form";
-import { FaBriefcase, FaCalendar, FaPlus, FaTrash } from "react-icons/fa6";
+import {
+  FaBriefcase,
+  FaCalendar,
+  FaCross,
+  FaPlus,
+  FaTrash,
+} from "react-icons/fa6";
 import FormInput from "../../../components/ui/FormInput";
 import { Button } from "../../../components/ui/Button";
 import { Loader } from "../../../components/ui/Loader";
-import { type PersonalInfoFormData } from "../../../types/auth.types";
-import { createUCCAUser } from "../services/auth";
+import {
+  type DropdownOption,
+  type PersonalInfoFormData,
+  type Position,
+} from "../../../types/auth.types";
+import { createUCCAUser, fetchPosition } from "../services/auth";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { getFromStore } from "../../../utils/appHelpers";
+import { Dropdown } from "../../../components/ui/Dropdown";
 
 // The PrevPosition component
 export function PrevPosition() {
   const { setStep, setPrev, updateData, data } = useRegistration();
   const [id, setId] = useState(true);
+  const [priestStatusOptions, setPriestStatusOptions] = useState<
+    DropdownOption[]
+  >([]);
+  const [positionError, setPositionError] = useState<string | null>(null);
+  const [isLoadingPositions, setIsLoadingPositions] = useState(false);
+
   const navigate = useNavigate();
   const {
     register,
@@ -83,6 +100,30 @@ export function PrevPosition() {
       );
     }
   };
+
+  // Fetch priest positions on mount
+  useEffect(() => {
+    const loadPositions = async () => {
+      setIsLoadingPositions(true);
+      try {
+        const res = await fetchPosition();
+        const options: DropdownOption[] = res
+          .data!.filter((pos: Position) => pos.is_enabled === "1")
+          .map((pos: Position) => ({
+            id: pos.id.toString(),
+            name: pos.name,
+          }));
+        setPriestStatusOptions(options);
+        setPositionError(null);
+      } catch {
+        setPositionError("Failed to load priest positions. Please try again.");
+        toast.error("Failed to load priest positions.");
+      } finally {
+        setIsLoadingPositions(false);
+      }
+    };
+    loadPositions();
+  }, []);
 
   return (
     <>
@@ -167,14 +208,31 @@ export function PrevPosition() {
         >
           <FaPlus className="mr-2" /> Add Another Position
         </button>
-        <FormInput
-          label="Current Position held in BCS"
-          placeholder="e.g., UCCA President"
-          icon={FaBriefcase}
-          register={register("bio.bcs_position")}
-          optional={true}
-          error={errors?.bio?.bcs_position}
+
+        {/* Right Column */}
+        <Controller
+          name="bio.bcs_position"
+          control={control}
+          rules={{ required: "Priest status is required" }}
+          render={({ field, fieldState: { error } }) => (
+            <Dropdown
+              isError={!!error || !!positionError}
+              label="Priest Status"
+              placeholder="Select Priest Status"
+              items={priestStatusOptions}
+              displayValueKey="name"
+              size="big"
+              errorMsg={`${error?.message || positionError}`}
+              onSelect={(item) => field.onChange(item.name)}
+              value={field.value}
+              icon={FaCross}
+              iconSize={20}
+              loading={isLoadingPositions}
+              disabled={isLoadingPositions || !!positionError}
+            />
+          )}
         />
+
         <Button
           disabled={isSubmitting}
           textSize="sm"
