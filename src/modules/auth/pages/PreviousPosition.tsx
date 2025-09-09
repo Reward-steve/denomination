@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
-import { useRegistration } from "../../../hooks/useReg";
-import Form from "../../../components/layout/Form";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import {
   FaBriefcase,
   FaCalendar,
@@ -9,24 +9,49 @@ import {
   FaPlus,
   FaTrash,
 } from "react-icons/fa6";
+
+// Hooks & Context
+import { useRegistration } from "../../../hooks/useReg";
+
+// Layout & UI
+import Form from "../../../components/layout/Form";
 import FormInput from "../../../components/ui/FormInput";
 import { Button } from "../../../components/ui/Button";
 import { Loader } from "../../../components/ui/Loader";
+import { Dropdown } from "../../../components/ui/Dropdown";
+
+// Utils & Services
+import { getFromStore } from "../../../utils/appHelpers";
+import { createUCCAUser, fetchPosition } from "../services/auth";
+
+// Types
 import {
   type DropdownOption,
   type PersonalInfoFormData,
   type Position,
 } from "../../../types/auth.types";
-import { createUCCAUser, fetchPosition } from "../services/auth";
-import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
-import { getFromStore } from "../../../utils/appHelpers";
-import { Dropdown } from "../../../components/ui/Dropdown";
 
-// The PrevPosition component
+// -------------------------
+// Helper: Build Final Payload
+// -------------------------
+const buildFinalPayload = (
+  data: PersonalInfoFormData,
+  formData: Partial<PersonalInfoFormData>
+) => ({
+  ...data,
+  prev_positions: formData.prev_positions,
+  bio: {
+    ...(data.bio || {}),
+    bcs_position: formData.bio?.bcs_position || data.bio?.bcs_position || "",
+  },
+});
+
+// -------------------------
+// Component
+// -------------------------
 export function PrevPosition() {
   const { setStep, setPrev, updateData, data } = useRegistration();
-  const [id, setId] = useState(true);
+  const [hasSession, setHasSession] = useState(true);
   const [priestStatusOptions, setPriestStatusOptions] = useState<
     DropdownOption[]
   >([]);
@@ -34,6 +59,7 @@ export function PrevPosition() {
   const [isLoadingPositions, setIsLoadingPositions] = useState(false);
 
   const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
@@ -46,62 +72,14 @@ export function PrevPosition() {
     name: "prev_positions",
   });
 
+  // -------------------------
+  // Lifecycle
+  // -------------------------
   useEffect(() => {
     setStep(5);
     setPrev(true);
   }, [setStep, setPrev]);
 
-  const onSubmit = async (formData: Partial<PersonalInfoFormData>) => {
-    const userId = getFromStore("ucca_reg_data");
-    try {
-      if (!userId) {
-        toast.error("User session lost. Please restart registration.");
-        setId(false);
-        return;
-      }
-      // Save step 5 data into context
-      updateData({
-        prev_positions: formData.prev_positions,
-        bio: {
-          ...(data.bio || {}),
-          bcs_position:
-            formData.bio?.bcs_position || data.bio?.bcs_position || "",
-        },
-      });
-      // Build final payload from all context data
-      const finalPayload = {
-        ...data,
-        prev_positions: formData.prev_positions,
-        bio: {
-          ...(data.bio || {}),
-          bcs_position:
-            formData.bio?.bcs_position || data.bio?.bcs_position || "",
-        },
-      };
-
-      console.log(data, finalPayload);
-
-      const res = await createUCCAUser(finalPayload);
-      console.log("Response:", res);
-      if (res.success) {
-        toast.success("Registration completed successfully!");
-        // 🔥 Clear registration state after success
-        sessionStorage.removeItem("ucca_reg_step");
-        sessionStorage.removeItem("ucca_reg_prev");
-        sessionStorage.removeItem("ucca_reg_data");
-        setStep(6);
-        navigate("/auth/success");
-      } else {
-        toast.error(res.message || "Registration failed");
-      }
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
-    }
-  };
-
-  // Fetch priest positions on mount
   useEffect(() => {
     const loadPositions = async () => {
       setIsLoadingPositions(true);
@@ -122,14 +100,58 @@ export function PrevPosition() {
         setIsLoadingPositions(false);
       }
     };
+
     loadPositions();
   }, []);
 
+  // -------------------------
+  // Handlers
+  // -------------------------
+  const onSubmit = async (formData: Partial<PersonalInfoFormData>) => {
+    const userId = getFromStore("ucca_reg_data");
+    if (!userId) {
+      toast.error("User session lost. Please restart registration.");
+      setHasSession(false);
+      return;
+    }
+
+    // Save step 5 data into context
+    updateData({
+      prev_positions: formData.prev_positions,
+      bio: {
+        ...(data.bio || {}),
+        bcs_position:
+          formData.bio?.bcs_position || data.bio?.bcs_position || "",
+      },
+    });
+
+    const finalPayload = buildFinalPayload(data, formData);
+
+    try {
+      const res = await createUCCAUser(finalPayload);
+      if (res.success) {
+        toast.success("Registration completed successfully!");
+        sessionStorage.removeItem("ucca_reg_step");
+        sessionStorage.removeItem("ucca_reg_prev");
+        sessionStorage.removeItem("ucca_reg_data");
+        setStep(6);
+        navigate("/auth/success");
+      } else {
+        toast.error(res.message || "Registration failed");
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "An unexpected error occurred"
+      );
+    }
+  };
+
+  // -------------------------
+  // Render
+  // -------------------------
   return (
     <>
-      {id ? (
-        ""
-      ) : (
+      {!hasSession && (
         <Button
           className="absolute top-5 right-4 z-50 text-accent"
           variant="outline"
@@ -139,35 +161,35 @@ export function PrevPosition() {
           Restart
         </Button>
       )}
+
       <Form
         title="Previous Positions"
         description="Please provide details about your past and current positions held in BCS."
         onSubmit={handleSubmit(onSubmit)}
       >
-        {/* New section for Previous Positions */}
         <div className="text-center mt-10">
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-text-placeholder">
             List any previous positions you held in the BCS.
           </p>
         </div>
+
         {fields.map((item, index) => (
           <div
             key={item.id}
-            className="p-4 border border-gray-200 rounded-lg space-y-4 relative"
+            className="p-4 border border-border rounded-lg space-y-4 relative"
           >
             <div className="flex justify-between items-center">
-              <h4 className="font-semibold text-gray-800">
-                Position #{index + 1}
-              </h4>
-              <button
+              <h4 className="font-semibold text-text">Position #{index + 1}</h4>
+              <Button
                 type="button"
                 onClick={() => remove(index)}
                 className="text-red-500 hover:text-red-700 transition-colors duration-200"
                 aria-label="Remove position"
               >
                 <FaTrash />
-              </button>
+              </Button>
             </div>
+
             <FormInput
               label="Position Name"
               placeholder="e.g., Senior Apostle"
@@ -177,6 +199,7 @@ export function PrevPosition() {
               })}
               error={errors.prev_positions?.[index]?.position_name}
             />
+
             <FormInput
               label="Start Year"
               placeholder="YYYY"
@@ -187,6 +210,7 @@ export function PrevPosition() {
               })}
               error={errors.prev_positions?.[index]?.start_year}
             />
+
             <FormInput
               label="End Year"
               placeholder="YYYY"
@@ -199,17 +223,7 @@ export function PrevPosition() {
             />
           </div>
         ))}
-        <button
-          type="button"
-          onClick={() => {
-            append({ position_name: "", start_year: "", end_year: "" });
-          }}
-          className="w-full flex items-center justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-        >
-          <FaPlus className="mr-2" /> Add Another Position
-        </button>
 
-        {/* Right Column */}
         <Controller
           name="bio.bcs_position"
           control={control}
@@ -222,7 +236,7 @@ export function PrevPosition() {
               items={priestStatusOptions}
               displayValueKey="name"
               size="big"
-              errorMsg={`${error?.message || positionError}`}
+              errorMsg={error?.message || positionError || ""}
               onSelect={(item) => field.onChange(item.name)}
               value={field.value}
               icon={FaCross}
@@ -232,20 +246,35 @@ export function PrevPosition() {
           )}
         />
 
-        <Button
-          disabled={isSubmitting}
-          textSize="sm"
-          type="submit"
-          variant="auth"
-        >
-          {isSubmitting ? (
-            <div className="flex items-center space-x-2">
-              <Loader /> <span>Saving...</span>
-            </div>
-          ) : (
-            "Save & Continue"
-          )}
-        </Button>
+        <div className="w-full flex flex-col sm:flex-row sm:justify-between items-center gap-3 sm:gap-6 mt-6">
+          <Button
+            disabled={isSubmitting}
+            textSize="sm"
+            type="submit"
+            variant="primary"
+            className="w-full sm:w-auto"
+          >
+            {isSubmitting ? (
+              <div className="flex items-center space-x-2">
+                <Loader /> <span>Saving...</span>
+              </div>
+            ) : (
+              "Save & Continue"
+            )}
+          </Button>
+
+          <Button
+            type="button"
+            onClick={() =>
+              append({ position_name: "", start_year: "", end_year: "" })
+            }
+            variant="secondary"
+            textSize="sm"
+            className="w-full sm:w-auto flex items-center justify-center"
+          >
+            <FaPlus className="mr-2" /> Add Another Position
+          </Button>
+        </div>
       </Form>
     </>
   );

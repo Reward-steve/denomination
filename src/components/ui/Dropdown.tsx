@@ -144,13 +144,11 @@ export function Dropdown({
       },
     },
     ".children": {
-      border: `1px solid ${theme.colors.border}`,
       borderRadius: 8,
       overflow: "hidden",
       boxShadow: "0 4px 21px -9px #00000036",
       position: "absolute",
       zIndex: 10,
-      backgroundColor: theme.colors.surface,
       width: "100%",
       maxHeight: 300,
       overflowY: "auto",
@@ -246,7 +244,7 @@ export function Dropdown({
                   }
                 : undefined
             }
-            className="dd-input bg-surface border border-border w-full"
+            className="dd-input bg-surface border border-border w-full placeholder:text-text-placeholder"
             readOnly={!filterable}
             onBlur={(e) => {
               if (
@@ -280,7 +278,7 @@ export function Dropdown({
       <div
         className={`children ${
           isOpen ? "_fadeInDown" : "_fadeOutUp"
-        } bg-surface`}
+        } bg-surface border border-border`}
       >
         {filteredItems.length > 0 ? (
           filteredItems.map((item, i) => (
@@ -315,21 +313,18 @@ export function DropdownItem({
   onClick,
   ref,
 }: IDropDownItem) {
-  const theme = useTheme();
   const itemStyles = css({
     padding: "5px 10px",
-    color: active ? theme.colors.primary : theme.colors.textSecondary,
     fontWeight: active ? "600" : "normal",
     cursor: "pointer",
     fontSize: "14px",
-    "&:hover": {
-      backgroundColor: theme.colors.border,
-    },
   });
   return (
     <div
       ref={ref}
-      className={itemStyles}
+      className={`${itemStyles} ${
+        active ? "text-primary" : "text-text-secondary"
+      } hover:bg-border`}
       tabIndex={-1}
       role="button"
       onClick={onClick}
