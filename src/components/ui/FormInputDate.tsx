@@ -88,13 +88,13 @@ const FormInputDate = <T extends object>({
           className={clsx(
             className,
             "text-sm w-full pl-10 pr-3 h-[52px] lg:h-[45px] rounded-xl border transition-all duration-200",
-            "bg-white focus:outline-none",
+            "bg-surface focus:outline-none",
             error
               ? "border-error text-error ring-1 ring-error"
               : "border-border text-text focus:border-accent focus:ring-2 focus:ring-accent/50"
           )}
           wrapperClassName="w-full"
-          popperClassName="z-[1000] shadow-lg rounded-lg border border-border bg-white"
+          popperClassName="z-[1000] shadow-lg rounded-lg border border-border bg-surface"
           id={id}
           aria-invalid={!!error}
           aria-describedby={error ? `${id}-error` : undefined}

@@ -15,7 +15,7 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     if (stored === "light") return lightTheme;
     if (stored === "dark") return darkTheme;
     const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
+      "(prefers-color-scheme: light)"
     ).matches;
     return prefersDark ? darkTheme : lightTheme;
   });

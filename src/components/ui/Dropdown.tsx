@@ -122,7 +122,6 @@ export function Dropdown({
       paddingLeft: Icon ? "2.25rem" : "1rem",
       paddingRight: "2.5rem",
       fontSize: size === "big" ? "0.875rem" : "0.75rem",
-      backgroundColor: "white",
       outline: "none",
       transition: "all 0.2s",
       cursor: filterable ? "auto" : "pointer",
@@ -151,7 +150,7 @@ export function Dropdown({
       boxShadow: "0 4px 21px -9px #00000036",
       position: "absolute",
       zIndex: 10,
-      backgroundColor: theme.colors.background,
+      backgroundColor: theme.colors.surface,
       width: "100%",
       maxHeight: 300,
       overflowY: "auto",
@@ -161,11 +160,6 @@ export function Dropdown({
       animation: isOpen
         ? "_fadeInDown 0.3s ease-out"
         : "_fadeOutUp 0.3s ease-out",
-    },
-    "@keyframes shake": {
-      "0%, 100%": { transform: "translateX(0)" },
-      "10%, 30%, 50%, 70%, 90%": { transform: "translateX(-2px)" },
-      "20%, 40%, 60%, 80%": { transform: "translateX(2px)" },
     },
   });
 
@@ -217,7 +211,7 @@ export function Dropdown({
   }, [defaultValue, displayValueKey]);
 
   return (
-    <div className={dropStyles}>
+    <div className={`${dropStyles}`}>
       <div className="input-cont flex flex-col w-full text-sm">
         {label && (
           <p className="flex">
@@ -252,7 +246,7 @@ export function Dropdown({
                   }
                 : undefined
             }
-            className="dd-input w-full"
+            className="dd-input bg-surface border border-border w-full"
             readOnly={!filterable}
             onBlur={(e) => {
               if (
@@ -268,7 +262,7 @@ export function Dropdown({
           />
           <GoChevronDown
             size={20}
-            className={`absolute bottom-4 right-3 ${
+            className={`absolute bottom-4 right-3 text-primary ${
               isOpen ? "rotate-180" : ""
             } ${disabled || loading ? "cursor-not-allowed" : "cursor-pointer"}`}
             color={loading ? theme.colors.neutral : theme.colors.accent}
@@ -283,7 +277,11 @@ export function Dropdown({
           </p>
         )}
       </div>
-      <div className={`children ${isOpen ? "_fadeInDown" : "_fadeOutUp"}`}>
+      <div
+        className={`children ${
+          isOpen ? "_fadeInDown" : "_fadeOutUp"
+        } bg-surface`}
+      >
         {filteredItems.length > 0 ? (
           filteredItems.map((item, i) => (
             <DropdownItem
@@ -320,7 +318,7 @@ export function DropdownItem({
   const theme = useTheme();
   const itemStyles = css({
     padding: "5px 10px",
-    color: active ? theme.colors.accent : theme.colors.textSecondary,
+    color: active ? theme.colors.primary : theme.colors.textSecondary,
     fontWeight: active ? "600" : "normal",
     cursor: "pointer",
     fontSize: "14px",
