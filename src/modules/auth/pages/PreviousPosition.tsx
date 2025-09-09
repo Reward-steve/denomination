@@ -226,7 +226,6 @@ export function PrevPosition() {
               onSelect={(item) => field.onChange(item.name)}
               value={field.value}
               icon={FaCross}
-              iconSize={20}
               loading={isLoadingPositions}
               disabled={isLoadingPositions || !!positionError}
             />

@@ -56,8 +56,8 @@ export const lightTheme: Theme = {
   colors: {
     primary: "#6366F1", // Spiritual and calming blue
     secondary: "#FACC15", // Hopeful yellow
-    accent: "#10B981",
-    accentLight: "#10B98140",
+    accent: "#0a3587",
+    accentLight: "#0a358740",
     text: "#1F2937", // Readable dark gray
     textSecondary: "#4B5563", // Muted text for less important info
     textPlaceholder: "#9CA3AF", // Light gray for form placeholders
@@ -104,8 +104,8 @@ export const darkTheme: Theme = {
   colors: {
     primary: "#6366F1", // Spiritual and calming blue
     secondary: "#FACC15", // Hopeful yellow
-    accent: "#10B981",
-    accentLight: "#10B98140",
+    accent: "#0a3587",
+    accentLight: "#0a358740",
     text: "#1F2937", // Readable dark gray
     textSecondary: "#4B5563", // Muted text for less important info
     textPlaceholder: "#9CA3AF", // Light gray for form placeholders

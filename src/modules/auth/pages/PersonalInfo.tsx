@@ -251,7 +251,6 @@ function PersonalInfo() {
                 onSelect={(item) => field.onChange(item.id)}
                 value={field.value}
                 icon={FaVenusMars}
-                iconSize={20}
               />
             )}
           />
@@ -271,7 +270,6 @@ function PersonalInfo() {
                 onSelect={(item) => field.onChange(item.id)}
                 value={field.value}
                 icon={FaRing}
-                iconSize={20}
               />
             )}
           />
@@ -410,7 +408,6 @@ function PersonalInfo() {
                 }}
                 value={field.value}
                 icon={FaMapPin}
-                iconSize={20}
                 loading={isLoadingStates}
                 disabled={isLoadingStates || !!stateError}
               />
@@ -435,7 +432,6 @@ function PersonalInfo() {
                 onSelect={(item) => field.onChange(item.name.toString())}
                 value={field.value}
                 icon={FaMapPin}
-                iconSize={20}
                 loading={isLoadingLgas}
                 disabled={
                   isLoadingLgas || !selectedStateId || lgas.length === 0
@@ -468,7 +464,6 @@ function PersonalInfo() {
                 onSelect={(item) => field.onChange(item.id)}
                 value={field.value}
                 icon={FaCross}
-                iconSize={20}
               />
             )}
           />

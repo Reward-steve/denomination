@@ -8,11 +8,17 @@ import { auth, dashboard } from "./routes";
 import ResponsiveProvider from "./context/ResponsiveProvider";
 import { authMenu, dashboardMenu } from "./constant";
 import NotFound from "./modules/auth/pages/NotFound";
+import { useState } from "react";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import { Login } from "./modules/auth/pages/LoginModal";
+import { AuthProvider } from "./context/AuthProvider";
 
 // This component will use the theme from our context
 function ThemedAppContent() {
+  const [showLogin, setShowLogin] = useState(false);
+
   return (
-    <RegistrationProvider>
+    <>
       {/* Global Toast Notifications */}
       <ToastContainer
         position="top-right"
@@ -25,7 +31,7 @@ function ThemedAppContent() {
         {/* Landing Page */}
         <Route path="/" element={<LandingPage />} />
 
-        {/*Auth-flow - Corrected approach */}
+        {/* Auth-flow */}
         <Route
           path="/auth/*"
           element={<Layout Items={authMenu} disabled={true} />}
@@ -36,7 +42,15 @@ function ThemedAppContent() {
           ))}
         </Route>
 
-        <Route path="/dashboard/*" element={<Layout Items={dashboardMenu} />}>
+        {/* Dashboard flow, protected by login modal */}
+        <Route
+          path="/dashboard/*"
+          element={
+            <ProtectedRoute onRequireLogin={() => setShowLogin(true)}>
+              <Layout Items={dashboardMenu} />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<Navigate to="home" replace />} />
           {dashboard.map(({ path, element: Element }) => (
             <Route key={path} path={path} element={<Element />} />
@@ -45,16 +59,26 @@ function ThemedAppContent() {
 
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </RegistrationProvider>
+
+      {/* Modal for login */}
+      <Login
+        showLogin={showLogin}
+        handleCloseLogin={() => setShowLogin(false)}
+      />
+    </>
   );
 }
 
 export default function App() {
   return (
     <ThemeProvider>
-      <ResponsiveProvider>
-        <ThemedAppContent />
-      </ResponsiveProvider>
+      <RegistrationProvider>
+        <AuthProvider>
+          <ResponsiveProvider>
+            <ThemedAppContent />
+          </ResponsiveProvider>
+        </AuthProvider>
+      </RegistrationProvider>
     </ThemeProvider>
   );
 }

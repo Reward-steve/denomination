@@ -48,9 +48,6 @@ const FormInputDate = <T extends object>({
     },
   });
 
-  // Debug field value
-  console.log(`FormInputDate (${name}): field.value =`, field.value);
-
   return (
     <label className="w-full block" style={styles}>
       {label && (

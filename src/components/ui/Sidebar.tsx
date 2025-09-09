@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { LuPanelRightClose, LuPanelRightOpen } from "react-icons/lu";
-import { useState, useCallback, memo } from "react";
+import { useState, useCallback } from "react";
 import { FaCircleCheck } from "react-icons/fa6";
 import type { IconType } from "react-icons";
 import clsx from "clsx";
@@ -59,50 +59,65 @@ const SidebarHeader = ({
   );
 };
 
-export const SidebarLink = memo(
-  ({ to, label, num, Icon, isActive, disabled, isOpen }: SidebarLinkProps) => {
-    const { step = 0 } = useRegistration();
-    const navigate = useNavigate();
-    const isDashboard = useLocation().pathname.includes("dashboard");
-    const isStepCompleted = num < step;
+interface SidebarLinkProps {
+  to: string;
+  label: string;
+  num: number;
+  step: number; // ✅ added
+  Icon?: IconType;
+  isOpen?: boolean;
+  isActive?: boolean;
+  disabled?: boolean;
+}
 
-    const handleClick = useCallback(() => {
-      if (!to) {
-        console.warn(`Invalid path for ${label}`);
-        return;
-      }
-      navigate(`${DASHBOARD_BASE_PATH}/${to}`);
-    }, [navigate, to, label]);
+export const SidebarLink = ({
+  to,
+  label,
+  num,
+  step,
+  Icon,
+  isOpen,
+  isActive,
+  disabled,
+}: SidebarLinkProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    const buttonClasses = clsx(
-      "w-full text-left my-4 flex items-center gap-3 p-2 rounded-md transition-colors text-sm hover:bg-accentLight",
-      {
-        "justify-start": isOpen && isDashboard,
-        "justify-center": !isOpen && isDashboard,
-        "justify-between": !isDashboard,
-        "border-2 border-accent bg-white": isActive && step === num,
-        "bg-accentLight": isStepCompleted || (isDashboard && isActive),
-        "bg-border": !isStepCompleted && !(isDashboard && isActive),
-      }
-    );
+  const isDashboard = location.pathname.includes("dashboard");
+  const basePath = isDashboard ? DASHBOARD_BASE_PATH : "/auth";
+  const isStepCompleted = num < step;
 
-    return (
-      <button
-        disabled={disabled}
-        title={label}
-        aria-label={isOpen ? undefined : label}
-        onClick={handleClick}
-        className={buttonClasses}
-      >
-        {Icon && <Icon className="text-lg" />}
-        {isOpen && <span className="overflow-hidden">{label}</span>}
-        {isStepCompleted && (
-          <FaCircleCheck className="text-lg text-green-700" />
-        )}
-      </button>
-    );
-  }
-);
+  const handleClick = useCallback(() => {
+    if (!to) return console.warn(`Invalid path for ${label}`);
+    navigate(`${basePath}/${to}`);
+  }, [navigate, to, basePath, label]);
+
+  const buttonClasses = clsx(
+    "w-full text-left my-4 flex items-center gap-3 p-2 rounded-md transition-colors text-sm hover:bg-accentLight",
+    {
+      "justify-start": isOpen && isDashboard,
+      "justify-center": !isOpen && isDashboard,
+      "justify-between": !isDashboard,
+      "border-2 border-accent bg-white": isActive && step === num,
+      "bg-accentLight": isStepCompleted || (isDashboard && isActive),
+      "bg-border": !isStepCompleted && !isActive && !isDashboard,
+    }
+  );
+
+  return (
+    <button
+      disabled={disabled}
+      title={label}
+      aria-label={isOpen ? undefined : label}
+      onClick={handleClick}
+      className={buttonClasses}
+    >
+      {Icon && <Icon className="text-lg" />}
+      {isOpen && <span className="overflow-hidden">{label}</span>}
+      {isStepCompleted && <FaCircleCheck className="text-lg text-green-700" />}
+    </button>
+  );
+};
 
 export const SidebarDesktop = ({
   items,
@@ -114,6 +129,11 @@ export const SidebarDesktop = ({
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(true);
   const isAuthPage = location.pathname.includes("auth");
+
+  // ✅ Step is pulled once here
+  const { step = 0 } = useRegistration();
+
+  console.log("SidebarDesktop step:", step);
 
   return (
     <aside
@@ -136,12 +156,13 @@ export const SidebarDesktop = ({
           />
           {items.length > 0 ? (
             <ul className="space-y-1">
-              {items.map(({ label, Icon, path, step }) => (
+              {items.map(({ label, Icon, path, step: itemStep }) => (
                 <li key={label}>
                   <SidebarLink
                     to={path}
                     label={label}
-                    num={step!}
+                    num={itemStep!}
+                    step={step} // ✅ pass current step here
                     disabled={disabled}
                     Icon={Icon}
                     isOpen={isOpen}
