@@ -3,7 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import { useRegistration } from "../../../hooks/useReg";
 import Form from "../../../components/layout/Form";
 import FormInput from "../../../components/ui/FormInput";
-import { FaHome } from "react-icons/fa";
+import { FaHome, FaCalendar } from "react-icons/fa";
 import { FaUpload } from "react-icons/fa6";
 import { Dropdown } from "../../../components/ui/Dropdown";
 import { Button } from "../../../components/ui/Button";
@@ -11,7 +11,6 @@ import { Loader } from "../../../components/ui/Loader";
 import type { PersonalInfoFormData } from "../../../types/auth.types";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import FormInputDate from "../../../components/ui/FormInputDate";
 
 // The UCCAInfo component
 export function UCCAInfo() {
@@ -76,12 +75,16 @@ export function UCCAInfo() {
         error={errors?.bio?.previous_pew}
       />
 
-      <FormInputDate
-        control={control}
-        name="bio.date_ucca"
+      <FormInput
+        type="date"
         label="Date of Promotion to UCCA"
+        placeholder="MM/DD/YYYY"
+        icon={FaCalendar}
+        register={register("bio.date_ucca")}
+        optional={true}
         error={errors?.bio?.date_ucca}
       />
+
       <Controller
         name="bio.promotion_method"
         control={control}
@@ -112,7 +115,7 @@ export function UCCAInfo() {
         <input
           type="checkbox"
           id="inducted"
-          className="form-checkbox text-blue-600 rounded-md"
+          className="form-checkbox text-primary accent-secondary rounded-md"
           {...register("bio.inducted")}
         />
         <label htmlFor="inducted" className="text-gray-700 flex items-center">
@@ -120,10 +123,13 @@ export function UCCAInfo() {
         </label>
       </div>
       {inducted && (
-        <FormInputDate
-          control={control}
-          name="bio.induction_date"
+        <FormInput
+          type="date"
           label="Induction Date"
+          placeholder="MM/DD/YYYY"
+          icon={FaCalendar}
+          register={register("bio.induction_date")}
+          optional={true}
           error={errors?.bio?.induction_date}
         />
       )}

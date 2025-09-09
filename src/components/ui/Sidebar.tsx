@@ -94,7 +94,7 @@ export const SidebarLink = memo(
         "bg-primary/10 text-primary": !isActive && isStepCompleted,
 
         // Incomplete step
-        "bg-neutral/10 text-text-secondary": !isActive && !isStepCompleted,
+        "bg-smooth text-text-secondary": !isActive && !isStepCompleted,
 
         // Disabled state
         "cursor-not-allowed": disabled,

@@ -20,13 +20,13 @@ import {
   FaVenusMars,
   FaRing,
   FaCross,
+  FaCalendar,
 } from "react-icons/fa6";
 import { GoMail } from "react-icons/go";
 import { Dropdown } from "../../../components/ui/Dropdown";
 import { FaHome } from "react-icons/fa";
 import { Button } from "../../../components/ui/Button";
 import { Loader } from "../../../components/ui/Loader";
-import FormInputDate from "../../../components/ui/FormInputDate";
 import { fetchStates, fetchLGA } from "../services/auth";
 
 interface DropdownOption {
@@ -229,11 +229,14 @@ function PersonalInfo() {
               required: "Last name is required",
             })}
           />
-          <FormInputDate
-            control={control}
-            name="bio.dob"
+          <FormInput
+            type="date"
             label="Date of Birth"
-            error={errors.bio?.dob}
+            placeholder="MM/DD/YYYY"
+            icon={FaCalendar}
+            register={register("bio.dob")}
+            optional={true}
+            error={errors?.bio?.dob}
           />
           <Controller
             name="bio.gender"
