@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { LuPanelRightClose, LuPanelRightOpen } from "react-icons/lu";
-import { useState, useCallback } from "react";
+import { useState, useCallback, memo } from "react";
 import { FaCircleCheck } from "react-icons/fa6";
 import type { IconType } from "react-icons";
 import clsx from "clsx";
@@ -50,7 +50,7 @@ const SidebarHeader = ({
         <button
           onClick={toggleOpen}
           aria-label="Toggle sidebar"
-          className="text-md p-2 rounded hover:bg-white hover:text-accent transition-colors"
+          className="text-md p-2 rounded hover:bg-neutral transition-colors"
         >
           {sidebarBtn}
         </button>
@@ -59,65 +59,61 @@ const SidebarHeader = ({
   );
 };
 
-interface SidebarLinkProps {
-  to: string;
-  label: string;
-  num: number;
-  step: number; // ✅ added
-  Icon?: IconType;
-  isOpen?: boolean;
-  isActive?: boolean;
-  disabled?: boolean;
-}
+export const SidebarLink = memo(
+  ({ to, label, num, Icon, isActive, disabled, isOpen }: SidebarLinkProps) => {
+    const { step = 0 } = useRegistration();
+    const navigate = useNavigate();
+    const isDashboard = useLocation().pathname.includes("dashboard");
+    const isStepCompleted = num < step;
 
-export const SidebarLink = ({
-  to,
-  label,
-  num,
-  step,
-  Icon,
-  isOpen,
-  isActive,
-  disabled,
-}: SidebarLinkProps) => {
-  const navigate = useNavigate();
-  const location = useLocation();
+    const handleClick = useCallback(() => {
+      if (!to) {
+        console.warn(`Invalid path for ${label}`);
+        return;
+      }
+      navigate(`${DASHBOARD_BASE_PATH}/${to}`);
+    }, [navigate, to, label]);
 
-  const isDashboard = location.pathname.includes("dashboard");
-  const basePath = isDashboard ? DASHBOARD_BASE_PATH : "/auth";
-  const isStepCompleted = num < step;
+    const buttonClasses = clsx(
+      "w-full text-left my-4 flex items-center gap-3 p-2 rounded-md transition-colors text-sm hover:bg-accentLight",
+      {
+        // Layout
+        "justify-start": isOpen && isDashboard,
+        "justify-center": !isOpen && isDashboard,
+        "justify-between": !isDashboard,
 
-  const handleClick = useCallback(() => {
-    if (!to) return console.warn(`Invalid path for ${label}`);
-    navigate(`${basePath}/${to}`);
-  }, [navigate, to, basePath, label]);
+        // Active state
+        "border-2 border-accent bg-white": isActive && step === num,
+        "bg-accent text-secondary": isDashboard && isActive,
 
-  const buttonClasses = clsx(
-    "w-full text-left my-4 flex items-center gap-3 p-2 rounded-md transition-colors text-sm hover:bg-accentLight",
-    {
-      "justify-start": isOpen && isDashboard,
-      "justify-center": !isOpen && isDashboard,
-      "justify-between": !isDashboard,
-      "border-2 border-accent bg-white": isActive && step === num,
-      "bg-accentLight": isStepCompleted || (isDashboard && isActive),
-      "bg-border": !isStepCompleted && !isActive && !isDashboard,
-    }
-  );
+        // Completed step
+        "bg-green-200 text-text": !isActive && isStepCompleted,
 
-  return (
-    <button
-      disabled={disabled}
-      title={label}
-      aria-label={isOpen ? undefined : label}
-      onClick={handleClick}
-      className={buttonClasses}
-    >
-      {Icon && <Icon className="text-lg" />}
-      {isOpen && <span className="overflow-hidden">{label}</span>}
-      {isStepCompleted && <FaCircleCheck className="text-lg text-green-700" />}
-    </button>
-  );
-};
+        // Incomplete step
+        "bg-gray-200 text-gray-700": !isActive && !isStepCompleted,
+
+        // Default fallback for dashboard inactive
+        "bg-white": isDashboard && !isActive,
+      }
+    );
+
+    return (
+      <button
+        disabled={disabled}
+        title={label}
+        aria-label={isOpen ? undefined : label}
+        onClick={handleClick}
+        className={buttonClasses}
+      >
+        {Icon && <Icon className="text-lg" />}
+        {isOpen && <span className="overflow-hidden">{label}</span>}
+        {isStepCompleted && (
+          <FaCircleCheck className="text-lg text-green-700" />
+        )}
+      </button>
+    );
+  }
+);
 
 export const SidebarDesktop = ({
   items,
@@ -129,11 +125,6 @@ export const SidebarDesktop = ({
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(true);
   const isAuthPage = location.pathname.includes("auth");
-
-  // ✅ Step is pulled once here
-  const { step = 0 } = useRegistration();
-
-  console.log("SidebarDesktop step:", step);
 
   return (
     <aside
@@ -156,13 +147,12 @@ export const SidebarDesktop = ({
           />
           {items.length > 0 ? (
             <ul className="space-y-1">
-              {items.map(({ label, Icon, path, step: itemStep }) => (
+              {items.map(({ label, Icon, path, step }) => (
                 <li key={label}>
                   <SidebarLink
                     to={path}
                     label={label}
-                    num={itemStep!}
-                    step={step} // ✅ pass current step here
+                    num={step!}
                     disabled={disabled}
                     Icon={Icon}
                     isOpen={isOpen}

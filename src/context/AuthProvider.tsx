@@ -1,28 +1,34 @@
 import { useState, useEffect, useCallback } from "react";
 import { AuthContext } from "./AuthContext";
+import { getFromStore, saveInStore } from "../utils/appHelpers";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
 
-  // ✅ Initialize state safely (avoids hydration mismatches in React 18+)
+  // ✅ Initialize from localStorage on first load
   useEffect(() => {
-    const storedAuth = localStorage.getItem("isAuthenticated");
-    setIsAuthenticated(storedAuth === "true");
+    const storedToken = getFromStore("tk");
+    if (storedToken) {
+      setToken(storedToken as string);
+    }
   }, []);
 
-  // ✅ Memoized functions (no re-renders unless needed)
-  const login = useCallback(() => {
-    setIsAuthenticated(true);
-    localStorage.setItem("isAuthenticated", "true");
+  // ✅ Login saves the token
+  const login = useCallback((newToken: string) => {
+    setToken(newToken);
+    saveInStore("tk", newToken);
   }, []);
 
+  // ✅ Logout clears everything
   const logout = useCallback(() => {
-    setIsAuthenticated(false);
-    localStorage.removeItem("isAuthenticated");
+    setToken(null);
+    sessionStorage.removeItem("tk"); // consistent cleanup
   }, []);
+
+  const isAuthenticated = !!token;
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

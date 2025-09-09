@@ -18,12 +18,12 @@ export const createUCCAUser = async (
   return await apiRequest("users/create", "POST", formData, "no");
 };
 
-export const login = async (
+export const loginApi = async (
   payload: any
 ): Promise<{
   success: boolean;
   message: string;
-  data: { token: string } | null;
+  data: { token: string; id: string } | null;
 }> => {
   const formData = new FormData();
   buildFormData(formData, payload);

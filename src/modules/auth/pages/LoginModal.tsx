@@ -5,10 +5,11 @@ import { Button } from "../../../components/ui/Button";
 import { Loader } from "../../../components/ui/Loader";
 import { FaArrowRightToBracket } from "react-icons/fa6";
 import { useEffect, useRef } from "react";
-import { login } from "../services/auth";
+import { loginApi } from "../services/auth";
 import { toast } from "react-toastify";
 import ReactDOM from "react-dom";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../hooks/useAuth";
 
 interface ModalProps {
   showLogin: boolean;
@@ -17,6 +18,7 @@ interface ModalProps {
 
 export function Login({ showLogin, handleCloseLogin }: ModalProps) {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const modalRef = useRef<HTMLDivElement | null>(null);
 
   const {
@@ -38,10 +40,15 @@ export function Login({ showLogin, handleCloseLogin }: ModalProps) {
       phone: formData.phoneNumber,
       password: formData.password,
     };
-    const res = await login(payload);
+    const res = await loginApi(payload);
+
     if (!res.success) {
       toast.error(res.message);
       return;
+    }
+    console.log(res);
+    if (res.success && res.data?.token) {
+      login(res.data.token);
     }
     toast.success(res.message);
     navigate("/dashboard");
