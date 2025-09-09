@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import type { PersonalInfoFormData } from "../types/auth.types";
 import { RegContext } from "./RegContext";
 import { saveInStore, getFromStore } from "../utils/appHelpers";
@@ -64,10 +64,6 @@ export const RegistrationProvider: React.FC<{ children: React.ReactNode }> = ({
     setPrev(val);
     saveInStore("ucca_reg_prev", val, "session");
   };
-
-  useEffect(() => {
-    console.log(step);
-  }, [step]);
 
   const value = {
     step,

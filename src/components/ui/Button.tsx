@@ -15,7 +15,7 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const baseStyles =
-  "inline-flex items-center justify-center font-medium rounded-lg transition-all focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed";
+  "inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed";
 
 const sizes: Record<string, string> = {
   sm: "px-3 py-1.5 text-sm",
@@ -34,27 +34,26 @@ const textSizes: Record<string, string> = {
 
 export const Button: React.FC<ButtonProps> = ({
   children,
-  variant = "accent",
+  variant = "primary",
   size = "md",
   textSize = "sm",
   className,
   ...props
 }) => {
-  // 🎨 Variants using theme colors instead of hard-coded values
   const variants: Record<string, string> = {
-    primary: "bg-accent text-white hover:bg-[#0a3587]/80 shadow-sm",
-    secondary: "bg-secondary text-white hover:bg-secondary/80 shadow-sm",
-    outline: "border border-subText text-text hover:bg-gray-100",
-    ghost: "text-text hover:bg-gray-50",
-    danger: "bg-red-500 text-white hover:bg-red-600",
+    primary: "bg-primary text-text hover:bg-primary/80 shadow-sm",
+    secondary: "bg-secondary text-text hover:bg-secondary/80 shadow-sm",
+    outline: "border border-border text-text hover:bg-neutral/20",
+    ghost: "text-text hover:bg-neutral/10",
+    danger: "bg-error text-text hover:bg-error/80",
     link: "text-secondary underline-offset-4 hover:underline bg-transparent",
     auth: `
-    w-full flex justify-center items-center
-    bg-accent text-white
-    hover:bg-[#0a3587]/80 hover:text-white
-    transition-all
-    h-[52px] rounded-lg m-0
-  `,
+      w-full flex justify-center items-center
+      bg-accent text-text
+      hover:bg-accent/80 hover:text-text
+      transition-all duration-200
+      h-[52px] rounded-lg m-0
+    `,
   };
 
   return (

@@ -9,6 +9,38 @@
 :root {
   --sidebar-width: 16rem; /* 64 in Tailwind */
   --sidebar-collapsed-width: 5rem; /* 20 in Tailwind */
+
+  --color-primary: 99 102 241;
+  --color-secondary: 250 204 21;
+  --color-accent: 59 130 248;
+  --color-accent-light: #3b82f640;
+  --color-text: 31 41 55;
+  --color-text-secondary: 75 85 99;
+  --color-text-placeholder: 156 163 175;
+  --color-background: 249 250 251;
+  --color-surface: 255 255 255;
+  --color-border: 229 231 235;
+  --color-neutral: 209 213 219;
+  --color-error: 239 68 68;
+  --color-smooth: 243 244 246;
+  --color-black: 0 0 0;
+}
+
+.dark {
+  --color-primary: 129 140 248;
+  --color-secondary: 251 191 36;
+  --color-accent: 59 130 246;
+  --color-accent-light: #3b82f640;
+  --color-text: 243 244 246;
+  --color-text-secondary: 209 213 219;
+  --color-text-placeholder: 107 114 128;
+  --color-background: 17 24 39;
+  --color-surface: 31 41 55;
+  --color-border: 55 65 81;
+  --color-neutral: 75 85 99;
+  --color-error: 248 113 113;
+  --color-smooth: 55 65 81;
+  --color-black: 0 0 0;
 }
 
 ._fadeOutUp {

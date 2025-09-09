@@ -77,7 +77,7 @@ export function Login({ showLogin, handleCloseLogin }: ModalProps) {
       role="dialog"
       aria-modal="true"
     >
-      <div className="bg-white rounded-2xl p-6 w-11/12 max-w-md shadow-2xl relative transition-transform transform scale-100 animate-fade">
+      <div className="bg-surface rounded-2xl p-6 w-11/12 max-w-md shadow-2xl relative transition-transform transform scale-100 animate-fade">
         {/* Close Button */}
         <button
           onClick={handleCloseLogin}
@@ -97,7 +97,7 @@ export function Login({ showLogin, handleCloseLogin }: ModalProps) {
             >
               <header className="text-center">
                 <h2 className="text-xl font-semibold text-text mb-1">Login</h2>
-                <p className="text-sm text-textPlaceholder">
+                <p className="text-sm text-text-placeholder">
                   Enter your phone number and password to continue.
                 </p>
               </header>

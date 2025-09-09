@@ -11,10 +11,10 @@ export function Header({ setShowLogin }: HeaderProps) {
     <header className="absolute top-0 left-0 w-full flex items-center justify-between z-20 p-6">
       {/* Logo + Title */}
       <div className="flex items-center justify-center">
-        <div className="bg-accent h-10 w-10 rounded-full mr-1 flex items-center justify-center font-bold text-neutral">
+        <div className="bg-accent h-10 w-10 rounded-full mr-1 flex items-center justify-center font-bold text-slate-300">
           D
         </div>
-        <span className="text-neutral font-bold text-2xl">enomination</span>
+        <span className="text-slate-300 font-bold text-2xl">enomination</span>
       </div>
 
       {/* Actions */}

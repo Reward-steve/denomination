@@ -1,11 +1,11 @@
-// pages/admin/settings/Settings.tsx
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { useResponsive } from "../../../hooks/useResponsive";
-import { SidebarDesktop } from "../../../components/ui/Sidebar";
+import { ResponsiveNav } from "../../../components/ui/Sidebar";
 import type {
   AuthSidebarProps,
   DashboardSidebarProps,
 } from "../../../constant";
+import Header from "../../../components/layout/Header";
 
 export default function Layout({
   Items,
@@ -15,33 +15,35 @@ export default function Layout({
   disabled?: boolean;
 }) {
   const { isMobile } = useResponsive();
-  const location = useLocation();
-
-  const activeSetting = location.pathname.split("/auth/")[1];
-  const isSettingSelected = Boolean(activeSetting);
 
   if (isMobile) {
     return (
-      <div className="min-h-screen">
-        {isSettingSelected ? (
-          <Outlet />
-        ) : (
-          <SidebarDesktop items={Items} disabled={disabled} />
-        )}
+      <div className="min-h-screen bg-background relative">
+        <main
+          style={{ scrollbarWidth: "none" }}
+          className="flex-1 pb-16 transition-all duration-200 overflow-y-auto h-screen"
+        >
+          <section className="w-full h-auto bg-background min-h-screen">
+            <div className="px-4 h-auto min-h-svh animate-fadeIn">
+              <Outlet />
+            </div>
+          </section>
+        </main>
+        <ResponsiveNav items={Items} disabled={disabled} />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-white relative">
-      <SidebarDesktop items={Items} disabled={disabled} />
-
+    <div className="flex min-h-screen bg-background relative">
+      <ResponsiveNav items={Items} disabled={disabled} />
       <main
         style={{ scrollbarWidth: "none" }}
-        className={`flex-1 transition-all duration-200 overflow-y-auto h-screen md:pr-2`}
+        className="flex-1 transition-all duration-200 overflow-y-auto h-screen md:pr-2"
       >
         <section className="w-full h-auto bg-background min-h-screen">
-          <div className="px-4 h-auto min-h-svh animate-fade">
+          {!disabled && <Header />}
+          <div className="px-4 h-auto min-h-svh animate-fadeIn">
             <Outlet />
           </div>
         </section>

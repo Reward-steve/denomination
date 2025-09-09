@@ -21,7 +21,7 @@ export default function Form({
   const { step } = useRegistration();
 
   return (
-    <div className="flex flex-col px-4 py-6 text-text animate-fade">
+    <div className="flex flex-col py-6 text-text animate-fade">
       <div className="flex-grow flex items-center justify-center mb-4 sm:mt-28 mt-10">
         <form
           onSubmit={onSubmit}
@@ -31,10 +31,10 @@ export default function Form({
           {step > 0 && step < 5 ? (
             <div>
               <p className="text-sm font-medium text-accent mb-2 flex justify-between">
-                <span className="text-xs font-semibold text-textPlaceholder">
+                <span className="text-xs font-semibold text-text-placeholder">
                   Step {step} of 5
                 </span>
-                <span className="text-xs text-textPlaceholder">
+                <span className="text-xs text-text-placeholder">
                   Registration
                 </span>
               </p>
@@ -59,7 +59,7 @@ export default function Form({
           {(title || description) && (
             <header className="text-center py-4">
               <h2 className="text-xl font-semibold text-text mb-1">{title}</h2>
-              <p className="text-sm text-textPlaceholder">{description}</p>
+              <p className="text-sm text-text-smooth">{description}</p>
             </header>
           )}
 
