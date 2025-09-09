@@ -9,7 +9,6 @@ import Events from "../modules/dashboard/pages/Events";
 import Finance from "../modules/dashboard/pages/Finance";
 import Home from "../modules/dashboard/pages/Home";
 import Users from "../modules/dashboard/pages/Users";
-import LandingPage from "../modules/Landing/pages/LandingPage";
 
 export const auth = [
   { path: "personal-info", element: PersonalInfo },
@@ -27,5 +26,3 @@ export const dashboard = [
   { path: "users", element: Users },
   { path: "documents", element: Documents },
 ];
-
-export const webPages = [{ path: "landing-page", element: LandingPage }];

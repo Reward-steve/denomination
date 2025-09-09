@@ -7,6 +7,7 @@ import Layout from "./modules/auth/components/Layout";
 import { auth, dashboard } from "./routes";
 import ResponsiveProvider from "./context/ResponsiveProvider";
 import { authMenu, dashboardMenu } from "./constant";
+import NotFound from "./modules/auth/pages/NotFound";
 
 // This component will use the theme from our context
 function ThemedAppContent() {
@@ -21,9 +22,8 @@ function ThemedAppContent() {
       />
 
       <Routes>
-        <Route index element={<Navigate to="/landing-page" replace />} />
         {/* Landing Page */}
-        <Route path="/landing-page" element={<LandingPage />} />
+        <Route path="/" element={<LandingPage />} />
 
         {/*Auth-flow - Corrected approach */}
         <Route
@@ -42,6 +42,8 @@ function ThemedAppContent() {
             <Route key={path} path={path} element={<Element />} />
           ))}
         </Route>
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </RegistrationProvider>
   );
