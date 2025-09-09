@@ -52,7 +52,7 @@ export default function Header() {
               placeholder="search..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="bg-white py-2 px-6 w-[80%] animate-fade duration-300 border border-border outline-none rounded-xl"
+              className="bg-background py-2 px-6 w-[80%] animate-fade duration-300 border border-border outline-none rounded-xl"
               autoFocus
             />
           ) : (
@@ -97,7 +97,7 @@ export default function Header() {
               alt="user_profile"
               className="w-8 h-8 rounded-full object-cover"
             />
-            <span className="text-sm font-medium text-black">
+            <span className="text-sm font-medium text-text">
               {user?.first_name}
             </span>
           </div>
