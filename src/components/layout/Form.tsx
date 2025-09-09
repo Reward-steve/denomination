@@ -59,7 +59,7 @@ export default function Form({
           {(title || description) && (
             <header className="text-center py-4">
               <h2 className="text-xl font-semibold text-text mb-1">{title}</h2>
-              <p className="text-sm text-text-smooth">{description}</p>
+              <p className="text-sm text-text-placeholder">{description}</p>
             </header>
           )}
 

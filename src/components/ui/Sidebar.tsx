@@ -91,13 +91,13 @@ export const SidebarLink = memo(
         "bg-accent/10 text-accent": isDashboard && isActive,
 
         // Completed step
-        "bg-primary/30 text-primary": !isActive && isStepCompleted,
+        "bg-primary/10 text-primary": !isActive && isStepCompleted,
 
         // Incomplete step
         "bg-neutral/10 text-text-secondary": !isActive && !isStepCompleted,
 
         // Disabled state
-        "opacity-50 cursor-not-allowed": disabled,
+        "cursor-not-allowed": disabled,
 
         // Default fallback
         "bg-smooth": isDashboard && !isActive,
