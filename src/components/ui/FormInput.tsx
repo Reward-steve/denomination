@@ -42,7 +42,7 @@ export default function FormInput({
           maxLength={maxLength}
           type={inputType}
           placeholder={placeholder}
-          className={`${className} accent-accent text-sm w-full outline-none bg-white ${
+          className={`${className} accent-accent text-sm w-full outline-none bg-surface ${
             Icon ? "pl-9" : "pl-4"
           } pr-10 h-[52px] lg:h-[45px] rounded-xl transition-all duration-200 focus:ring-1 ${
             error
