@@ -6,7 +6,7 @@ import { useTheme } from "../../hooks/useTheme";
 import img from "../../../public/de.png";
 import { lightTheme } from "../../utils/themes";
 import { useEffect, useState } from "react";
-import type { UserDetails } from "../../types/auth.types";
+import type { User } from "../../types/auth.types";
 import { getFromStore } from "../../utils/appHelpers";
 
 export default function Header() {
@@ -15,7 +15,7 @@ export default function Header() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [openSearch, setOpenSearch] = useState(false);
-  const [user, setUser] = useState<UserDetails>();
+  const [user, setUser] = useState<User>();
 
   const { theme, toggleTheme } = useTheme();
 
@@ -27,7 +27,8 @@ export default function Header() {
   useEffect(() => {
     const curr_user = getFromStore("curr_user");
     if (curr_user) {
-      setUser(curr_user as UserDetails);
+      console.log(curr_user);
+      setUser(curr_user as User);
     }
   }, []);
 

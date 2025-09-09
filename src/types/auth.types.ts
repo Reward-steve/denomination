@@ -79,6 +79,14 @@ export interface NextOfKin {
   address: string;
 }
 
+export interface Skill {
+  id: number;
+  user_id: number;
+  skill_name: string;
+  created_at: string;
+  updated_at: string;
+}
+
 /**
  * Top-level personal info payload that matches the screenshot exactly.
  * The screenshot top-level keys are: bio, education, prev_positions, nok, user_id, skills
@@ -203,4 +211,45 @@ export interface Position {
   created_at: string;
   updated_at: string;
   descr: string | null;
+}
+
+export interface User {
+  id: number;
+  first_name: string;
+  middle_name: string | null;
+  last_name: string;
+  email_verified_at: string | null;
+  reg_status: number;
+  dob: string; // ISO date string
+  gender: "male" | "female" | string;
+  marital_status: "single" | "married" | string;
+  lga: string | null;
+  city: string | null;
+  bethel: string | null;
+  zone: string | null;
+  area: string | null;
+  origin_state: string | null;
+  residence_state: string | null;
+  nationality: string | null;
+  priest_status: string | null;
+  occupation: string | null;
+  photo: string | null;
+  residential_address: string | null;
+  hobbies: string | null;
+  primary_phone: string;
+  secondary_phone: string | null;
+  email: string | null;
+  previous_pew: string | null;
+  date_ucca: string | null;
+  promotion_method: string | null;
+  inducted: number;
+  induction_date: string | null;
+  bcs_position: string | null;
+  remember_token: string | null;
+  created_at: string;
+  updated_at: string;
+  education: Education | null;
+  prev_positions: PreviousPosition[];
+  nok: NextOfKin[];
+  skills: Skill[];
 }

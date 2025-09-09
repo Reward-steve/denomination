@@ -1,5 +1,5 @@
 import { apiRequest } from "../../../services/apiResquest";
-import type { LGA, Position, States } from "../../../types/auth.types";
+import type { LGA, Position, States, User } from "../../../types/auth.types";
 import { buildFormData } from "../../../utils/appHelpers";
 
 export const createUCCAUser = async (
@@ -23,7 +23,7 @@ export const loginApi = async (
 ): Promise<{
   success: boolean;
   message: string;
-  data: { token: string; id: string } | null;
+  data: { token: string; id: string; user: User } | null;
 }> => {
   const formData = new FormData();
   buildFormData(formData, payload);
