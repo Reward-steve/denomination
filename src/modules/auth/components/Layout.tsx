@@ -5,7 +5,6 @@ import type {
   AuthSidebarProps,
   DashboardSidebarProps,
 } from "../../../constant";
-import Header from "../../../components/layout/Header";
 
 export default function Layout({
   Items,
@@ -42,8 +41,7 @@ export default function Layout({
         className="flex-1 transition-all duration-200 overflow-y-auto h-screen md:pr-2"
       >
         <section className="w-full h-auto bg-background min-h-screen">
-          {!disabled && <Header />}
-          <div className="px-4 h-auto min-h-svh animate-fadeIn">
+          <div className="px-2 h-auto min-h-svh animate-fadeIn">
             <Outlet />
           </div>
         </section>
