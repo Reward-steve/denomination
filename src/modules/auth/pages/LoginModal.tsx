@@ -122,7 +122,6 @@ export function Login({ showLogin, handleCloseLogin }: ModalProps) {
       onClick={(e) => {
         if (e.target === modalRef.current) handleCloseLogin();
       }}
-      ref={modalRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="login-title"
@@ -173,7 +172,6 @@ export function Login({ showLogin, handleCloseLogin }: ModalProps) {
               },
             })}
             error={errors.phoneNumber}
-            inputRef={firstInputRef}
           />
 
           <FormInput

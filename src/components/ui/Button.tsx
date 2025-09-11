@@ -41,7 +41,7 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const variants: Record<string, string> = {
-    primary: "bg-primary text-white hover:bg-primary/80 shadow-sm",
+    primary: `bg-primary text-white hover:bg-primary/80 shadow-sm`,
     secondary: "bg-secondary text-white hover:bg-secondary/80 shadow-sm",
     outline: "border border-border text-text hover:bg-neutral/20",
     ghost: "text-text hover:bg-neutral/10",
