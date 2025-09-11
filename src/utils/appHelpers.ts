@@ -89,28 +89,50 @@ export function formatDate(
     : `${day}-${month}-${year}`;
 }
 
+// ✅ Strongly typed recursive function with sanitization
 export const buildFormData = (
   formData: FormData,
-  data: any,
+  data:
+    | Record<string, unknown>
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | File
+    | Date
+    | null
+    | undefined,
   parentKey?: string
-) => {
-  if (data && typeof data === "object" && !(data instanceof File)) {
-    // If it's a nested object, iterate through its keys
-    Object.keys(data).forEach((key) => {
-      buildFormData(
-        formData,
-        data[key],
-        parentKey ? `${parentKey}[${key}]` : key
-      );
-    });
-  } else if (Array.isArray(data)) {
-    // If it's an array, append each element with the correct array notation
+): void => {
+  // Skip null, undefined, and empty string
+  if (data === null || data === undefined || data === "") {
+    return;
+  }
+
+  // Handle arrays
+  if (Array.isArray(data)) {
     data.forEach((item, index) => {
-      buildFormData(formData, item, `${parentKey}[${index}]`);
+      const key = `${parentKey}[${index}]`;
+      buildFormData(formData, item as any, key);
     });
-  } else {
-    // For primitive values or files, append directly
-    const value = data == null ? "" : data;
-    formData.append(parentKey || "", value);
+    return;
+  }
+
+  // Handle nested objects (exclude File and Date)
+  if (
+    typeof data === "object" &&
+    !(data instanceof File) &&
+    !(data instanceof Date)
+  ) {
+    Object.entries(data as Record<string, unknown>).forEach(([key, value]) => {
+      const formKey = parentKey ? `${parentKey}[${key}]` : key;
+      buildFormData(formData, value as any, formKey);
+    });
+    return;
+  }
+
+  // Handle primitive values (string, number, boolean, File, Date)
+  if (parentKey) {
+    formData.append(parentKey, String(data));
   }
 };

@@ -31,32 +31,12 @@ import {
   type Position,
 } from "../../../types/auth.types";
 
-// -------------------------
-// Helper: Build Final Payload
-// -------------------------
-const buildFinalPayload = (
-  data: PersonalInfoFormData,
-  formData: Partial<PersonalInfoFormData>
-) => ({
-  ...data,
-  prev_positions: formData.prev_positions,
-  bio: {
-    ...(data.bio || {}),
-    bcs_position: formData.bio?.bcs_position || data.bio?.bcs_position || "",
-  },
-});
-
-// -------------------------
-// Component
-// -------------------------
 export function PrevPosition() {
   const { setStep, setPrev, updateData, data } = useRegistration();
   const [hasSession, setHasSession] = useState(true);
-  const [priestStatusOptions, setPriestStatusOptions] = useState<
-    DropdownOption[]
-  >([]);
+  const [positions, setPositions] = useState<DropdownOption[]>([]);
   const [positionError, setPositionError] = useState<string | null>(null);
-  const [isLoadingPositions, setIsLoadingPositions] = useState(false);
+  const [loadingPositions, setLoadingPositions] = useState(false);
 
   const navigate = useNavigate();
 
@@ -82,22 +62,24 @@ export function PrevPosition() {
 
   useEffect(() => {
     const loadPositions = async () => {
-      setIsLoadingPositions(true);
+      setLoadingPositions(true);
       try {
         const res = await fetchPosition();
-        const options: DropdownOption[] = res
-          .data!.filter((pos: Position) => pos.is_enabled === "1")
-          .map((pos: Position) => ({
+        const enabled = res.data?.filter(
+          (pos: Position) => pos.is_enabled === "1"
+        );
+        setPositions(
+          enabled!.map((pos: Position) => ({
             id: pos.id.toString(),
             name: pos.name,
-          }));
-        setPriestStatusOptions(options);
+          }))
+        );
         setPositionError(null);
       } catch {
-        setPositionError("Failed to load priest positions. Please try again.");
-        toast.error("Failed to load priest positions.");
+        setPositionError("Unable to load positions. Please try again.");
+        toast.error("Failed to fetch positions");
       } finally {
-        setIsLoadingPositions(false);
+        setLoadingPositions(false);
       }
     };
 
@@ -105,35 +87,41 @@ export function PrevPosition() {
   }, []);
 
   // -------------------------
-  // Handlers
+  // Submit Handler
   // -------------------------
   const onSubmit = async (formData: Partial<PersonalInfoFormData>) => {
     const userId = getFromStore("ucca_reg_data");
     if (!userId) {
-      toast.error("User session lost. Please restart registration.");
+      toast.error("Session expired. Please restart registration.");
       setHasSession(false);
       return;
     }
 
-    // Save step 5 data into context
+    // Update context
     updateData({
+      prev_positions: formData.prev_positions,
+      bio: {
+        ...(data.bio || {}),
+        bcs_position: formData.bio?.bcs_position || "",
+      },
+    });
+
+    // Final payload
+    const finalPayload = {
+      ...data,
       prev_positions: formData.prev_positions,
       bio: {
         ...(data.bio || {}),
         bcs_position:
           formData.bio?.bcs_position || data.bio?.bcs_position || "",
       },
-    });
-
-    const finalPayload = buildFinalPayload(data, formData);
+    };
 
     try {
       const res = await createUCCAUser(finalPayload);
       if (res.success) {
         toast.success("Registration completed successfully!");
-        sessionStorage.removeItem("ucca_reg_step");
-        sessionStorage.removeItem("ucca_reg_prev");
-        sessionStorage.removeItem("ucca_reg_data");
+        sessionStorage.clear();
         setStep(6);
         navigate("/auth/success");
       } else {
@@ -141,7 +129,7 @@ export function PrevPosition() {
       }
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
+        error instanceof Error ? error.message : "Unexpected error occurred"
       );
     }
   };
@@ -163,43 +151,57 @@ export function PrevPosition() {
       )}
 
       <Form
-        title="Previous Positions"
-        description="Please provide details about your past and current positions held in BCS."
+        title="Previous Positions in BCS"
+        description="Tell us about positions you’ve held previously, as well as your current role."
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="text-center mt-10">
-          <p className="mt-2 text-text-placeholder">
-            List any previous positions you held in the BCS.
+        {fields.length === 0 && (
+          <p className="text-sm text-text-placeholder text-center mt-4">
+            No positions added yet. Click below to add your first.
           </p>
-        </div>
+        )}
 
         {fields.map((item, index) => (
           <div
             key={item.id}
-            className="p-4 border border-border rounded-lg space-y-4 relative"
+            className="p-4 border border-border rounded-lg space-y-4 relative mt-6"
           >
             <div className="flex justify-between items-center">
               <h4 className="font-semibold text-text">Position #{index + 1}</h4>
               <Button
                 type="button"
                 onClick={() => remove(index)}
-                className="text-red-500 hover:text-red-700 transition-colors duration-200"
-                aria-label="Remove position"
+                variant="ghost"
+                className="text-red-500 hover:text-red-700"
               >
                 <FaTrash />
               </Button>
             </div>
 
-            <FormInput
-              label="Position Name"
-              placeholder="e.g., Senior Apostle"
-              icon={FaBriefcase}
-              register={register(`prev_positions.${index}.position_name`, {
-                required: "Position name is required",
-              })}
-              error={errors.prev_positions?.[index]?.position_name}
+            {/* Position Dropdown */}
+            <Controller
+              name={`prev_positions.${index}.position_name`}
+              control={control}
+              rules={{ required: "Position name is required" }}
+              render={({ field, fieldState: { error } }) => (
+                <Dropdown
+                  isError={!!error || !!positionError}
+                  label="Position Name"
+                  placeholder="Select Position"
+                  items={positions}
+                  displayValueKey="name"
+                  size="big"
+                  errorMsg={error?.message || positionError || ""}
+                  onSelect={(item) => field.onChange(item.name)}
+                  value={field.value}
+                  icon={FaCross}
+                  loading={loadingPositions}
+                  disabled={loadingPositions || !!positionError}
+                />
+              )}
             />
 
+            {/* Years */}
             <FormInput
               label="Start Year"
               placeholder="YYYY"
@@ -224,29 +226,19 @@ export function PrevPosition() {
           </div>
         ))}
 
-        <Controller
-          name="bio.bcs_position"
-          control={control}
-          rules={{ required: "Priest status is required" }}
-          render={({ field, fieldState: { error } }) => (
-            <Dropdown
-              isError={!!error || !!positionError}
-              label="Priest Status"
-              placeholder="Select Priest Status"
-              items={priestStatusOptions}
-              displayValueKey="name"
-              size="big"
-              errorMsg={error?.message || positionError || ""}
-              onSelect={(item) => field.onChange(item.name)}
-              value={field.value}
-              icon={FaCross}
-              loading={isLoadingPositions}
-              disabled={isLoadingPositions || !!positionError}
-            />
-          )}
+        {/* Current Position */}
+        <FormInput
+          label="Current Position"
+          placeholder="e.g., Senior Apostle"
+          icon={FaBriefcase}
+          register={register(`bio.bcs_position`, {
+            required: "Current position is required",
+          })}
+          error={errors?.bio?.bcs_position}
         />
 
-        <div className="w-full flex flex-col sm:flex-row sm:justify-between items-center gap-3 sm:gap-6 mt-6">
+        {/* Actions */}
+        <div className="w-full flex flex-col sm:flex-row sm:justify-between items-center gap-3 mt-8">
           <Button
             disabled={isSubmitting}
             textSize="sm"
@@ -272,7 +264,7 @@ export function PrevPosition() {
             textSize="sm"
             className="w-full sm:w-auto flex items-center justify-center"
           >
-            <FaPlus className="mr-2" /> Add Another Position
+            <FaPlus className="mr-2" /> Add Position
           </Button>
         </div>
       </Form>

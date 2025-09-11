@@ -1,18 +1,13 @@
 import { FaCamera, FaPlus } from "react-icons/fa";
 import { uploadImage } from "../../../utils/appHelpers";
-
-type ImageUploaderProps = {
-  message: string;
-  imagePreview: string;
-  setImagePreview: (img: string) => void;
-  setImageFile: (file: File) => void;
-};
+import type { ImageUploaderProps } from "../../../types/auth.types";
 
 export default function ImageUploader({
   message,
   imagePreview,
   setImagePreview,
   setImageFile,
+  error,
 }: ImageUploaderProps) {
   return (
     <div className="relative flex flex-col items-center justify-center">
@@ -53,6 +48,7 @@ export default function ImageUploader({
 
       {/* Label */}
       <p className="mt-3 text-sm font-medium text-text">{message}</p>
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
     </div>
   );
 }

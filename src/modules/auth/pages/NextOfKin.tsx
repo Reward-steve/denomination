@@ -11,11 +11,22 @@ import { FaPhone, FaUser } from "react-icons/fa6";
 import type { PersonalInfoFormData } from "../../../types/auth.types";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { relationships } from "../../../constant";
 
-// The NOKInfo component
+/**
+ * Next of Kin Information Page
+ * --------------------------------------------
+ * Step 3 of Registration flow.
+ * Collects details of the user's primary contact
+ * (Next of Kin) in case of emergencies or records.
+ */
 export default function NOKInfo() {
   const { setStep, setPrev, updateData } = useRegistration();
   const navigate = useNavigate();
+
+  // --------------------------------------------
+  // React Hook Form setup
+  // --------------------------------------------
   const {
     register,
     handleSubmit,
@@ -23,46 +34,48 @@ export default function NOKInfo() {
     formState: { errors, isSubmitting },
   } = useForm<PersonalInfoFormData>();
 
+  // --------------------------------------------
+  // Stepper control (mark this as Step 3)
+  // --------------------------------------------
   useEffect(() => {
     setStep(3);
     setPrev(true);
   }, [setStep, setPrev]);
 
+  // --------------------------------------------
+  // Submit Handler
+  // --------------------------------------------
   const onSubmit = async (formData: PersonalInfoFormData) => {
     try {
       const payload = {
         nok: formData.nok,
       };
 
-      // ✅ Just update context — no API call here
+      // ✅ Save NOK data into context (not API yet)
       updateData(payload);
 
-      toast.success("Next of kin details saved!");
-      navigate("/auth/ucca-info"); // proceed to step 4
+      toast.success("Next of kin details saved successfully!");
+      navigate("/auth/ucca-info"); // Step 4
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "An unexpected error occurred."
+        error instanceof Error ? error.message : "Something went wrong."
       );
     }
   };
 
-  const mockRelationships = [
-    { id: "1", name: "Father" },
-    { id: "2", name: "Mother" },
-    { id: "3", name: "Sibling" },
-    { id: "4", name: "Spouse" },
-    { id: "5", name: "Other" },
-  ];
-
+  // --------------------------------------------
+  // Render
+  // --------------------------------------------
   return (
     <Form
       title="Next of Kin Information"
-      description="Please provide the details of your next of kin."
+      description="Provide the details of your next of kin. This helps us know who to contact in case of emergencies."
       onSubmit={handleSubmit(onSubmit)}
     >
+      {/* Full Name */}
       <FormInput
         label="Full Name"
-        placeholder="Enter full name"
+        placeholder="Enter full name of your next of kin"
         icon={FaUser}
         register={register("nok.0.full_name", {
           required: "Full name is required",
@@ -70,20 +83,22 @@ export default function NOKInfo() {
         error={errors?.nok?.[0]?.full_name}
       />
 
+      {/* Phone Number */}
       <FormInput
         label="Phone Number"
-        placeholder="Enter phone number"
+        placeholder="Enter valid phone number"
         icon={FaPhone}
         register={register("nok.0.phone", {
           required: "Phone number is required",
           pattern: {
             value: /^\+?[0-9\s-()]+$/,
-            message: "Invalid phone number format",
+            message: "Please enter a valid phone number",
           },
         })}
         error={errors?.nok?.[0]?.phone}
       />
 
+      {/* Residential Address */}
       <FormInput
         label="Residential Address"
         placeholder="Enter residential address"
@@ -94,6 +109,7 @@ export default function NOKInfo() {
         error={errors?.nok?.[0]?.address}
       />
 
+      {/* Relationship Dropdown */}
       <Controller
         name="nok.0.relationship"
         control={control}
@@ -103,7 +119,7 @@ export default function NOKInfo() {
             isError={!!errors?.nok?.[0]?.relationship}
             label="Relationship"
             placeholder="Select relationship"
-            items={mockRelationships}
+            items={relationships}
             displayValueKey="name"
             size="big"
             errorMsg={errors?.nok?.[0]?.relationship?.message}
@@ -113,6 +129,7 @@ export default function NOKInfo() {
         )}
       />
 
+      {/* Submit Button */}
       <Button
         disabled={isSubmitting}
         textSize="sm"

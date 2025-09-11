@@ -10,12 +10,13 @@ import type { PersonalInfoFormData } from "../../../types/auth.types";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
-// Keep backend payload as string[], but use an object array internally for robust FieldArray control.
+// ------------------ Types ------------------
 type FormValues = Omit<PersonalInfoFormData, "skills"> & {
   skills: { value: string }[];
 };
 
 export function EducationData() {
+  // ------------------ Hooks ------------------
   const { setStep, setPrev, updateData } = useRegistration();
   const navigate = useNavigate();
 
@@ -40,18 +41,22 @@ export function EducationData() {
 
   const [skillInput, setSkillInput] = React.useState("");
 
+  // ------------------ Lifecycle ------------------
   React.useEffect(() => {
     setStep(2);
     setPrev(true);
   }, [setStep, setPrev]);
 
+  // ------------------ Helpers ------------------
   const normalize = (s: string) => s.trim().replace(/\s+/g, " ");
   const skillExists = (val: string) =>
     fields.some((f) => f.value?.toLowerCase() === val.toLowerCase());
 
+  // ------------------ Handlers ------------------
   const addSkill = (raw: string) => {
     const val = normalize(raw);
     if (!val) return;
+
     if (val.length > 40) {
       toast.warn("Skill too long (max 40 chars).");
       return;
@@ -60,19 +65,20 @@ export function EducationData() {
       toast.info("Skill already added.");
       return;
     }
+
     append({ value: val });
     setSkillInput("");
-    // keep validation in sync if you require at least one skill
     trigger("skills");
   };
 
   const addMany = (raw: string) => {
-    // Support comma/newline separated paste
     const parts = raw
       .split(/,|\n/)
       .map((p) => normalize(p))
       .filter(Boolean);
+
     if (!parts.length) return;
+
     let added = 0;
     for (const p of parts) {
       if (!skillExists(p) && p.length <= 40) {
@@ -80,6 +86,7 @@ export function EducationData() {
         added++;
       }
     }
+
     if (added === 0) toast.info("No new skills to add.");
     setSkillInput("");
     trigger("skills");
@@ -99,11 +106,10 @@ export function EducationData() {
         skills: skillsAsStrings,
       };
 
-      // ✅ Store data in context for final submit
       updateData(payload);
 
       toast.success("Education details saved!");
-      navigate("/auth/next-of-kin"); // move to step 3
+      navigate("/auth/next-of-kin");
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "An unexpected error occurred."
@@ -131,12 +137,14 @@ export function EducationData() {
     }
   };
 
+  // ------------------ Render ------------------
   return (
     <Form
-      title="Education Details"
-      description="Please provide details about your involvement with the UCCA."
+      title="Education & Skills"
+      description="Share your academic background and the skills you bring to the UCCA community."
       onSubmit={handleSubmit(onSubmit)}
     >
+      {/* Education Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormInput
           label="Certificate"
@@ -160,9 +168,9 @@ export function EducationData() {
         />
       </div>
 
-      {/* Skills (tag-style input managed as an array) */}
-      <div className="mt-4">
-        <label className="block text-sm font-medium mb-1">Skills</label>
+      {/* Skills Section */}
+      <div className="mt-6">
+        <label className="block text-sm font-medium mb-2">Skills</label>
         <div className="flex gap-2">
           <div className="relative flex-1">
             <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
@@ -170,7 +178,11 @@ export function EducationData() {
             </span>
             <input
               type="text"
-              className="pl-10 h-[52px] rounded-xl transition-all duration-200 focus:ring-1 border border-border text-text focus:border-accent focus:ring-accent text-sm w-full outline-none bg-transparent"
+              className={`pl-10 h-[52px] rounded-xl transition-all duration-200 focus:ring-2 border text-sm w-full outline-none bg-surface ${
+                errors.skills
+                  ? "border-error focus:border-error focus:ring-red-400 animate-shake"
+                  : "border-border text-text focus:border-accent focus:ring-accent"
+              }`}
               placeholder="Type a skill and press Enter (or paste comma-separated)"
               value={skillInput}
               onChange={(e) => setSkillInput(e.target.value)}
@@ -179,34 +191,33 @@ export function EducationData() {
               aria-label="Add a skill"
             />
           </div>
-          <div>
-            <Button
-              type="button"
-              variant="auth"
-              textSize="sm"
-              onClick={() => addSkill(skillInput)}
-            >
-              Add +
-            </Button>
-          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            textSize="sm"
+            onClick={() => addSkill(skillInput)}
+            className="rounded-xl"
+          >
+            Add +
+          </Button>
         </div>
 
-        {/* Hidden input attaches validation to the array */}
+        {/* Hidden input for validation */}
         <input type="hidden" {...skillsArrayValidator} />
 
-        {/* Chips */}
+        {/* Skill Chips */}
         {fields.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
             {fields.map((field, idx) => (
               <span
                 key={field.id}
-                className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm"
+                className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm bg-surface shadow-sm"
               >
                 {field.value}
                 <button
                   type="button"
                   onClick={() => removeSkill(idx)}
-                  className="rounded-full px-2 py-0.5 hover:bg-red-200"
+                  className="rounded-full px-2 py-0.5 text-red-600 hover:bg-red-100 transition"
                   aria-label={`Remove ${field.value}`}
                   title="Remove"
                 >
@@ -219,17 +230,19 @@ export function EducationData() {
 
         {/* Validation error */}
         {errors?.skills && (
-          <p className="mt-2 text-xs text-red-600">
-            {String(errors.skills.message || "Please add at least one skill.")}
+          <p className="mt-1 text-xs text-error animate-shake">
+            {String(errors.skills.message || "Please add atleast one skill")}
           </p>
         )}
       </div>
 
+      {/* Submit */}
       <Button
         disabled={isSubmitting}
         textSize="sm"
         type="submit"
         variant="auth"
+        className="mt-6"
       >
         {isSubmitting ? (
           <div className="flex items-center space-x-2">

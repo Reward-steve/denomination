@@ -3,6 +3,14 @@ import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
 import type { IconType } from "react-icons";
 import type { Ref } from "react";
 
+export interface ImageUploaderProps {
+  message: string;
+  imagePreview: string;
+  setImagePreview: React.Dispatch<React.SetStateAction<string>>;
+  setImageFile: (file: File) => void;
+  error?: string; // <-- add this
+}
+
 /**
  * Bio section — matches screenshot strictly (fields shown in the screenshot are present).
  * Note: `hobbies` in the screenshot is a comma-separated string, so kept as string.
