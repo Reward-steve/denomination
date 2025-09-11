@@ -153,7 +153,7 @@ export const ResponsiveNav = ({
               className={clsx(
                 "flex flex-col items-center text-xs p-2 transition-colors duration-200",
                 isActive
-                  ? "text-accent bg-accent-light rounded-md"
+                  ? "text-accent"
                   : "text-text-secondary hover:bg-neutral"
               )}
             >
