@@ -10,6 +10,7 @@ const App = () => {
   const [showLogin, setShowLogin] = useState(false);
   const navigate = useNavigate();
 
+  // Background slideshow rotation
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrent((prev) => (prev + 1) % images.length);
@@ -20,7 +21,7 @@ const App = () => {
   const handleCloseLogin = () => setShowLogin(false);
 
   return (
-    <main className="relative h-screen w-full overflow-hidden font-sans antialiased flex md:justify-start md:items-start sm:justify-center sm:items-center">
+    <main className="relative h-screen w-full overflow-hidden font-sans antialiased flex justify-center items-center lg:justify-start lg:items-start">
       {/* Background Slideshow */}
       {images.map((img, idx) => (
         <div
@@ -33,57 +34,52 @@ const App = () => {
         />
       ))}
 
-      {/* Gradient Overlay for readability */}
+      {/* Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/70" />
 
+      {/* Header */}
       <Header setShowLogin={setShowLogin} />
 
       {/* Hero Section */}
-      <main className="w-full flex justify-center items-center h-svh lg:justify-start lg:items-start">
-        <section className="relative z-10 h-full flex flex-col sm:items-center md:items-start justify-center sm:text-center md:text-left text-slate-300 px-6  ">
-          <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold mb-4 drop-shadow-xl animate-fade-in-up">
-            Welcome to (UCCA)
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl max-w-xl animate-fade-in-up animation-delay-300">
-            Universal Council of Christ Ambassadors, Aks Portal
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 mt-6">
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={() => navigate("/auth/personal-info")}
-            >
-              Start Application
-            </Button>
-            <Button
-              variant="secondary"
-              size="lg"
-              onClick={() => setShowLogin(true)}
-            >
-              Existing User? Login
-            </Button>
-          </div>
-        </section>
-      </main>
+      <section className="relative z-10 h-full flex flex-col items-center lg:items-start justify-center text-center lg:text-left text-slate-200 px-6 max-w-2xl">
+        <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold mb-4 drop-shadow-xl">
+          Welcome to <span className="text-primary">(UCCA)</span>
+        </h1>
+        <p className="text-base sm:text-lg md:text-xl max-w-xl opacity-90">
+          Universal Council of Christ Ambassadors, Aks Portal
+        </p>
+
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 mt-6 w-full sm:w-auto">
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={() => navigate("/auth/personal-info")}
+            className="w-full sm:w-auto"
+          >
+            Start Application
+          </Button>
+          <Button
+            variant="secondary"
+            size="lg"
+            onClick={() => setShowLogin(true)}
+            className="w-full sm:w-auto"
+          >
+            Existing User? Login
+          </Button>
+        </div>
+      </section>
 
       {/* Login Modal */}
-      <div
-        role="dialog"
-        aria-modal="true"
-        className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ${
-          showLogin ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-      >
-        {/* Backdrop */}
+      {showLogin && (
         <div
-          onClick={handleCloseLogin}
-          className="absolute inset-0 cursor-pointer"
-        />
-
-        {showLogin && (
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+        >
           <Modal showLogin={showLogin} handleCloseLogin={handleCloseLogin} />
-        )}
-      </div>
+        </div>
+      )}
     </main>
   );
 };

@@ -11,7 +11,7 @@ import { FaPhone, FaUser } from "react-icons/fa6";
 import type { PersonalInfoFormData } from "../../../types/auth.types";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { relationships } from "../../../constant";
+import { relationships } from "../constant";
 
 /**
  * Next of Kin Information Page

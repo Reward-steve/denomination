@@ -1,6 +1,8 @@
 import { FaCamera, FaPlus } from "react-icons/fa";
 import { uploadImage } from "../../../utils/appHelpers";
 import type { ImageUploaderProps } from "../../../types/auth.types";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 export default function ImageUploader({
   message,
@@ -9,6 +11,12 @@ export default function ImageUploader({
   setImageFile,
   error,
 }: ImageUploaderProps) {
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
+
   return (
     <div className="relative flex flex-col items-center justify-center">
       {/* Upload Label */}
