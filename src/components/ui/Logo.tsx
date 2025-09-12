@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import logo from "../../../public/de.png";
+import logo from "../../../public/logo.png";
 
 export default function Logo({ isCollapsed }: { isCollapsed?: boolean }) {
   return (

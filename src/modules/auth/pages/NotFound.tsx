@@ -1,24 +1,34 @@
 import { Link } from "react-router-dom";
 import { Button } from "../../../components/ui/Button";
 
+/**
+ * NotFound Page (404)
+ * ------------------------------------------------
+ * Shown when a user navigates to a non-existent route.
+ * Offers a clear message and a call-to-action
+ * to return to the homepage.
+ */
 function NotFound() {
   return (
     <main className="w-full flex justify-center items-center px-4">
-      <div className="min-h-screen max-w-md flex flex-col items-center justify-center text-center text-text">
-        {/* Big 404 */}
+      <section
+        className="min-h-screen max-w-md flex flex-col items-center justify-center text-center text-text"
+        role="alert"
+      >
+        {/* 404 Code */}
         <h1 className="text-7xl sm:text-8xl font-extrabold text-accent mb-4">
           404
         </h1>
 
-        {/* Subtitle */}
+        {/* Title */}
         <h2 className="text-2xl sm:text-3xl font-semibold mb-3">
           Page Not Found
         </h2>
 
-        {/* Description */}
+        {/* Message */}
         <p className="text-base sm:text-lg mb-8 text-text-placeholder leading-relaxed">
-          Oops! The page you’re looking for doesn’t exist or may have been
-          moved. Don’t worry, you can always head back to the homepage.
+          Sorry, we can’t find the page you’re looking for. It may have been
+          moved or no longer exists.
         </p>
 
         {/* CTA */}
@@ -27,7 +37,7 @@ function NotFound() {
             Back to Home
           </Button>
         </Link>
-      </div>
+      </section>
     </main>
   );
 }

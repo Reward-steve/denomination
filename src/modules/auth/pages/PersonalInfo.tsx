@@ -42,23 +42,18 @@ import { GoMail } from "react-icons/go";
 // -------------------------
 // Dropdown Options
 // -------------------------
-interface DropdownOption {
-  id: string;
-  name: string;
-}
-
-const genderOptions: DropdownOption[] = [
+const genderOptions = [
   { id: "male", name: "Male" },
   { id: "female", name: "Female" },
 ];
 
-const maritalStatusOptions: DropdownOption[] = [
+const maritalStatusOptions = [
   { id: "single", name: "Single" },
   { id: "married", name: "Married" },
   { id: "separated", name: "Separated" },
 ];
 
-const priestStatusOptions: DropdownOption[] = [
+const priestStatusOptions = [
   { id: "posted", name: "Posted" },
   { id: "yet_to_be_posted", name: "Yet to be Posted" },
 ];
@@ -67,11 +62,13 @@ const priestStatusOptions: DropdownOption[] = [
 // Component
 // -------------------------
 function PersonalInfo() {
+  // ----------------- State -----------------
   const [imagePreview, setImagePreview] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
+
   const [states, setStates] = useState<States[]>([]);
   const [lgas, setLgas] = useState<LGA[]>([]);
-  const [selectedStateId, setSelectedStateId] = useState<string>("");
+  const [selectedStateId, setSelectedStateId] = useState("");
 
   const [isLoadingStates, setIsLoadingStates] = useState(false);
   const [isLoadingLgas, setIsLoadingLgas] = useState(false);
@@ -81,6 +78,7 @@ function PersonalInfo() {
   const navigate = useNavigate();
   const { setStep, setPrev, updateData } = useRegistration();
 
+  // ----------------- Form -----------------
   const {
     register,
     handleSubmit,
@@ -118,9 +116,7 @@ function PersonalInfo() {
 
   const password = watch("bio.password");
 
-  // -------------------------
-  // Lifecycle
-  // -------------------------
+  // ----------------- Lifecycle -----------------
   useEffect(() => {
     setStep(1);
     setPrev(false);
@@ -131,10 +127,10 @@ function PersonalInfo() {
       setIsLoadingStates(true);
       try {
         const res = await fetchStates();
-        setStates(res.data!);
+        setStates(res.data ?? []);
       } catch {
-        setStateError("Failed to load states. Please try again.");
-        toast.error("Failed to load states.");
+        setStateError("Failed to load states.");
+        toast.error("Could not load states. Please retry.");
       } finally {
         setIsLoadingStates(false);
       }
@@ -153,15 +149,15 @@ function PersonalInfo() {
       try {
         const res = await fetchLGA(selectedStateId);
         if (res.success) {
-          setLgas(res.data!);
+          setLgas(res.data ?? []);
           setLgaError(null);
         } else {
           setLgaError(res.message || "Failed to load LGAs");
           toast.error(res.message || "Failed to load LGAs");
         }
       } catch {
-        setLgaError("Failed to load LGAs. Please try again.");
-        toast.error("Failed to load LGAs");
+        setLgaError("Failed to load LGAs.");
+        toast.error("Could not load LGAs.");
       } finally {
         setIsLoadingLgas(false);
       }
@@ -169,65 +165,59 @@ function PersonalInfo() {
     loadLgas();
   }, [selectedStateId, setValue]);
 
-  // -------------------------
-  // Handlers
-  // -------------------------
-  const onSubmit = async (formData: PersonalInfoFormData) => {
+  // ----------------- Handlers -----------------
+  const onSubmit = (formData: PersonalInfoFormData) => {
     if (!imageFile) {
       toast.error("Profile photo is required.");
       return;
     }
 
     try {
-      const payload = { ...formData, photo: imageFile };
-      updateData(payload);
+      updateData({ ...formData, photo: imageFile });
       toast.success("Personal information saved!");
       navigate("/auth/education-data");
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "An unexpected error occurred."
+        error instanceof Error ? error.message : "Unexpected error occurred"
       );
     }
   };
 
-  // -------------------------
-  // Render
-  // -------------------------
+  // ----------------- Render -----------------
   return (
     <Form
-      title="UCCA Personal Information"
-      description="Please provide your personal details for UCCA registration. Ensure all entries are correct and your photo is uploaded."
+      title="Personal Information"
+      description="Provide accurate personal details. This forms the foundation of your UCCA profile."
       onSubmit={handleSubmit(onSubmit)}
     >
+      {/* Profile Photo */}
       <Controller
         name="photo"
         control={control}
         rules={{ required: "Profile photo is required" }}
         render={({ field, fieldState: { error } }) => (
           <ImageUploader
-            message="Add profile photo"
+            message="Upload your photo"
             imagePreview={imagePreview}
             setImagePreview={setImagePreview}
             setImageFile={(file) => {
               field.onChange(file);
               setImageFile(file);
             }}
-            error={error?.message} // now valid
+            error={error?.message}
           />
         )}
       />
 
-      {/* Basic Details Section */}
-      <div className="space-y-6">
+      {/* Basic Details */}
+      <section className="space-y-6">
         <h2 className="font-semibold text-lg text-gray-700">Basic Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormInput
             label="First Name"
             placeholder="Enter first name"
             icon={FaUser}
-            register={register("bio.first_name", {
-              required: "First name is required",
-            })}
+            register={register("bio.first_name", { required: "Required" })}
             error={errors.bio?.first_name}
           />
           <FormInput
@@ -242,9 +232,7 @@ function PersonalInfo() {
             label="Last Name"
             placeholder="Enter last name"
             icon={FaUser}
-            register={register("bio.last_name", {
-              required: "Last name is required",
-            })}
+            register={register("bio.last_name", { required: "Required" })}
             error={errors.bio?.last_name}
           />
           <FormInput
@@ -252,15 +240,13 @@ function PersonalInfo() {
             label="Date of Birth"
             placeholder="MM/DD/YYYY"
             icon={FaCalendar}
-            register={register("bio.dob", {
-              required: "Date of birth is required",
-            })}
+            register={register("bio.dob", { required: "Required" })}
             error={errors.bio?.dob}
           />
           <Controller
             name="bio.gender"
             control={control}
-            rules={{ required: "Gender is required" }}
+            rules={{ required: "Required" }}
             render={({ field, fieldState: { error } }) => (
               <Dropdown
                 isError={!!error}
@@ -268,7 +254,6 @@ function PersonalInfo() {
                 placeholder="Select Gender"
                 items={genderOptions}
                 displayValueKey="name"
-                size="big"
                 errorMsg={error?.message}
                 onSelect={(item) => field.onChange(item.id)}
                 value={field.value}
@@ -279,7 +264,7 @@ function PersonalInfo() {
           <Controller
             name="bio.marital_status"
             control={control}
-            rules={{ required: "Marital status is required" }}
+            rules={{ required: "Required" }}
             render={({ field, fieldState: { error } }) => (
               <Dropdown
                 isError={!!error}
@@ -287,7 +272,6 @@ function PersonalInfo() {
                 placeholder="Select Marital Status"
                 items={maritalStatusOptions}
                 displayValueKey="name"
-                size="big"
                 errorMsg={error?.message}
                 onSelect={(item) => field.onChange(item.id)}
                 value={field.value}
@@ -296,48 +280,48 @@ function PersonalInfo() {
             )}
           />
         </div>
-      </div>
+      </section>
 
-      {/* Contact Information Section */}
-      <div className="space-y-6">
+      {/* Contact Information */}
+      <section className="space-y-6">
         <h2 className="font-semibold text-lg text-gray-700">
           Contact Information
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormInput
             label="Mobile Number"
-            placeholder="Primary mobile number"
+            placeholder="Primary number"
             icon={FaPhone}
             register={register("bio.phone", {
-              required: "Mobile number is required",
-              pattern: { value: /^\d+$/, message: "Invalid phone number" },
+              required: "Required",
+              pattern: { value: /^\d+$/, message: "Invalid number" },
             })}
             error={errors.bio?.phone}
           />
           <FormInput
             optional
-            label="Secondary Mobile Number"
-            placeholder="Secondary mobile number"
+            label="Secondary Number"
+            placeholder="Optional"
             icon={FaPhone}
             register={register("bio.secondary_phone")}
             error={errors.bio?.secondary_phone}
           />
           <FormInput
             label="Home Address"
-            placeholder="Enter Home Address"
+            placeholder="Residential address"
             icon={FaHome}
             register={register("bio.residential_address", {
-              required: "Home address is required",
+              required: "Required",
             })}
             error={errors.bio?.residential_address}
           />
           <FormInput
             type="email"
             label="Email"
-            placeholder="youremail@example.com"
+            placeholder="example@email.com"
             icon={GoMail}
             register={register("bio.email", {
-              required: "Email is required",
+              required: "Required",
               pattern: {
                 value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                 message: "Enter a valid email",
@@ -346,64 +330,54 @@ function PersonalInfo() {
             error={errors.bio?.email}
           />
         </div>
-      </div>
+      </section>
 
-      {/* Geographic Information Section */}
-      <div className="space-y-6">
+      {/* Geographic Information */}
+      <section className="space-y-6">
         <h2 className="font-semibold text-lg text-gray-700">
           Geographic Information
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormInput
             label="City of Residence"
-            placeholder="Enter City of Residence"
+            placeholder="Enter City"
             icon={FaMapPin}
-            register={register("bio.city", {
-              required: "City of residence is required",
-            })}
+            register={register("bio.city", { required: "Required" })}
             error={errors.bio?.city}
           />
           <FormInput
             label="Nationality"
-            icon={FaMapPin}
             value="Nigeria"
             disabled
-            register={register("bio.nationality", {
-              required: "Nationality is required",
-            })}
+            icon={FaMapPin}
+            register={register("bio.nationality", { required: "Required" })}
             error={errors.bio?.nationality}
           />
           <FormInput
             label="State of Residence"
-            placeholder="Enter State of Residence"
+            placeholder="Enter State"
             icon={FaMapPin}
-            register={register("bio.residence_state", {
-              required: "State of residence is required",
-            })}
+            register={register("bio.residence_state", { required: "Required" })}
             error={errors.bio?.residence_state}
           />
           <FormInput
-            label="Area of Residence"
-            placeholder="Enter Area of Residence"
+            label="Area"
+            placeholder="Enter Area"
             icon={FaMapPin}
-            register={register("bio.area", {
-              required: "Area of residence is required",
-            })}
+            register={register("bio.area", { required: "Required" })}
             error={errors.bio?.area}
           />
           <FormInput
-            label="Bethel of Residence"
-            placeholder="Enter Bethel of Residence"
+            label="Bethel"
+            placeholder="Enter Bethel"
             icon={FaHome}
-            register={register("bio.bethel", {
-              required: "Bethel of residence is required",
-            })}
+            register={register("bio.bethel", { required: "Required" })}
             error={errors.bio?.bethel}
           />
           <FormInput
             optional
-            label="Zone of Residence"
-            placeholder="Enter Zone of Residence"
+            label="Zone"
+            placeholder="Optional"
             icon={FaMapPin}
             register={register("bio.zone")}
             error={errors.bio?.zone}
@@ -411,15 +385,14 @@ function PersonalInfo() {
           <Controller
             name="bio.origin_state"
             control={control}
-            rules={{ required: "State of origin is required" }}
+            rules={{ required: "Required" }}
             render={({ field, fieldState: { error } }) => (
               <Dropdown
                 isError={!!error || !!stateError}
                 label="State of Origin"
-                placeholder="Select State of Origin"
+                placeholder="Select State"
                 items={states}
                 displayValueKey="name"
-                size="big"
                 errorMsg={error?.message || stateError || ""}
                 onSelect={(item) => {
                   field.onChange(item.name.toString());
@@ -436,15 +409,14 @@ function PersonalInfo() {
           <Controller
             name="bio.lga"
             control={control}
-            rules={{ required: "LGA of origin is required" }}
+            rules={{ required: "Required" }}
             render={({ field, fieldState: { error } }) => (
               <Dropdown
                 isError={!!error || !!lgaError}
-                label="Local Govt of Origin"
-                placeholder="Select LGA of Origin"
+                label="LGA"
+                placeholder="Select LGA"
                 items={lgas}
                 displayValueKey="name"
-                size="big"
                 errorMsg={error?.message || lgaError || ""}
                 onSelect={(item) => field.onChange(item.name.toString())}
                 value={field.value}
@@ -457,10 +429,10 @@ function PersonalInfo() {
             )}
           />
         </div>
-      </div>
+      </section>
 
-      {/* Additional Information Section */}
-      <div className="space-y-6">
+      {/* Additional Information */}
+      <section className="space-y-6">
         <h2 className="font-semibold text-lg text-gray-700">
           Additional Information
         </h2>
@@ -468,15 +440,14 @@ function PersonalInfo() {
           <Controller
             name="bio.priest_status"
             control={control}
-            rules={{ required: "Priest status is required" }}
+            rules={{ required: "Required" }}
             render={({ field, fieldState: { error } }) => (
               <Dropdown
                 isError={!!error}
                 label="Priest Status"
-                placeholder="Select Priest Status"
+                placeholder="Select Status"
                 items={priestStatusOptions}
                 displayValueKey="name"
-                size="big"
                 errorMsg={error?.message}
                 onSelect={(item) => field.onChange(item.id)}
                 value={field.value}
@@ -487,47 +458,44 @@ function PersonalInfo() {
           <FormInput
             optional
             label="Hobbies"
-            placeholder="Comma separated hobbies"
+            placeholder="e.g., Reading, Singing"
             icon={FaHeart}
             register={register("bio.hobbies")}
             error={errors.bio?.hobbies}
           />
         </div>
-      </div>
+      </section>
 
-      {/* Account Details Section */}
-      <div className="space-y-6">
+      {/* Account Details */}
+      <section className="space-y-6">
         <h2 className="font-semibold text-lg text-gray-700">Account Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormInput
             label="Password"
-            placeholder="Enter your password"
+            placeholder="Enter password"
             type="password"
             icon={FaLock}
             register={register("bio.password", {
-              required: "Password is required",
-              minLength: {
-                value: 6,
-                message: "Password must be at least 6 characters long",
-              },
+              required: "Required",
+              minLength: { value: 6, message: "At least 6 characters" },
             })}
             error={errors.bio?.password}
           />
           <FormInput
             label="Confirm Password"
-            placeholder="Confirm your password"
+            placeholder="Re-enter password"
             type="password"
             icon={FaLock}
             register={register("bio.confirm_password", {
-              required: "Confirm password is required",
-              validate: (value) =>
-                value === password || "Passwords do not match",
+              required: "Required",
+              validate: (val) => val === password || "Passwords do not match",
             })}
             error={errors.bio?.confirm_password}
           />
         </div>
-      </div>
+      </section>
 
+      {/* Submit */}
       <Button
         disabled={isSubmitting || isLoadingStates || isLoadingLgas}
         textSize="sm"
@@ -535,7 +503,7 @@ function PersonalInfo() {
         variant="auth"
       >
         {isSubmitting || isLoadingStates || isLoadingLgas ? (
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Loader /> <span>Submitting...</span>
           </div>
         ) : (

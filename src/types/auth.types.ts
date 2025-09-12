@@ -3,89 +3,108 @@ import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
 import type { IconType } from "react-icons";
 import type { Ref } from "react";
 
-export interface ImageUploaderProps {
-  message: string;
-  imagePreview: string;
-  setImagePreview: React.Dispatch<React.SetStateAction<string>>;
-  setImageFile: (file: File) => void;
-  error?: string; // <-- add this
-}
-
-/**
- * Bio section — matches screenshot strictly (fields shown in the screenshot are present).
- * Note: `hobbies` in the screenshot is a comma-separated string, so kept as string.
- */
-
+/* ----------------------------------------
+ * Supporting Types
+ * --------------------------------------*/
 export interface States {
-  country_id: string;
   id: number;
   name: string;
+  country_id: string;
 }
 
 export interface LGA {
   id: number;
   name: string;
-  state_id: number; // Links back to state ID
+  state_id: number;
 }
 
+/* ----------------------------------------
+ * Bio section (core personal info)
+ * Matches backend payload exactly
+ * --------------------------------------*/
 export interface BioData {
   first_name: string;
-  middle_name?: string;
   last_name: string;
+  middle_name?: string;
   password?: string;
+  confirm_password?: string;
+
   dob: string; // "YYYY-MM-DD"
   gender: string;
   phone: string;
+  secondary_phone?: string;
+  email: string;
   marital_status: string;
+
+  origin_state: string;
+  residence_state: string;
   lga: string;
   city: string;
+
+  residential_address?: string;
+  nationality?: string;
+  occupation?: string;
+  priest_status?: string;
+
+  promotion_method?: string;
+  promotion_letter: File | null;
+  previous_pew?: string;
+
+  hobbies?: string;
+
+  inducted?: boolean;
+  induction_date?: string; // "YYYY-MM-DD"
+  date_ucca?: string; // "YYYY-MM-DD"
+
+  bcs_position?: string;
+
+  // Hierarchy fields
   bethel: string;
   zone?: string;
   area: string;
-  origin_state: string;
-  confirm_password: string;
-  secondary_phone?: string;
-  nationality?: string;
-  residence_state: string;
-  priest_status?: string;
-  occupation?: string;
-  residential_address?: string;
-  email: string;
-  previous_pew?: string;
-  date_ucca?: string;
-  promotion_method?: string;
-  inducted?: boolean | string | number;
-  induction_date?: string;
-  bcs_position?: string;
-  hobbies?: string;
 }
 
-/**
- * Education object
- */
+/* ----------------------------------------
+ * Education
+ * --------------------------------------*/
 export interface Education {
   certificate: string;
   study: string;
 }
 
-/**
- * Previous position entry
- */
+/* ----------------------------------------
+ * Previous positions
+ * --------------------------------------*/
 export interface PreviousPosition {
   position_name: string;
   start_year: string;
   end_year: string;
 }
 
-/**
- * Next of kin entry (screenshot shows `nok` as an array of these objects)
- */
+/* ----------------------------------------
+ * Next of kin
+ * --------------------------------------*/
 export interface NextOfKin {
   full_name: string;
   relationship: string;
   phone: string;
   address: string;
 }
+
+/* ----------------------------------------
+ * Top-level personal info payload
+ * This is what backend expects
+ * --------------------------------------*/
+export type PersonalInfoFormData = {
+  bio: BioData;
+  education: Education;
+  prev_positions: PreviousPosition[];
+  nok: NextOfKin[];
+  skills: string[];
+  ucca_position: number[];
+  photo?: File;
+  user_id?: string | number; // only required for update flow
+};
 
 export interface Skill {
   id: number;
@@ -95,59 +114,43 @@ export interface Skill {
   updated_at: string;
 }
 
-/**
- * Top-level personal info payload that matches the screenshot exactly.
- * The screenshot top-level keys are: bio, education, prev_positions, nok, user_id, skills
- */
-export type PersonalInfoFormData = {
-  bio: BioData;
-  photo?: File;
-  education: Education;
-  prev_positions: PreviousPosition[]; // can be []
-  nok: NextOfKin[]; // screenshot: array with one object
-  user_id?: string | number; // screenshot had "15" as string; support both
-  skills: string[]; // array of skill strings
-};
-
-/**
- * Small helper to normalize form data into the exact payload shape expected by backend.
- * - Accepts a partial / flat form object and returns a PersonalInfoFormData with:
- *   - bio (merged fields)
- *   - education
- *   - prev_positions (array)
- *   - nok (array)
- *   - skills (array)
- *
- * Usage:
- *   const payload = buildPersonalInfoPayload(formValues);
- *   createUCCAUser(payload);
- */
-export function buildPersonalInfoPayload(data: Partial<PersonalInfoFormData>) {
+/* ----------------------------------------
+ * Payload builder (frontend → backend)
+ * Normalizes partial form data
+ * --------------------------------------*/
+export function buildPersonalInfoPayload(
+  data: Partial<PersonalInfoFormData>
+): PersonalInfoFormData {
   return {
-    user_id: String(data.user_id || ""), // force string
+    user_id: data.user_id ? String(data.user_id) : undefined,
+
     bio: {
       first_name: data.bio?.first_name || "",
       last_name: data.bio?.last_name || "",
       middle_name: data.bio?.middle_name || "",
-      gender: data.bio?.gender || "",
+      password: data.bio?.password || "",
       dob: data.bio?.dob
         ? new Date(data.bio.dob).toISOString().split("T")[0]
         : "",
+      gender: data.bio?.gender || "",
       phone: String(data.bio?.phone || ""),
       email: data.bio?.email || "",
       marital_status: data.bio?.marital_status || "",
-      nationality: data.bio?.nationality || "",
       origin_state: data.bio?.origin_state || "",
-      lga: data.bio?.lga || "",
       residence_state: data.bio?.residence_state || "",
+      lga: data.bio?.lga || "",
       city: data.bio?.city || "",
       residential_address: data.bio?.residential_address || "",
       occupation: data.bio?.occupation || "",
+      promotion_letter: data.bio?.promotion_letter || null,
       priest_status: data.bio?.priest_status || "",
       promotion_method: data.bio?.promotion_method || "",
       previous_pew: data.bio?.previous_pew || "",
       hobbies: data.bio?.hobbies || "",
-      inducted: data.bio?.inducted || "",
+      inducted: data.bio?.inducted ?? false,
+      secondary_phone: data.bio?.secondary_phone || "",
+      nationality: data.bio?.nationality || "",
+      confirm_password: data.bio?.password || "",
       induction_date: data.bio?.induction_date
         ? new Date(data.bio.induction_date).toISOString().split("T")[0]
         : "",
@@ -155,31 +158,38 @@ export function buildPersonalInfoPayload(data: Partial<PersonalInfoFormData>) {
         ? new Date(data.bio.date_ucca).toISOString().split("T")[0]
         : "",
       bcs_position: data.bio?.bcs_position || "",
-      area: data.bio?.area || "",
-      zone: data.bio?.zone || "",
       bethel: data.bio?.bethel || "",
-      password: data.bio?.password || "",
+      zone: data.bio?.zone || "",
+      area: data.bio?.area || "",
     },
+
     education: {
       certificate: data.education?.certificate || "",
       study: data.education?.study || "",
     },
+
     prev_positions: (data.prev_positions || []).map((p) => ({
       position_name: p.position_name || "",
       start_year: String(p.start_year || ""),
       end_year: String(p.end_year || ""),
     })),
+
+    nok: (data.nok || []).map((n) => ({
+      full_name: n.full_name || "",
+      relationship: n.relationship || "",
+      phone: n.phone || "",
+      address: n.address || "",
+    })),
+
+    skills: data.skills || [],
+    ucca_position: data.ucca_position || [],
+    photo: data.photo,
   };
 }
 
-/**
- * Simple helper types used by UI components — left intact from original file.
- */
-export interface UserDetails {
-  first_name: string;
-  last_name: string;
-}
-
+/* ----------------------------------------
+ * Reusable form component props
+ * --------------------------------------*/
 export type FormInputProps = {
   maxLength?: number;
   id?: string;
@@ -194,6 +204,14 @@ export type FormInputProps = {
   ref?: Ref<HTMLInputElement>;
   [key: string]: any;
 };
+
+export interface ImageUploaderProps {
+  message: string;
+  imagePreview: string;
+  setImagePreview: React.Dispatch<React.SetStateAction<string>>;
+  setImageFile: (file: File) => void;
+  error?: string; // <-- add this
+}
 
 export type CodeInputProps = {
   digits: string[];

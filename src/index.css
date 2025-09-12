@@ -27,7 +27,7 @@
 }
 
 .dark {
-  --color-primary: 35 70 241;
+  --color-primary: 45 80 162;
   --color-secondary: 251 191 36;
   --color-accent: 59 130 246;
   --color-accent-light: #3b82f640;
@@ -115,4 +115,15 @@ input::-webkit-inner-spin-button {
 /* Removes arrows in Firefox */
 input[type="number"] {
   -moz-appearance: textfield;
+}
+
+/* Outline text utility */
+.text-outline {
+  -webkit-text-stroke: 1px rgb(var(--color-black)); /* stroke width + color */
+  color: transparent; /* only outline */
+}
+
+.text-outline-fill {
+  -webkit-text-stroke: 1px rgb(var(--color-black)); /* outline color */
+  color: rgb(var(--color-primary)); /* fill color from theme */
 }

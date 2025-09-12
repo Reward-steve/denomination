@@ -52,7 +52,6 @@ export function EducationData() {
   const skillExists = (val: string) =>
     fields.some((f) => f.value?.toLowerCase() === val.toLowerCase());
 
-  // ------------------ Handlers ------------------
   const addSkill = (raw: string) => {
     const val = normalize(raw);
     if (!val) return;
@@ -77,37 +76,27 @@ export function EducationData() {
       .map((p) => normalize(p))
       .filter(Boolean);
 
-    if (!parts.length) return;
+    const newSkills = parts.filter((p) => !skillExists(p) && p.length <= 40);
 
-    let added = 0;
-    for (const p of parts) {
-      if (!skillExists(p) && p.length <= 40) {
-        append({ value: p });
-        added++;
-      }
+    if (newSkills.length === 0) {
+      toast.info("No new skills to add.");
+      return;
     }
 
-    if (added === 0) toast.info("No new skills to add.");
+    newSkills.forEach((p) => append({ value: p }));
     setSkillInput("");
     trigger("skills");
   };
 
-  const removeSkill = (index: number) => {
-    remove(index);
-    trigger("skills");
-  };
-
+  // ------------------ Handlers ------------------
   const onSubmit = async (formData: FormValues) => {
     try {
-      const skillsAsStrings = (formData.skills || []).map((s) => s.value);
-
       const payload = {
         education: { ...formData.education },
-        skills: skillsAsStrings,
+        skills: formData.skills.map((s) => s.value),
       };
 
       updateData(payload);
-
       toast.success("Education details saved!");
       navigate("/auth/next-of-kin");
     } catch (error) {
@@ -141,10 +130,11 @@ export function EducationData() {
   return (
     <Form
       title="Education & Skills"
-      description="Share your academic background and the skills you bring to the UCCA community."
+      description="Tell us about your academic background and the skills you bring."
       onSubmit={handleSubmit(onSubmit)}
     >
       {/* Education Section */}
+      <h2 className="text-lg font-semibold mb-3">Education</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormInput
           label="Certificate"
@@ -169,8 +159,13 @@ export function EducationData() {
       </div>
 
       {/* Skills Section */}
-      <div className="mt-6">
-        <label className="block text-sm font-medium mb-2">Skills</label>
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold mb-3">Skills</h2>
+        <p className="text-sm text-muted mb-2 text-text-placeholder">
+          Add your skills one by one, press <strong>Enter</strong> or paste a
+          list separated by commas.
+        </p>
+
         <div className="flex gap-2">
           <div className="relative flex-1">
             <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
@@ -183,7 +178,7 @@ export function EducationData() {
                   ? "border-error focus:border-error focus:ring-red-400 animate-shake"
                   : "border-border text-text focus:border-accent focus:ring-accent"
               }`}
-              placeholder="Type a skill and press Enter (or paste comma-separated)"
+              placeholder="Type a skill and press Enter"
               value={skillInput}
               onChange={(e) => setSkillInput(e.target.value)}
               onKeyDown={onSkillKeyDown}
@@ -216,10 +211,9 @@ export function EducationData() {
                 {field.value}
                 <button
                   type="button"
-                  onClick={() => removeSkill(idx)}
+                  onClick={() => remove(idx)}
                   className="rounded-full px-2 py-0.5 text-red-600 hover:bg-red-100 transition"
                   aria-label={`Remove ${field.value}`}
-                  title="Remove"
                 >
                   ×
                 </button>
@@ -231,7 +225,7 @@ export function EducationData() {
         {/* Validation error */}
         {errors?.skills && (
           <p className="mt-1 text-xs text-error animate-shake">
-            {String(errors.skills.message || "Please add atleast one skill")}
+            {String(errors.skills.message || "Please add at least one skill")}
           </p>
         )}
       </div>
@@ -242,7 +236,7 @@ export function EducationData() {
         textSize="sm"
         type="submit"
         variant="auth"
-        className="mt-6"
+        className="mt-8"
       >
         {isSubmitting ? (
           <div className="flex items-center space-x-2">

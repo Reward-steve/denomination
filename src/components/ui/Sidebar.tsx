@@ -88,10 +88,10 @@ export const SidebarLink = memo(
         // Active state
         "border-2 border-primary bg-surface text-primary":
           isActive && step === num,
-        "bg-accent/10 text-accent": isDashboard && isActive,
+        "bg-accent/20 text-accent": isDashboard && isActive,
 
         // Completed step
-        "bg-primary/10 text-primary": !isActive && isStepCompleted,
+        "bg-accent/10 text-primary": !isActive && isStepCompleted,
 
         // Incomplete step
         "bg-smooth text-text-secondary": !isActive && !isStepCompleted,

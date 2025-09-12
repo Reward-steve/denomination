@@ -1,32 +1,36 @@
 import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+
+// Context & Hooks
 import { useRegistration } from "../../../hooks/useReg";
+
+// Layout & UI
 import Form from "../../../components/layout/Form";
 import FormInput from "../../../components/ui/FormInput";
 import { Dropdown } from "../../../components/ui/Dropdown";
 import { Button } from "../../../components/ui/Button";
 import { Loader } from "../../../components/ui/Loader";
+
+// Icons
+import { FaUser, FaPhone } from "react-icons/fa6";
 import { FaHome } from "react-icons/fa";
-import { FaPhone, FaUser } from "react-icons/fa6";
+
+// Types & Constants
 import type { PersonalInfoFormData } from "../../../types/auth.types";
-import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 import { relationships } from "../constant";
 
 /**
  * Next of Kin Information Page
- * --------------------------------------------
- * Step 3 of Registration flow.
- * Collects details of the user's primary contact
- * (Next of Kin) in case of emergencies or records.
+ * ----------------------------
+ * Step 3 of registration.
+ * Collects details of the user's emergency contact.
  */
 export default function NOKInfo() {
   const { setStep, setPrev, updateData } = useRegistration();
   const navigate = useNavigate();
 
-  // --------------------------------------------
-  // React Hook Form setup
-  // --------------------------------------------
   const {
     register,
     handleSubmit,
@@ -34,28 +38,18 @@ export default function NOKInfo() {
     formState: { errors, isSubmitting },
   } = useForm<PersonalInfoFormData>();
 
-  // --------------------------------------------
-  // Stepper control (mark this as Step 3)
-  // --------------------------------------------
+  // Stepper: mark this page as step 3
   useEffect(() => {
     setStep(3);
     setPrev(true);
   }, [setStep, setPrev]);
 
-  // --------------------------------------------
-  // Submit Handler
-  // --------------------------------------------
+  // Handle form submit
   const onSubmit = async (formData: PersonalInfoFormData) => {
     try {
-      const payload = {
-        nok: formData.nok,
-      };
-
-      // ✅ Save NOK data into context (not API yet)
-      updateData(payload);
-
-      toast.success("Next of kin details saved successfully!");
-      navigate("/auth/ucca-info"); // Step 4
+      updateData({ nok: formData.nok });
+      toast.success("Next of kin details saved!");
+      navigate("/auth/ucca-info"); // go to Step 4
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Something went wrong."
@@ -63,19 +57,16 @@ export default function NOKInfo() {
     }
   };
 
-  // --------------------------------------------
-  // Render
-  // --------------------------------------------
   return (
     <Form
       title="Next of Kin Information"
-      description="Provide the details of your next of kin. This helps us know who to contact in case of emergencies."
+      description="Provide the details of your next of kin. This person will be contacted in case of an emergency."
       onSubmit={handleSubmit(onSubmit)}
     >
       {/* Full Name */}
       <FormInput
         label="Full Name"
-        placeholder="Enter full name of your next of kin"
+        placeholder="e.g., John Doe"
         icon={FaUser}
         register={register("nok.0.full_name", {
           required: "Full name is required",
@@ -86,22 +77,22 @@ export default function NOKInfo() {
       {/* Phone Number */}
       <FormInput
         label="Phone Number"
-        placeholder="Enter valid phone number"
+        placeholder="e.g., +234 812 345 6789"
         icon={FaPhone}
         register={register("nok.0.phone", {
           required: "Phone number is required",
           pattern: {
             value: /^\+?[0-9\s-()]+$/,
-            message: "Please enter a valid phone number",
+            message: "Enter a valid phone number",
           },
         })}
         error={errors?.nok?.[0]?.phone}
       />
 
-      {/* Residential Address */}
+      {/* Address */}
       <FormInput
         label="Residential Address"
-        placeholder="Enter residential address"
+        placeholder="Enter their full home address"
         icon={FaHome}
         register={register("nok.0.address", {
           required: "Residential address is required",
@@ -109,7 +100,7 @@ export default function NOKInfo() {
         error={errors?.nok?.[0]?.address}
       />
 
-      {/* Relationship Dropdown */}
+      {/* Relationship */}
       <Controller
         name="nok.0.relationship"
         control={control}
@@ -123,21 +114,22 @@ export default function NOKInfo() {
             displayValueKey="name"
             size="big"
             errorMsg={errors?.nok?.[0]?.relationship?.message}
-            onSelect={(item) => field.onChange(item.name.toLowerCase())}
+            onSelect={(item) => field.onChange(item.name)}
             value={field.value}
           />
         )}
       />
 
-      {/* Submit Button */}
+      {/* Submit */}
       <Button
         disabled={isSubmitting}
         textSize="sm"
         type="submit"
         variant="auth"
+        className="w-full"
       >
         {isSubmitting ? (
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Loader /> <span>Saving...</span>
           </div>
         ) : (

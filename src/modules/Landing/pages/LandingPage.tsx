@@ -10,31 +10,30 @@ const App = () => {
   const [showLogin, setShowLogin] = useState(false);
   const navigate = useNavigate();
 
-  // Background slideshow rotation
+  // Rotate slideshow every 6s
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % images.length);
-    }, 6000);
+    const interval = setInterval(
+      () => setCurrent((prev) => (prev + 1) % images.length),
+      6000
+    );
     return () => clearInterval(interval);
   }, []);
 
-  const handleCloseLogin = () => setShowLogin(false);
-
   return (
     <main className="relative h-screen w-full overflow-hidden font-sans antialiased flex justify-center items-center lg:justify-start lg:items-start">
-      {/* Background Slideshow */}
+      {/* Background slideshow */}
       {images.map((img, idx) => (
         <div
           key={idx}
-          style={{ backgroundImage: `url(${img})` }}
           aria-hidden="true"
+          style={{ backgroundImage: `url(${img})` }}
           className={`absolute inset-0 bg-cover bg-center transition-all duration-[2500ms] ease-in-out transform ${
             current === idx ? "opacity-100 scale-105" : "opacity-0 scale-100"
           }`}
         />
       ))}
 
-      {/* Gradient Overlay */}
+      {/* Dark gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/70" />
 
       {/* Header */}
@@ -43,8 +42,12 @@ const App = () => {
       {/* Hero Section */}
       <section className="relative z-10 h-full flex flex-col items-center lg:items-start justify-center text-center lg:text-left text-slate-200 px-6 max-w-2xl">
         <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold mb-4 drop-shadow-xl">
-          Welcome to <span className="text-primary">(UCCA)</span>
+          Welcome to{" "}
+          <span className="text-outline-fill font-extrabold tracking-wide">
+            (UCCA)
+          </span>
         </h1>
+
         <p className="text-base sm:text-lg md:text-xl max-w-xl opacity-90">
           Universal Council of Christ Ambassadors, Aks Portal
         </p>
@@ -72,13 +75,10 @@ const App = () => {
 
       {/* Login Modal */}
       {showLogin && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-        >
-          <Modal showLogin={showLogin} handleCloseLogin={handleCloseLogin} />
-        </div>
+        <Modal
+          showLogin={showLogin}
+          handleCloseLogin={() => setShowLogin(false)}
+        />
       )}
     </main>
   );

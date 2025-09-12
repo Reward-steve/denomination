@@ -3,7 +3,7 @@ import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useResponsive } from "../../hooks/useResponsive";
 import { useTheme } from "../../hooks/useTheme";
-import img from "../../../public/de.png";
+import img from "../../../public/logo.png";
 import { lightTheme } from "../../utils/themes";
 import { useEffect, useState } from "react";
 import type { User } from "../../types/auth.types";
