@@ -1,28 +1,50 @@
-import { FaBell, FaSearch, FaMoon, FaSun } from "react-icons/fa";
+import {
+  FaBell,
+  FaSearch,
+  FaMoon,
+  FaSun,
+  FaSignOutAlt,
+  FaCog,
+} from "react-icons/fa";
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useResponsive } from "../../hooks/useResponsive";
 import { useTheme } from "../../hooks/useTheme";
 import img from "../../../public/logo.png";
 import { lightTheme } from "../../utils/themes";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { User } from "../../types/auth.types";
 import { getFromStore } from "../../utils/appHelpers";
 import type { Theme } from "@emotion/react";
+import clsx from "clsx";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function Header() {
   const { isMobile } = useResponsive();
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { logout } = useAuth();
 
   const [search, setSearch] = useState("");
   const [openSearch, setOpenSearch] = useState(false);
   const [user, setUser] = useState<User>();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const curr_user = getFromStore("curr_user");
     if (curr_user) setUser(curr_user as User);
+  }, []);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
   const pageTitle =
@@ -51,6 +73,13 @@ export default function Header() {
           openSearch={openSearch}
           onToggleSearch={handleSearchToggle}
           onBack={handleBack}
+          user={user}
+          theme={theme}
+          toggleTheme={toggleTheme}
+          logout={logout}
+          menuOpen={menuOpen}
+          setMenuOpen={setMenuOpen}
+          menuRef={menuRef}
         />
       ) : (
         <DesktopHeader
@@ -59,6 +88,10 @@ export default function Header() {
           theme={theme}
           toggleTheme={toggleTheme}
           user={user}
+          logout={logout}
+          menuOpen={menuOpen}
+          setMenuOpen={setMenuOpen}
+          menuRef={menuRef}
         />
       )}
     </nav>
@@ -73,16 +106,15 @@ function MobileHeader({
   openSearch,
   onToggleSearch,
   onBack,
-}: {
-  title: string;
-  search: string;
-  setSearch: (val: string) => void;
-  openSearch: boolean;
-  onToggleSearch: () => void;
-  onBack: () => void;
-}) {
+  theme,
+  toggleTheme,
+  logout,
+  menuOpen,
+  setMenuOpen,
+  menuRef,
+}: any) {
   return (
-    <div className="flex items-center justify-between py-2 px-3">
+    <div className="flex items-center justify-between py-2 px-3 relative">
       {/* Back Button */}
       <button onClick={onBack} aria-label="Go Back">
         <MdOutlineKeyboardArrowLeft className="text-2xl text-text-placeholder" />
@@ -110,10 +142,27 @@ function MobileHeader({
         )}
       </div>
 
-      {/* Toggle Search */}
-      <button onClick={onToggleSearch} aria-label="Search">
-        <FaSearch className="text-md text-text-placeholder" />
-      </button>
+      {/* Right side: search + avatar */}
+      <div className="flex items-center gap-3 relative" ref={menuRef}>
+        <button onClick={onToggleSearch} aria-label="Search">
+          <FaSearch className="text-md text-text-placeholder" />
+        </button>
+        <button onClick={() => setMenuOpen((p: boolean) => !p)}>
+          <img
+            src={img}
+            alt="user_profile"
+            className="w-8 h-8 rounded-full object-cover"
+          />
+        </button>
+
+        {menuOpen && (
+          <ProfileMenu
+            theme={theme}
+            toggleTheme={toggleTheme}
+            logout={logout}
+          />
+        )}
+      </div>
     </div>
   );
 }
@@ -125,15 +174,13 @@ function DesktopHeader({
   theme,
   toggleTheme,
   user,
-}: {
-  search: string;
-  setSearch: (val: string) => void;
-  theme: Theme;
-  toggleTheme: () => void;
-  user?: User;
-}) {
+  logout,
+  menuOpen,
+  setMenuOpen,
+  menuRef,
+}: any) {
   return (
-    <div className="h-14 flex items-center justify-between bg-surface border border-border px-4 rounded-md">
+    <div className="h-14 flex items-center justify-between bg-surface border border-border px-4 rounded-md relative">
       {/* Search Bar */}
       <form className="flex-1 max-w-md">
         <label className="flex items-center gap-2 p-2 border border-border rounded-md w-full bg-smooth">
@@ -149,25 +196,13 @@ function DesktopHeader({
       </form>
 
       {/* Right Side */}
-      <div className="flex items-center gap-4 ml-4">
-        {/* Dark Mode Toggle */}
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-full border border-border hover:bg-smooth transition"
-          aria-label="Toggle Theme"
-        >
-          {theme !== lightTheme ? (
-            <FaSun className="text-yellow-400 hover:text-yellow-500" />
-          ) : (
-            <FaMoon className="text-blue-400 hover:text-blue-500" />
-          )}
-        </button>
-
-        {/* Notifications */}
+      <div className="flex items-center gap-4 ml-4 relative" ref={menuRef}>
         <FaBell className="text-primary text-lg cursor-pointer" />
 
-        {/* User Avatar */}
-        <div className="flex items-center gap-2">
+        <button
+          onClick={() => setMenuOpen((p: boolean) => !p)}
+          className="flex items-center gap-2"
+        >
           <img
             src={img}
             alt="user_profile"
@@ -176,8 +211,56 @@ function DesktopHeader({
           <span className="text-sm font-medium text-text">
             {user?.first_name}
           </span>
-        </div>
+        </button>
+
+        {menuOpen && (
+          <ProfileMenu
+            theme={theme}
+            toggleTheme={toggleTheme}
+            logout={logout}
+          />
+        )}
       </div>
+    </div>
+  );
+}
+
+/* ---------------- PROFILE MENU (Shared) ---------------- */
+function ProfileMenu({
+  theme,
+  toggleTheme,
+  logout,
+}: {
+  theme: Theme;
+  toggleTheme: () => void;
+  logout: () => void;
+}) {
+  return (
+    <div className="absolute right-0 top-12 w-48 bg-surface border border-border rounded-lg shadow-md overflow-hidden animate-fade">
+      <button
+        onClick={toggleTheme}
+        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text hover:bg-accent hover:text-white transition-colors"
+      >
+        {theme !== lightTheme ? <FaSun /> : <FaMoon />}
+        {theme !== lightTheme ? "Light Mode" : "Dark Mode"}
+      </button>
+
+      <button
+        disabled
+        className={clsx(
+          "flex items-center gap-2 w-full px-4 py-2 text-sm cursor-not-allowed",
+          "text-text-placeholder bg-surface"
+        )}
+      >
+        <FaCog /> Settings
+      </button>
+
+      <button
+        onClick={logout}
+        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-500 hover:bg-red-500 hover:text-white transition-colors"
+      >
+        <FaSignOutAlt /> Logout
+      </button>
     </div>
   );
 }

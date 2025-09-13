@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { Navigate } from "react-router-dom";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  onRequireLogin: () => void;
+  onRequireLogin?: () => void; // optional if you want to show a modal
 }
 
 export default function ProtectedRoute({
@@ -13,14 +14,14 @@ export default function ProtectedRoute({
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      onRequireLogin(); // open login modal
+    if (!isAuthenticated && onRequireLogin) {
+      onRequireLogin(); // optionally open a login modal
     }
   }, [isAuthenticated, onRequireLogin]);
 
   if (!isAuthenticated) {
-    // Don't render dashboard content until logged in
-    return null;
+    // 🚀 Redirect instead of blank page
+    return <Navigate to="/auth" replace />;
   }
 
   return <>{children}</>;
