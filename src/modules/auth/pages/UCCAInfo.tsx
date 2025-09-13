@@ -105,7 +105,7 @@ export default function UCCAInfo() {
       const payload: Partial<PersonalInfoFormData> = {
         bio: {
           ...formData.bio,
-          inducted: !!formData.bio?.inducted,
+          inducted: formData.bio?.inducted ? "1" : "0",
         },
         // ✅ Convert string ids back to numbers
         ucca_position: (formData.ucca_position || []).map((id) => Number(id)),

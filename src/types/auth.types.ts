@@ -52,7 +52,7 @@ export interface BioData {
 
   hobbies?: string;
 
-  inducted?: boolean;
+  inducted?: "0" | "1" | boolean; // "0" | "1" from backend, boolean in form
   induction_date?: string; // "YYYY-MM-DD"
   date_ucca?: string; // "YYYY-MM-DD"
 

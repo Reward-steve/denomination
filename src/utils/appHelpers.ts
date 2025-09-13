@@ -142,7 +142,7 @@ export const buildFormData = (
   if (!parentKey) return;
 
   if (typeof data === "boolean") {
-    formData.append(parentKey, data ? "true" : "false");
+    formData.append(parentKey, data ? "1" : "0");
   } else if (data instanceof File) {
     formData.append(parentKey, data);
   } else if (data instanceof Date) {
