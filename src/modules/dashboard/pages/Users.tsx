@@ -1,4 +1,4 @@
-import { DashboardLayout } from "../components/Layout";
+import DashboardLayout from "../components/Layout";
 
 export default function Users() {
   return (

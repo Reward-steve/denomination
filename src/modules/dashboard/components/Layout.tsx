@@ -1,4 +1,3 @@
-import clsx from "classnames";
 import Header from "../../../components/layout/Header";
 
 interface DashboardLayoutProps {
@@ -6,21 +5,18 @@ interface DashboardLayoutProps {
   disabled?: boolean;
 }
 
-export const DashboardLayout = ({
-  children,
-  disabled,
-}: DashboardLayoutProps) => {
+const DashboardLayout = ({ children, disabled }: DashboardLayoutProps) => {
   return (
-    <>
+    <div className="min-h-screen flex flex-col transition-colors duration-300">
+      {/* Top Header */}
       {!disabled && <Header />}
-      <div className="min-h-screen text-text transition-colors duration-300">
-        {/* Main Content */}
-        <main className={clsx("flex-1 py-6 transition-all duration-300")}>
-          <div className="rounded-xl border border-border animate-fadeIn">
-            {children}
-          </div>
-        </main>
-      </div>
-    </>
+
+      {/* Page Content */}
+      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6">
+        {children}
+      </main>
+    </div>
   );
 };
+
+export default DashboardLayout;

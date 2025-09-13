@@ -20,7 +20,7 @@ export default function Layout({
           className="flex-1 pb-16 transition-all duration-200 overflow-y-auto h-screen"
         >
           <section className="w-full h-auto bg-background min-h-screen">
-            <div className="px-4 h-auto min-h-svh animate-fadeIn">
+            <div className="h-auto min-h-svh animate-fadeIn">
               <Outlet />
             </div>
           </section>
@@ -38,7 +38,7 @@ export default function Layout({
         className="flex-1 transition-all duration-200 overflow-y-auto h-screen md:pr-2"
       >
         <section className="w-full h-auto bg-background min-h-screen">
-          <div className="px-2 h-auto min-h-svh animate-fadeIn">
+          <div className="h-auto min-h-svh animate-fadeIn">
             <Outlet />
           </div>
         </section>
