@@ -78,15 +78,6 @@ export default function PrevPosition() {
       },
     });
 
-    const stored = getFromStore("photo"); // maybe { name: string, base64: string }
-
-    let imgFile: File | undefined;
-    if (stored) {
-      imgFile = stored as File;
-    } else {
-      imgFile = undefined;
-    }
-
     const finalPayload = {
       ...data,
       ...formData,
@@ -95,7 +86,6 @@ export default function PrevPosition() {
         bcs_position:
           formData.bio?.bcs_position || data.bio?.bcs_position || "",
       },
-      photo: imgFile,
     };
     console.log(finalPayload);
 

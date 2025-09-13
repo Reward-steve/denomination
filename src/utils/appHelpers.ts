@@ -1,6 +1,12 @@
 import { toast } from "react-toastify";
 import SimpleCrypto from "simple-crypto-js";
 
+/**
+ * Handle image upload from input
+ * - Validates size & type
+ * - Generates preview URL
+ * - Stores the File object
+ */
 export const uploadImage = (
   e: React.ChangeEvent<HTMLInputElement>,
   setImagePreview: (url: string) => void,
@@ -9,7 +15,8 @@ export const uploadImage = (
   const file = e.target.files?.[0];
   if (!file) return;
 
-  const maxSize = 2 * 1024 * 1024; // 2MB
+  // Limit: 2MB
+  const maxSize = 2 * 1024 * 1024;
   if (file.size > maxSize) {
     toast.error("Image must be smaller than 2MB");
     return;
@@ -21,14 +28,20 @@ export const uploadImage = (
     return;
   }
 
-  // Generate preview URL
-  const previewUrl = URL.createObjectURL(file);
-  setImagePreview(previewUrl);
-
-  // Store the actual File object
+  setImagePreview(URL.createObjectURL(file));
   setImageFile(file);
 };
 
+/** Convert File → Base64 string */
+export const fileToBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (err) => reject(err);
+  });
+
+/** Basic password strength checker */
 export function getStrength(pw: string) {
   let score = 0;
   if (pw.length >= 8) score++;
@@ -40,15 +53,17 @@ export function getStrength(pw: string) {
   return "Strong";
 }
 
-// === Storage Functions (Session/Local) ===
+/**
+ * Save encrypted value in session/local storage
+ */
 export const saveInStore = (
   key: string,
   data: object | string | number | boolean,
   storage: "session" | "local" = "session"
 ) => {
   try {
-    const _secret = import.meta.env.VITE_SECRET_KEY;
-    const simpleCrypto = new SimpleCrypto(_secret);
+    const secret = import.meta.env.VITE_SECRET_KEY;
+    const simpleCrypto = new SimpleCrypto(secret);
     const payload = simpleCrypto.encrypt(data);
 
     if (storage === "session") {
@@ -61,13 +76,16 @@ export const saveInStore = (
   }
 };
 
+/**
+ * Retrieve and decrypt stored value
+ */
 export const getFromStore = <T>(
   key: string,
   storage: "session" | "local" = "session"
 ): T | null => {
   try {
-    const _secret = import.meta.env.VITE_SECRET_KEY;
-    const simpleCrypto = new SimpleCrypto(_secret);
+    const secret = import.meta.env.VITE_SECRET_KEY;
+    const simpleCrypto = new SimpleCrypto(secret);
     const data =
       storage === "session"
         ? sessionStorage.getItem(key)
@@ -79,6 +97,7 @@ export const getFromStore = <T>(
   }
 };
 
+/** Format date string into yyyy-mm-dd or dd-mm-yyyy */
 export function formatDate(
   dateString: string,
   format: "yyyy-mm-dd" | "dd-mm-yyyy"
@@ -89,50 +108,46 @@ export function formatDate(
     : `${day}-${month}-${year}`;
 }
 
-// ✅ Strongly typed recursive function with sanitization
+/**
+ * Recursively build FormData from objects
+ * - Handles nested objects, arrays, Files, Dates, and booleans
+ */
 export const buildFormData = (
   formData: FormData,
-  data:
-    | Record<string, unknown>
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | File
-    | Date
-    | null
-    | undefined,
+  data: any,
   parentKey?: string
 ): void => {
-  // Skip null, undefined, and empty string
-  if (data === null || data === undefined || data === "") {
-    return;
-  }
+  if (data === null || data === undefined || data === "") return;
 
-  // Handle arrays
   if (Array.isArray(data)) {
     data.forEach((item, index) => {
-      const key = `${parentKey}[${index}]`;
-      buildFormData(formData, item as any, key);
+      const key = parentKey ? `${parentKey}[${index}]` : `${index}`;
+      buildFormData(formData, item, key);
     });
     return;
   }
 
-  // Handle nested objects (exclude File and Date)
   if (
     typeof data === "object" &&
     !(data instanceof File) &&
     !(data instanceof Date)
   ) {
-    Object.entries(data as Record<string, unknown>).forEach(([key, value]) => {
+    Object.entries(data).forEach(([key, value]) => {
       const formKey = parentKey ? `${parentKey}[${key}]` : key;
-      buildFormData(formData, value as any, formKey);
+      buildFormData(formData, value, formKey);
     });
     return;
   }
 
-  // Handle primitive values (string, number, boolean, File, Date)
-  if (parentKey) {
+  if (!parentKey) return;
+
+  if (typeof data === "boolean") {
+    formData.append(parentKey, data ? "true" : "false");
+  } else if (data instanceof File) {
+    formData.append(parentKey, data);
+  } else if (data instanceof Date) {
+    formData.append(parentKey, data.toISOString());
+  } else {
     formData.append(parentKey, String(data));
   }
 };

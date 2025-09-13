@@ -1,78 +1,123 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import type { PersonalInfoFormData } from "../types/auth.types";
 import { RegContext } from "./RegContext";
 import { saveInStore, getFromStore } from "../utils/appHelpers";
 
-// Helper: Deep merge objects safely
+/**
+ * Deep merge helper for nested form objects.
+ * Ensures updates don’t overwrite unrelated keys.
+ */
 const deepMerge = <T extends object>(target: T, source: Partial<T>): T => {
-  const output = { ...target };
-  for (const key in source) {
+  const out: any = { ...(target as any) };
+
+  for (const key of Object.keys(source) as (keyof typeof source)[]) {
+    const sVal = source[key];
+    const tVal = (out as any)[key];
+
+    if (sVal === undefined) continue;
+
     if (
-      Object.prototype.hasOwnProperty.call(source, key) &&
-      source[key] !== undefined
+      sVal &&
+      typeof sVal === "object" &&
+      !Array.isArray(sVal) &&
+      !(sVal instanceof File)
     ) {
-      if (
-        typeof source[key] === "object" &&
-        !Array.isArray(source[key]) &&
-        source[key] !== null
-      ) {
-        (output as any)[key] = deepMerge(
-          (target as any)[key] || {},
-          source[key] as any
-        );
-      } else {
-        (output as any)[key] = source[key];
-      }
+      out[key] = deepMerge((tVal as object) || {}, sVal as Partial<object>);
+    } else {
+      out[key] = sVal;
     }
   }
-  return output;
+
+  return out as T;
 };
+
+/**
+ * Remove File objects (non-serializable) before saving to storage.
+ */
+const omitFilesForStorage = (value: any): any => {
+  if (value === null || value === undefined) return value;
+  if (value instanceof File) return undefined;
+
+  if (Array.isArray(value)) {
+    return value
+      .map((v) => omitFilesForStorage(v))
+      .filter((v) => v !== undefined);
+  }
+
+  if (typeof value === "object") {
+    const out: any = {};
+    for (const k of Object.keys(value)) {
+      const v = omitFilesForStorage(value[k]);
+      if (v !== undefined) out[k] = v;
+    }
+    return out;
+  }
+
+  return value;
+};
+
+/** Default state shape to satisfy TypeScript */
+const DEFAULT_DATA = {
+  bio: {},
+  prev_positions: [],
+  ucca_position: [],
+  photo: undefined,
+  education: [],
+  nok: {},
+} as unknown as PersonalInfoFormData;
 
 export const RegistrationProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [step, setStep] = useState<number>(() => {
-    return getFromStore<number>("ucca_reg_step", "session") || 1;
-  });
+  const [step, setStep] = useState<number>(
+    () => getFromStore<number>("ucca_reg_step", "session") || 1
+  );
 
-  const [prev, setPrev] = useState<boolean>(() => {
-    return getFromStore<boolean>("ucca_reg_prev", "session") ?? true;
-  });
+  const [prev, setPrev] = useState<boolean>(
+    () => getFromStore<boolean>("ucca_reg_prev", "session") ?? true
+  );
 
-  const [data, setData] = useState<PersonalInfoFormData>(() => {
-    return (
-      getFromStore<PersonalInfoFormData>("ucca_reg_data", "session") ||
-      ({} as PersonalInfoFormData)
-    );
-  });
+  // Load saved data, or start fresh
+  const initialData =
+    getFromStore<PersonalInfoFormData>("ucca_reg_data", "session") ||
+    DEFAULT_DATA;
 
-  const updateData = (updates: Partial<PersonalInfoFormData>) => {
-    setData((prev) => {
-      const merged = deepMerge(prev, updates); // ✅ preserve nested data
-      saveInStore("ucca_reg_data", merged, "session");
-      return merged;
+  // Files stay in memory only (not persisted)
+  const [data, setData] = useState<PersonalInfoFormData>(() => initialData);
+
+  const updateData = useCallback((updates: Partial<PersonalInfoFormData>) => {
+    setData((prevState) => {
+      const merged = deepMerge(prevState, updates);
+
+      // Only persist serializable values
+      saveInStore("ucca_reg_data", omitFilesForStorage(merged), "session");
+
+      return merged; // keep Files in memory
     });
-  };
+  }, []);
 
-  // keep step & prev persistent too
-  const setStepPersist = (val: number) => {
+  const setStepPersist = useCallback((val: number) => {
     setStep(val);
     saveInStore("ucca_reg_step", val, "session");
-  };
+  }, []);
 
-  const setPrevPersist = (val: boolean) => {
+  const setPrevPersist = useCallback((val: boolean) => {
     setPrev(val);
     saveInStore("ucca_reg_prev", val, "session");
-  };
+  }, []);
 
-  const value = {
-    step,
-    setStep: setStepPersist,
-    data,
-    updateData,
-    prev,
-    setPrev: setPrevPersist,
-  };
+  // Memoize context value to avoid unnecessary re-renders
+  const value = useMemo(
+    () => ({
+      step,
+      setStep: setStepPersist,
+      data,
+      updateData,
+      prev,
+      setPrev: setPrevPersist,
+    }),
+    [step, data, prev, setStepPersist, setPrevPersist, updateData]
+  );
 
   return <RegContext.Provider value={value}>{children}</RegContext.Provider>;
 };

@@ -40,7 +40,6 @@ import {
 import { FaHome } from "react-icons/fa";
 import { GoMail } from "react-icons/go";
 import type { IconType } from "react-icons";
-import { saveInStore } from "../../../utils/appHelpers";
 
 // -------------------------
 // Dropdown Options
@@ -176,11 +175,9 @@ function PersonalInfo() {
       return;
     }
 
-    const payload = { ...formData, photo: imageFile };
+    console.log({ ...formData });
 
-    if (imageFile) {
-      saveInStore("photo", imageFile);
-    }
+    const payload = { ...formData };
 
     try {
       updateData(payload);

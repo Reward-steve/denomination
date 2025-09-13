@@ -105,7 +105,7 @@ export default function UCCAInfo() {
       const payload: Partial<PersonalInfoFormData> = {
         bio: {
           ...formData.bio,
-          inducted: formData.bio.inducted,
+          inducted: !!formData.bio?.inducted,
         },
         // ✅ Convert string ids back to numbers
         ucca_position: (formData.ucca_position || []).map((id) => Number(id)),
@@ -164,7 +164,7 @@ export default function UCCAInfo() {
             isError={!!error || !!positionError}
             errorMsg={error?.message || positionError || ""}
             loading={loadingPositions}
-            disabled={loadingPositions || !!positionError}
+            disabled={loadingPositions}
             multiple
           />
         )}
@@ -189,6 +189,7 @@ export default function UCCAInfo() {
         render={({ field, fieldState: { error } }) => (
           <Dropdown
             label="Evidence of Promotion"
+            placeholder="Select evidence of promotion"
             items={PROMOTION_EVIDENCE as DropdownOption[]}
             icon={FaCross}
             size="big"
@@ -200,7 +201,6 @@ export default function UCCAInfo() {
             onSelect={(selected) => field.onChange(selected?.name)}
             isError={!!error}
             errorMsg={error?.message || ""}
-            disabled={!!error}
             displayValueKey="name"
           />
         )}

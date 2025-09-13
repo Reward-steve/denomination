@@ -183,7 +183,7 @@ export function buildPersonalInfoPayload(
 
     skills: data.skills || [],
     ucca_position: data.ucca_position || [],
-    photo: data.photo,
+    photo: data.photo || undefined,
   };
 }
 
