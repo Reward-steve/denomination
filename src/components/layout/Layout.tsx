@@ -1,10 +1,7 @@
 import { Outlet } from "react-router-dom";
-import { useResponsive } from "../../../hooks/useResponsive";
-import { ResponsiveNav } from "../../../components/ui/Sidebar";
-import type {
-  AuthSidebarProps,
-  DashboardSidebarProps,
-} from "../../../constant";
+import { useResponsive } from "../../hooks/useResponsive";
+import { ResponsiveNav } from "../ui/Sidebar";
+import type { AuthSidebarProps, DashboardSidebarProps } from "../../constant";
 
 export default function Layout({
   Items,

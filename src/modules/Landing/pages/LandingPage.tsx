@@ -42,10 +42,7 @@ const App = () => {
       {/* Hero Section */}
       <section className="relative z-10 h-full flex flex-col items-center lg:items-start justify-center text-center lg:text-left text-slate-200 px-6 max-w-2xl">
         <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold mb-4 drop-shadow-xl">
-          Welcome to{" "}
-          <span className="text-outline-fill font-extrabold tracking-wide">
-            (UCCA)
-          </span>
+          Welcome to UCCA
         </h1>
 
         <p className="text-base sm:text-lg md:text-xl max-w-xl opacity-90">

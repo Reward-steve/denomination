@@ -11,7 +11,7 @@ import { FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
 import ReactDOM from "react-dom";
 import clsx from "clsx";
-import { saveInStore } from "../../../utils/appHelpers";
+import { getFromStore, saveInStore } from "../../../utils/appHelpers";
 import type { User } from "../../../types/auth.types";
 
 interface ModalProps {
@@ -66,6 +66,16 @@ export function Login({ showLogin, handleCloseLogin }: ModalProps) {
       );
     }
   };
+
+  useEffect(() => {
+    const allow = getFromStore("curr_user");
+
+    if (allow) {
+      // User already logged in → just close modal
+      handleCloseLogin();
+      navigate("/dashboard");
+    }
+  }, [handleCloseLogin]);
 
   // Handle ESC key and focus trapping
   useEffect(() => {

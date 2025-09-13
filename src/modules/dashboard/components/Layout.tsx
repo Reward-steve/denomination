@@ -12,7 +12,6 @@ export const DashboardLayout = ({
 }: DashboardLayoutProps) => {
   return (
     <>
-      {" "}
       {!disabled && <Header />}
       <div className="min-h-screen text-text transition-colors duration-300">
         {/* Main Content */}

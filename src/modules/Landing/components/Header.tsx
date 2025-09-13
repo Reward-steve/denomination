@@ -19,7 +19,7 @@ export function Header({
     <header className="absolute top-0 left-0 w-full flex items-center justify-between z-20 px-6 py-4">
       {/* Logo + Title */}
       <Link to="/" className="flex items-center space-x-2">
-        <div className="h-10 w-10 flex-shrink-0 border border-border rounded-full">
+        <div className="h-10 w-10 flex-shrink-0 border-4 border-border rounded-full">
           <img
             src={logo}
             alt={`${title} logo`}

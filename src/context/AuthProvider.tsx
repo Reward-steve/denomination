@@ -1,28 +1,27 @@
 import { useState, useEffect, useCallback } from "react";
 import { AuthContext } from "./AuthContext";
-import { getFromStore, saveInStore } from "../utils/appHelpers";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
 
-  // ✅ Initialize from localStorage on first load
+  // ✅ Initialize from sessionStorage on first load
   useEffect(() => {
-    const storedToken = getFromStore("tk");
+    const storedToken = sessionStorage.getItem("tk");
     if (storedToken) {
-      setToken(storedToken as string);
+      setToken(storedToken);
     }
   }, []);
 
-  // ✅ Login saves the token
+  // ✅ Login saves the token in sessionStorage
   const login = useCallback((newToken: string) => {
     setToken(newToken);
-    saveInStore("tk", newToken);
+    sessionStorage.setItem("tk", newToken);
   }, []);
 
-  // ✅ Logout clears everything
+  // ✅ Logout clears from sessionStorage
   const logout = useCallback(() => {
     setToken(null);
-    sessionStorage.removeItem("tk"); // consistent cleanup
+    sessionStorage.removeItem("tk");
   }, []);
 
   const isAuthenticated = !!token;

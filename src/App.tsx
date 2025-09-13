@@ -3,7 +3,7 @@ import { ToastContainer } from "react-toastify";
 import { ThemeProvider } from "./context/ThemeProvider";
 import LandingPage from "./modules/Landing/pages/LandingPage";
 import { RegistrationProvider } from "./context/RegProvider";
-import Layout from "./modules/auth/components/Layout";
+import Layout from "./components/layout/Layout";
 import { auth, dashboard } from "./routes";
 import ResponsiveProvider from "./context/ResponsiveProvider";
 import { authMenu, dashboardMenu } from "./constant";
