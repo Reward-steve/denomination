@@ -64,7 +64,7 @@ export default function Header() {
   const handleBack = () => navigate(-1);
 
   return (
-    <nav className="sticky md:top-2 top-0 z-50 bg-background border-b border-border">
+    <nav className="sticky md:top-2 top-0 z-50 bg-background sm:border-none border-b border-border">
       {isMobile ? (
         <MobileHeader
           title={pageTitle}

@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { getFromStore } from "../../../utils/appHelpers";
 import type { User } from "../../../types/auth.types";
 import DashboardLayout from "../components/Layout";
+import { Link } from "react-router-dom";
 
 /* -------------------- TYPES -------------------- */
 interface StatCardProps {
@@ -99,13 +100,15 @@ export default function Home() {
               >
                 View Messages
               </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="w-full sm:w-auto animate-fade transition-all"
-              >
-                Upcoming Events
-              </Button>
+              <Link to={"/dashboard/events"} className="w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full sm:w-auto animate-fade transition-all"
+                >
+                  Upcoming Events
+                </Button>
+              </Link>
             </div>
           </section>
         </div>

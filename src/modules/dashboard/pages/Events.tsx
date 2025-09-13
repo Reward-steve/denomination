@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "../../../components/ui/Button";
 import { FaCalendarPlus, FaCalendarAlt } from "react-icons/fa";
 import clsx from "clsx";
+import DashboardLayout from "../components/Layout";
 
 interface Event {
   id: number;
@@ -65,7 +66,7 @@ export default function Events() {
   };
 
   return (
-    <>
+    <DashboardLayout>
       <main className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-8">
         {/* Header */}
         <section className="flex items-center justify-between">
@@ -165,6 +166,6 @@ export default function Events() {
           </div>
         </div>
       )}
-    </>
+    </DashboardLayout>
   );
 }
