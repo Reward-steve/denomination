@@ -3,7 +3,10 @@ import { Button } from "../../../components/ui/Button";
 import { FaEnvelope, FaCalendar } from "react-icons/fa6";
 import { FaFileAlt } from "react-icons/fa";
 import clsx from "clsx";
+import { getFromStore } from "../../../utils/appHelpers";
+import type { User } from "../../../types/auth.types";
 
+/* -------------------- TYPES -------------------- */
 interface StatCardProps {
   title: string;
   value: string;
@@ -11,6 +14,7 @@ interface StatCardProps {
   icon: React.ComponentType<{ className?: string }>;
 }
 
+/* -------------------- COMPONENTS -------------------- */
 const StatCard = ({ title, value, description, icon: Icon }: StatCardProps) => (
   <div
     className={clsx(
@@ -29,21 +33,30 @@ const StatCard = ({ title, value, description, icon: Icon }: StatCardProps) => (
   </div>
 );
 
+/* -------------------- PAGE -------------------- */
 export default function Home() {
+  const user = getFromStore("curr_user") as User | null;
+
+  // Gracefully handle missing user (e.g. during reload)
+  const fullName = user
+    ? `${user.first_name} ${user.middle_name || ""} ${user.last_name}`.trim()
+    : "Guest";
+
   return (
     <DashboardLayout>
       <main className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
-        {/* Welcome Section */}
+        {/* ---------------- Intro Section ---------------- */}
         <section>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-text animate-fade">
-            Welcome Back
+            Welcome back, <span className="text-primary">{fullName}</span> 👋
           </h1>
-          <p className="text-text-placeholder mt-2 text-sm sm:text-base">
-            Here’s a quick overview of your account and activities.
+          <p className="text-text-placeholder mt-2 text-sm sm:text-base max-w-2xl">
+            Here’s a quick overview of your account and activities. Stay on top
+            of your applications, events, and messages with ease.
           </p>
         </section>
 
-        {/* Quick Stats Section */}
+        {/* ---------------- Quick Stats ---------------- */}
         <section className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           <StatCard
             title="Applications"
@@ -65,7 +78,7 @@ export default function Home() {
           />
         </section>
 
-        {/* Quick Actions Section */}
+        {/* ---------------- Quick Actions ---------------- */}
         <section className="space-y-4">
           <h2 className="text-xl font-semibold text-text">Quick Actions</h2>
           <div className="flex flex-wrap gap-4 w-full">
