@@ -1,46 +1,17 @@
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../../../components/ui/Button";
 import { FaCalendarPlus, FaCalendarAlt } from "react-icons/fa";
-import clsx from "clsx";
 import DashboardLayout from "../components/Layout";
+import { initialEvents, type Event } from "../types";
+import { EventCard } from "../components/EventCard";
+import { EventModal } from "../components/EventModal";
 
-interface Event {
-  id: number;
-  title: string;
-  date: string;
-  description: string;
-}
-
-/* ---------------- Event Card ---------------- */
-const EventCard = ({ title, date, description }: Event) => (
-  <div
-    className={clsx(
-      "p-6 rounded-2xl bg-surface shadow-md",
-      "hover:shadow-lg hover:bg-surface/90 transition-all duration-200 animate-fade"
-    )}
-  >
-    <h3 className="text-lg font-semibold text-text">{title}</h3>
-    <p className="text-sm text-text-placeholder">{date}</p>
-    <p className="mt-2 text-text">{description}</p>
-  </div>
-);
-
+/* ---------------- Page ---------------- */
 export default function Events() {
-  const [events, setEvents] = useState<Event[]>([
-    {
-      id: 1,
-      title: "Leadership Summit",
-      date: "2025-09-20",
-      description: "Annual gathering of all coordinators and leaders.",
-    },
-    {
-      id: 2,
-      title: "Community Outreach",
-      date: "2025-09-25",
-      description: "Charity event for local communities.",
-    },
-  ]);
+  // initial demo events
+  const [events, setEvents] = useState<Event[]>(initialEvents);
 
+  // modal state + form model
   const [showModal, setShowModal] = useState(false);
   const [newEvent, setNewEvent] = useState<Event>({
     id: 0,
@@ -48,8 +19,27 @@ export default function Events() {
     date: "",
     description: "",
   });
+  const [formError, setFormError] = useState<string | null>(null);
 
-  /* Close modal with Esc key */
+  // refs for accessibility & focus management
+  const firstInputRef = useRef<HTMLInputElement | null>(null);
+  const modalRef = useRef<HTMLDivElement | null>(null);
+
+  /* Focus first input when modal opens and prevent body scroll */
+  useEffect(() => {
+    if (showModal) {
+      firstInputRef.current?.focus();
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showModal]);
+
+  /* Close modal with Escape key */
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") setShowModal(false);
@@ -58,113 +48,111 @@ export default function Events() {
     return () => window.removeEventListener("keydown", handleEsc);
   }, []);
 
+  /* ---------------- Handlers ---------------- */
   const handleAddEvent = () => {
-    if (!newEvent.title || !newEvent.date) return; // validation
-    setEvents([...events, { ...newEvent, id: events.length + 1 }]);
+    // basic validation
+    if (!newEvent.title.trim()) {
+      setFormError("Title is required.");
+      return;
+    }
+    if (!newEvent.date) {
+      setFormError("Date is required.");
+      return;
+    }
+
+    const next: Event = {
+      ...newEvent,
+      id: Date.now(), // simple unique id
+      title: newEvent.title.trim(),
+    };
+
+    setEvents((prev) => [next, ...prev]); // newest first
     setNewEvent({ id: 0, title: "", date: "", description: "" });
+    setFormError(null);
     setShowModal(false);
   };
 
+  const handleDelete = (id: number) => {
+    // naive delete with confirm (you can replace with nicer UI)
+    if (!confirm("Are you sure you want to delete this event?")) return;
+    setEvents((prev) => prev.filter((e) => e.id !== id));
+  };
+
+  const handleEdit = (event: Event) => {
+    // Simple "edit in modal" behavior: populate form and open modal
+    setNewEvent(event);
+    setShowModal(true);
+  };
+
+  const handleModalClick = (e: React.MouseEvent) => {
+    // close modal when clicking on the overlay background
+    if (e.target === modalRef.current) {
+      setShowModal(false);
+    }
+  };
+
+  /* ---------------- Render ---------------- */
   return (
     <DashboardLayout>
-      <main className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-8">
+      <main className="max-w-6xl mx-auto space-y-8 lg:py-8 py-6">
         {/* Header */}
-        <section className="flex items-center justify-between">
-          <h1 className="text-2xl sm:text-3xl font-bold text-text flex items-center gap-2">
-            <FaCalendarAlt className="text-accent" /> Events
-          </h1>
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={() => setShowModal(true)}
-            className="flex items-center gap-2"
-          >
-            <FaCalendarPlus /> Add Event
-          </Button>
+        <section className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <FaCalendarAlt className="text-accent text-2xl" />
+            <h1 className="text-xl sm:text-2xl font-bold text-text">Events</h1>
+          </div>
+
+          <div className="flex gap-3">
+            <Button
+              variant="primary"
+              textSize="xs"
+              className="gap-2"
+              onClick={() => {
+                setNewEvent({ id: 0, title: "", date: "", description: "" });
+                setFormError(null);
+                setShowModal(true);
+              }}
+            >
+              <FaCalendarPlus /> Add Event
+            </Button>
+          </div>
         </section>
 
-        {/* Events List */}
-        <section className="grid gap-4 sm:grid-cols-2">
-          {events.length > 0 ? (
-            events.map((event) => <EventCard key={event.id} {...event} />)
+        {/* Events grid */}
+        <section>
+          {events.length === 0 ? (
+            <div className="py-16 text-center">
+              <p className="text-text-placeholder">
+                No events available. Add your first event.
+              </p>
+            </div>
           ) : (
-            <p className="text-center col-span-full text-text-placeholder py-8">
-              No events available. Start by adding one.
-            </p>
+            <div className="grid gap-4">
+              {events.map((ev) => (
+                <EventCard
+                  key={ev.id}
+                  event={ev}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
           )}
         </section>
       </main>
 
-      {/* Add Event Modal */}
+      {/* Modal — Add / Edit Event */}
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
-          <div className="bg-surface rounded-2xl p-6 w-full max-w-md shadow-xl animate-fade">
-            <h2 className="text-xl font-semibold text-text mb-4">
-              Add New Event
-            </h2>
-            <form
-              className="space-y-4"
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleAddEvent();
-              }}
-            >
-              <div>
-                <label className="block text-sm mb-1 text-text-placeholder">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  placeholder="Event Title"
-                  className="w-full p-2 border rounded-lg bg-background text-text focus:ring-2 focus:ring-accent"
-                  value={newEvent.title}
-                  onChange={(e) =>
-                    setNewEvent({ ...newEvent, title: e.target.value })
-                  }
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm mb-1 text-text-placeholder">
-                  Date
-                </label>
-                <input
-                  type="date"
-                  className="w-full p-2 border rounded-lg bg-background text-text focus:ring-2 focus:ring-accent"
-                  value={newEvent.date}
-                  onChange={(e) =>
-                    setNewEvent({ ...newEvent, date: e.target.value })
-                  }
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm mb-1 text-text-placeholder">
-                  Description
-                </label>
-                <textarea
-                  placeholder="Event Description"
-                  className="w-full p-2 border rounded-lg bg-background text-text focus:ring-2 focus:ring-accent"
-                  value={newEvent.description}
-                  onChange={(e) =>
-                    setNewEvent({ ...newEvent, description: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-2">
-                <Button variant="outline" onClick={() => setShowModal(false)}>
-                  Cancel
-                </Button>
-                <Button variant="primary" type="submit">
-                  Save
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <EventModal
+          modalRef={modalRef}
+          handleModalClick={handleModalClick}
+          newEvent={newEvent}
+          setNewEvent={setNewEvent}
+          formError={formError}
+          handleAddEvent={handleAddEvent}
+          setShowModal={setShowModal}
+          firstInputRef={firstInputRef}
+        />
       )}
     </DashboardLayout>
   );

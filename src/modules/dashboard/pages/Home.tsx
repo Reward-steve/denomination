@@ -19,8 +19,8 @@ interface StatCardProps {
 const StatCard = ({ title, value, description, icon: Icon }: StatCardProps) => (
   <div
     className={clsx(
-      "p-6 rounded-2xl bg-surface shadow-md",
-      "hover:shadow-lg hover:bg-surface/90 transition-all duration-200 animate-fade"
+      "p-6 rounded-2xl bg-surface shadow-sm",
+      "hover:shadow-md hover:bg-surface/60 transition-all duration-200 animate-fade border border-border"
     )}
   >
     <div className="flex items-start gap-4">
@@ -47,7 +47,7 @@ export default function Home() {
     <DashboardLayout>
       <div className="space-y-12">
         {/* ---------------- Intro Section ---------------- */}
-        <section className="space-y-2">
+        <section className="space-y-2 my-4 sm:my-8">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-text animate-fade">
             Welcome back, <span className="text-primary">{fullName}</span> 👋
           </h1>
