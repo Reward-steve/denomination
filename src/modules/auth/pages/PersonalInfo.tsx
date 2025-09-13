@@ -8,6 +8,7 @@ import {
   type PersonalInfoFormData,
   type LGA,
   type States,
+  type DropdownOption,
 } from "../../../types/auth.types";
 
 // Hooks & Context
@@ -38,22 +39,24 @@ import {
 } from "react-icons/fa6";
 import { FaHome } from "react-icons/fa";
 import { GoMail } from "react-icons/go";
+import type { IconType } from "react-icons";
+import { saveInStore } from "../../../utils/appHelpers";
 
 // -------------------------
 // Dropdown Options
 // -------------------------
-const genderOptions = [
+const genderOptions: DropdownOption[] = [
   { id: "male", name: "Male" },
   { id: "female", name: "Female" },
 ];
 
-const maritalStatusOptions = [
+const maritalStatusOptions: DropdownOption[] = [
   { id: "single", name: "Single" },
   { id: "married", name: "Married" },
   { id: "separated", name: "Separated" },
 ];
 
-const priestStatusOptions = [
+const priestStatusOptions: DropdownOption[] = [
   { id: "posted", name: "Posted" },
   { id: "yet_to_be_posted", name: "Yet to be Posted" },
 ];
@@ -62,7 +65,6 @@ const priestStatusOptions = [
 // Component
 // -------------------------
 function PersonalInfo() {
-  // ----------------- State -----------------
   const [imagePreview, setImagePreview] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
 
@@ -78,7 +80,6 @@ function PersonalInfo() {
   const navigate = useNavigate();
   const { setStep, setPrev, updateData } = useRegistration();
 
-  // ----------------- Form -----------------
   const {
     register,
     handleSubmit,
@@ -122,15 +123,17 @@ function PersonalInfo() {
     setPrev(false);
   }, [setStep, setPrev]);
 
+  // Load states
   useEffect(() => {
     const loadStates = async () => {
       setIsLoadingStates(true);
       try {
         const res = await fetchStates();
         setStates(res.data ?? []);
+        setStateError(null);
       } catch {
-        setStateError("Failed to load states.");
-        toast.error("Could not load states. Please retry.");
+        setStateError("Could not load states.");
+        toast.error("Failed to fetch states.");
       } finally {
         setIsLoadingStates(false);
       }
@@ -138,6 +141,7 @@ function PersonalInfo() {
     loadStates();
   }, []);
 
+  // Load LGAs when state changes
   useEffect(() => {
     const loadLgas = async () => {
       if (!selectedStateId) {
@@ -152,12 +156,12 @@ function PersonalInfo() {
           setLgas(res.data ?? []);
           setLgaError(null);
         } else {
-          setLgaError(res.message || "Failed to load LGAs");
-          toast.error(res.message || "Failed to load LGAs");
+          setLgaError(res.message || "Failed to load LGAs.");
+          toast.error(res.message || "Could not fetch LGAs.");
         }
       } catch {
-        setLgaError("Failed to load LGAs.");
-        toast.error("Could not load LGAs.");
+        setLgaError("Could not load LGAs.");
+        toast.error("Error fetching LGAs.");
       } finally {
         setIsLoadingLgas(false);
       }
@@ -172,8 +176,14 @@ function PersonalInfo() {
       return;
     }
 
+    const payload = { ...formData, photo: imageFile };
+
+    if (imageFile) {
+      saveInStore("photo", imageFile);
+    }
+
     try {
-      updateData({ ...formData, photo: imageFile });
+      updateData(payload);
       toast.success("Personal information saved!");
       navigate("/auth/education-data");
     } catch (error) {
@@ -183,11 +193,48 @@ function PersonalInfo() {
     }
   };
 
-  // ----------------- Render -----------------
+  const renderDropdown = (
+    name: keyof PersonalInfoFormData["bio"],
+    label: string,
+    items: DropdownOption[],
+    icon: IconType,
+    extra?: {
+      error?: string | null;
+      loading?: boolean;
+      disabled?: boolean;
+      onChange?: (item: DropdownOption) => void;
+    }
+  ) => (
+    <Controller
+      name={`bio.${name}` as const}
+      control={control}
+      rules={{ required: `Please select ${label.toLowerCase()}` }}
+      render={({ field, fieldState: { error } }) => (
+        <Dropdown
+          isError={!!error || !!extra?.error}
+          label={label}
+          placeholder={`Select ${label.toLowerCase()}`}
+          items={items}
+          displayValueKey="name"
+          errorMsg={error?.message || extra?.error || ""}
+          onSelect={(item) => {
+            if (!item || Array.isArray(item)) return;
+            field.onChange(item.name);
+            extra?.onChange?.(item);
+          }}
+          value={items.find((item) => item.name === field.value)}
+          icon={icon}
+          loading={extra?.loading}
+          disabled={extra?.disabled}
+        />
+      )}
+    />
+  );
+
   return (
     <Form
       title="Personal Information"
-      description="Provide accurate personal details. This forms the foundation of your UCCA profile."
+      description="Fill in accurate personal details. These form the foundation of your UCCA profile."
       onSubmit={handleSubmit(onSubmit)}
     >
       {/* Profile Photo */}
@@ -211,13 +258,15 @@ function PersonalInfo() {
 
       {/* Basic Details */}
       <section className="space-y-6">
-        <h2 className="font-semibold text-lg text-gray-700">Basic Details</h2>
+        <h2 className="font-semibold text-lg text-gray-800">Basic Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormInput
             label="First Name"
             placeholder="Enter first name"
             icon={FaUser}
-            register={register("bio.first_name", { required: "Required" })}
+            register={register("bio.first_name", {
+              required: "First name is required",
+            })}
             error={errors.bio?.first_name}
           />
           <FormInput
@@ -232,59 +281,34 @@ function PersonalInfo() {
             label="Last Name"
             placeholder="Enter last name"
             icon={FaUser}
-            register={register("bio.last_name", { required: "Required" })}
+            register={register("bio.last_name", {
+              required: "Last name is required",
+            })}
             error={errors.bio?.last_name}
           />
           <FormInput
             type="date"
             label="Date of Birth"
-            placeholder="MM/DD/YYYY"
             icon={FaCalendar}
-            register={register("bio.dob", { required: "Required" })}
+            register={register("bio.dob", {
+              required: "Date of birth is required",
+            })}
             error={errors.bio?.dob}
           />
-          <Controller
-            name="bio.gender"
-            control={control}
-            rules={{ required: "Required" }}
-            render={({ field, fieldState: { error } }) => (
-              <Dropdown
-                isError={!!error}
-                label="Gender"
-                placeholder="Select Gender"
-                items={genderOptions}
-                displayValueKey="name"
-                errorMsg={error?.message}
-                onSelect={(item) => field.onChange(item.id)}
-                value={field.value}
-                icon={FaVenusMars}
-              />
-            )}
-          />
-          <Controller
-            name="bio.marital_status"
-            control={control}
-            rules={{ required: "Required" }}
-            render={({ field, fieldState: { error } }) => (
-              <Dropdown
-                isError={!!error}
-                label="Marital Status"
-                placeholder="Select Marital Status"
-                items={maritalStatusOptions}
-                displayValueKey="name"
-                errorMsg={error?.message}
-                onSelect={(item) => field.onChange(item.id)}
-                value={field.value}
-                icon={FaRing}
-              />
-            )}
-          />
+
+          {renderDropdown("gender", "Gender", genderOptions, FaVenusMars)}
+          {renderDropdown(
+            "marital_status",
+            "Marital Status",
+            maritalStatusOptions,
+            FaRing
+          )}
         </div>
       </section>
 
       {/* Contact Information */}
       <section className="space-y-6">
-        <h2 className="font-semibold text-lg text-gray-700">
+        <h2 className="font-semibold text-lg text-gray-800">
           Contact Information
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -293,8 +317,8 @@ function PersonalInfo() {
             placeholder="Primary number"
             icon={FaPhone}
             register={register("bio.phone", {
-              required: "Required",
-              pattern: { value: /^\d+$/, message: "Invalid number" },
+              required: "Phone number is required",
+              pattern: { value: /^\d+$/, message: "Enter a valid number" },
             })}
             error={errors.bio?.phone}
           />
@@ -311,7 +335,7 @@ function PersonalInfo() {
             placeholder="Residential address"
             icon={FaHome}
             register={register("bio.residential_address", {
-              required: "Required",
+              required: "Address is required",
             })}
             error={errors.bio?.residential_address}
           />
@@ -321,7 +345,7 @@ function PersonalInfo() {
             placeholder="example@email.com"
             icon={GoMail}
             register={register("bio.email", {
-              required: "Required",
+              required: "Email is required",
               pattern: {
                 value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                 message: "Enter a valid email",
@@ -334,7 +358,7 @@ function PersonalInfo() {
 
       {/* Geographic Information */}
       <section className="space-y-6">
-        <h2 className="font-semibold text-lg text-gray-700">
+        <h2 className="font-semibold text-lg text-gray-800">
           Geographic Information
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -342,7 +366,7 @@ function PersonalInfo() {
             label="City of Residence"
             placeholder="Enter City"
             icon={FaMapPin}
-            register={register("bio.city", { required: "Required" })}
+            register={register("bio.city", { required: "City is required" })}
             error={errors.bio?.city}
           />
           <FormInput
@@ -350,111 +374,55 @@ function PersonalInfo() {
             value="Nigeria"
             disabled
             icon={FaMapPin}
-            register={register("bio.nationality", { required: "Required" })}
-            error={errors.bio?.nationality}
+            register={register("bio.nationality")}
           />
-          <FormInput
-            label="State of Residence"
-            placeholder="Enter State"
-            icon={FaMapPin}
-            register={register("bio.residence_state", { required: "Required" })}
-            error={errors.bio?.residence_state}
-          />
-          <FormInput
-            label="Area"
-            placeholder="Enter Area"
-            icon={FaMapPin}
-            register={register("bio.area", { required: "Required" })}
-            error={errors.bio?.area}
-          />
-          <FormInput
-            label="Bethel"
-            placeholder="Enter Bethel"
-            icon={FaHome}
-            register={register("bio.bethel", { required: "Required" })}
-            error={errors.bio?.bethel}
-          />
-          <FormInput
-            optional
-            label="Zone"
-            placeholder="Optional"
-            icon={FaMapPin}
-            register={register("bio.zone")}
-            error={errors.bio?.zone}
-          />
-          <Controller
-            name="bio.origin_state"
-            control={control}
-            rules={{ required: "Required" }}
-            render={({ field, fieldState: { error } }) => (
-              <Dropdown
-                isError={!!error || !!stateError}
-                label="State of Origin"
-                placeholder="Select State"
-                items={states}
-                displayValueKey="name"
-                errorMsg={error?.message || stateError || ""}
-                onSelect={(item) => {
-                  field.onChange(item.name.toString());
-                  setSelectedStateId(item.id.toString());
-                  setValue("bio.lga", "");
-                }}
-                value={field.value}
-                icon={FaMapPin}
-                loading={isLoadingStates}
-                disabled={isLoadingStates || !!stateError}
-              />
-            )}
-          />
-          <Controller
-            name="bio.lga"
-            control={control}
-            rules={{ required: "Required" }}
-            render={({ field, fieldState: { error } }) => (
-              <Dropdown
-                isError={!!error || !!lgaError}
-                label="LGA"
-                placeholder="Select LGA"
-                items={lgas}
-                displayValueKey="name"
-                errorMsg={error?.message || lgaError || ""}
-                onSelect={(item) => field.onChange(item.name.toString())}
-                value={field.value}
-                icon={FaMapPin}
-                loading={isLoadingLgas}
-                disabled={
-                  isLoadingLgas || !selectedStateId || lgas.length === 0
-                }
-              />
-            )}
-          />
+
+          {renderDropdown(
+            "origin_state",
+            "State of Origin",
+            states as unknown as DropdownOption[],
+            FaMapPin,
+            {
+              error: stateError,
+              loading: isLoadingStates,
+              disabled: isLoadingStates,
+              onChange: (item) => {
+                setSelectedStateId(item?.id as unknown as string);
+                setValue("bio.origin_state", item.name);
+                setValue("bio.lga", "");
+              },
+            }
+          )}
+
+          {renderDropdown(
+            "lga",
+            "LGA",
+            lgas as unknown as DropdownOption[],
+            FaMapPin,
+            {
+              error: lgaError,
+              loading: isLoadingLgas,
+              disabled: selectedStateId === "" || isLoadingLgas,
+              onChange: (item) => {
+                setValue("bio.lga", item.name);
+              },
+            }
+          )}
         </div>
       </section>
 
-      {/* Additional Information */}
+      {/* Additional Info */}
       <section className="space-y-6">
-        <h2 className="font-semibold text-lg text-gray-700">
+        <h2 className="font-semibold text-lg text-gray-800">
           Additional Information
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Controller
-            name="bio.priest_status"
-            control={control}
-            rules={{ required: "Required" }}
-            render={({ field, fieldState: { error } }) => (
-              <Dropdown
-                isError={!!error}
-                label="Priest Status"
-                placeholder="Select Status"
-                items={priestStatusOptions}
-                displayValueKey="name"
-                errorMsg={error?.message}
-                onSelect={(item) => field.onChange(item.id)}
-                value={field.value}
-                icon={FaCross}
-              />
-            )}
-          />
+          {renderDropdown(
+            "priest_status",
+            "Priest Status",
+            priestStatusOptions,
+            FaCross
+          )}
           <FormInput
             optional
             label="Hobbies"
@@ -468,7 +436,7 @@ function PersonalInfo() {
 
       {/* Account Details */}
       <section className="space-y-6">
-        <h2 className="font-semibold text-lg text-gray-700">Account Details</h2>
+        <h2 className="font-semibold text-lg text-gray-800">Account Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormInput
             label="Password"
@@ -476,8 +444,8 @@ function PersonalInfo() {
             type="password"
             icon={FaLock}
             register={register("bio.password", {
-              required: "Required",
-              minLength: { value: 6, message: "At least 6 characters" },
+              required: "Password is required",
+              minLength: { value: 6, message: "Must be at least 6 characters" },
             })}
             error={errors.bio?.password}
           />
@@ -487,7 +455,7 @@ function PersonalInfo() {
             type="password"
             icon={FaLock}
             register={register("bio.confirm_password", {
-              required: "Required",
+              required: "Confirm password is required",
               validate: (val) => val === password || "Passwords do not match",
             })}
             error={errors.bio?.confirm_password}
@@ -495,7 +463,6 @@ function PersonalInfo() {
         </div>
       </section>
 
-      {/* Submit */}
       <Button
         disabled={isSubmitting || isLoadingStates || isLoadingLgas}
         textSize="sm"

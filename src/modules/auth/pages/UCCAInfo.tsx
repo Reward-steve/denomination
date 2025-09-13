@@ -15,7 +15,6 @@ import { Loader } from "../../../components/ui/Loader";
 import { Dropdown } from "../../../components/ui/Dropdown";
 import { CheckboxField } from "../components/CheckBoxField";
 import { FileUploadField } from "../components/FileUploadfield";
-import { DropdownField } from "../components/UCCADropdown";
 
 // Icons
 import { FaHome, FaCalendar } from "react-icons/fa";
@@ -61,6 +60,7 @@ export default function UCCAInfo() {
   // Watchers for conditional fields
   const inducted = watch("bio.inducted");
   const promotionEvidence = watch("bio.promotion_method");
+  console.log(inducted);
 
   /** Mark this as Step 4 */
   useEffect(() => {
@@ -79,9 +79,10 @@ export default function UCCAInfo() {
           (pos: Position) => pos.is_enabled === "1"
         );
 
+        // ✅ Normalize ids to string
         setPositions(
           enabled!.map((pos: Position) => ({
-            id: pos.id.toString(),
+            id: String(pos.id),
             name: pos.name,
           }))
         );
@@ -106,12 +107,13 @@ export default function UCCAInfo() {
           ...formData.bio,
           inducted: formData.bio.inducted,
         },
-        ucca_position: formData.ucca_position || [],
+        // ✅ Convert string ids back to numbers
+        ucca_position: (formData.ucca_position || []).map((id) => Number(id)),
       };
-
+      console.log(payload);
       updateData(payload);
       toast.success("UCCA details saved!");
-      navigate("/auth/prev-position"); // Step 5
+      navigate("/auth/prev-position");
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "An unexpected error occurred."
@@ -148,12 +150,22 @@ export default function UCCAInfo() {
             displayValueKey="name"
             icon={FaCross}
             size="big"
-            value={field.value}
-            onSelect={(item) => field.onChange(item.id)} // send ID
+            // ✅ Match selected ids (string[]) with dropdown options
+            value={positions.filter((opt) =>
+              (field.value || []).includes(opt.id as unknown as number)
+            )}
+            onSelect={(selected) => {
+              if (Array.isArray(selected)) {
+                field.onChange(selected.map((item) => item.id));
+              } else {
+                field.onChange([]);
+              }
+            }}
             isError={!!error || !!positionError}
             errorMsg={error?.message || positionError || ""}
             loading={loadingPositions}
             disabled={loadingPositions || !!positionError}
+            multiple
           />
         )}
       />
@@ -174,13 +186,22 @@ export default function UCCAInfo() {
         name="bio.promotion_method"
         control={control}
         rules={{ required: "Promotion evidence is required" }}
-        render={({ field }) => (
-          <DropdownField
-            field={field}
+        render={({ field, fieldState: { error } }) => (
+          <Dropdown
             label="Evidence of Promotion"
             items={PROMOTION_EVIDENCE as DropdownOption[]}
+            icon={FaCross}
+            size="big"
+            value={
+              PROMOTION_EVIDENCE.find((opt) => opt.name === field.value) as
+                | DropdownOption
+                | undefined
+            }
+            onSelect={(selected) => field.onChange(selected?.name)}
+            isError={!!error}
+            errorMsg={error?.message || ""}
+            disabled={!!error}
             displayValueKey="name"
-            error={errors?.bio?.promotion_method?.message}
           />
         )}
       />

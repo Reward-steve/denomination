@@ -20,6 +20,7 @@ import { FaHome } from "react-icons/fa";
 // Types & Constants
 import type { PersonalInfoFormData } from "../../../types/auth.types";
 import { relationships } from "../constant";
+import { MdFamilyRestroom } from "react-icons/md";
 
 /**
  * Next of Kin Information Page
@@ -105,7 +106,7 @@ export default function NOKInfo() {
         name="nok.0.relationship"
         control={control}
         rules={{ required: "Relationship is required" }}
-        render={({ field }) => (
+        render={({ field, fieldState: { error } }) => (
           <Dropdown
             isError={!!errors?.nok?.[0]?.relationship}
             label="Relationship"
@@ -113,9 +114,13 @@ export default function NOKInfo() {
             items={relationships}
             displayValueKey="name"
             size="big"
-            errorMsg={errors?.nok?.[0]?.relationship?.message}
-            onSelect={(item) => field.onChange(item.name)}
-            value={field.value}
+            errorMsg={error?.message}
+            onSelect={(item) => {
+              if (!item || Array.isArray(item)) return;
+              field.onChange(item.name);
+            }}
+            icon={MdFamilyRestroom}
+            value={relationships.find((item) => item.name === field.value)}
           />
         )}
       />

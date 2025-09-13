@@ -1,10 +1,15 @@
 import { apiRequest } from "../../../services/apiResquest";
-import type { LGA, Position, States, User } from "../../../types/auth.types";
+import type {
+  LGA,
+  PersonalInfoFormData,
+  Position,
+  States,
+  User,
+} from "../../../types/auth.types";
 import { buildFormData } from "../../../utils/appHelpers";
 
 export const createUCCAUser = async (
-  payload: any,
-  photo?: File
+  payload: PersonalInfoFormData
 ): Promise<{
   success: boolean;
   message: string;
@@ -12,15 +17,14 @@ export const createUCCAUser = async (
 }> => {
   const formData = new FormData();
   buildFormData(formData, payload);
-  if (photo) {
-    formData.append("photo", photo);
-  }
+
   return await apiRequest("users/create", "POST", formData, "no");
 };
 
-export const loginApi = async (
-  payload: any
-): Promise<{
+export const loginApi = async (payload: {
+  phone: string;
+  password: string;
+}): Promise<{
   success: boolean;
   message: string;
   data: { token: string; id: string; user: User } | null;

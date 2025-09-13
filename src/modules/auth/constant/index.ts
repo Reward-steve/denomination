@@ -1,4 +1,6 @@
-export const PROMOTION_EVIDENCE: { id: string; name: string }[] = [
+import type { DropdownOption } from "../../../types/auth.types";
+
+export const PROMOTION_EVIDENCE: DropdownOption[] = [
   { id: "1", name: "Father's Pronouncement" },
   { id: "2", name: "Father's Letter" },
 ];

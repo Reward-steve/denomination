@@ -1,7 +1,7 @@
 // types/auth.types.ts
 import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
 import type { IconType } from "react-icons";
-import type { Ref } from "react";
+import type { ComponentPropsWithoutRef } from "react";
 
 /* ----------------------------------------
  * Supporting Types
@@ -102,7 +102,7 @@ export type PersonalInfoFormData = {
   nok: NextOfKin[];
   skills: string[];
   ucca_position: number[];
-  photo?: File;
+  photo?: File; // optional profile photo upload;
   user_id?: string | number; // only required for update flow
 };
 
@@ -190,19 +190,13 @@ export function buildPersonalInfoPayload(
 /* ----------------------------------------
  * Reusable form component props
  * --------------------------------------*/
-export type FormInputProps = {
-  maxLength?: number;
-  id?: string;
-  type?: string;
+export type FormInputProps = ComponentPropsWithoutRef<"input"> & {
   label?: string;
-  placeholder?: string;
   icon?: IconType;
   register?: UseFormRegisterReturn;
   error?: FieldError;
   styles?: Record<string, string>;
-  className?: string;
-  ref?: Ref<HTMLInputElement>;
-  [key: string]: any;
+  optional?: boolean;
 };
 
 export interface ImageUploaderProps {
@@ -226,7 +220,7 @@ export interface UserDetails {
 }
 
 export interface DropdownOption {
-  id: string;
+  id: number | string;
   name: string;
 }
 
