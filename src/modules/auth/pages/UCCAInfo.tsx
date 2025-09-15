@@ -13,7 +13,7 @@ import FormInput from "../../../components/ui/FormInput";
 import { Button } from "../../../components/ui/Button";
 import { Loader } from "../../../components/ui/Loader";
 import { Dropdown } from "../../../components/ui/Dropdown";
-import { CheckboxField } from "../components/CheckBoxField";
+import { CheckboxField } from "../../../components/ui/CheckBoxField";
 import { FileUploadField } from "../components/FileUploadfield";
 
 // Icons
