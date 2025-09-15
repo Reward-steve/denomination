@@ -5,7 +5,7 @@ export interface EventModalProps {
   newEvent: Event;
   setNewEvent: (value: React.SetStateAction<Event>) => void;
   formError?: string | null;
-  handleAddEvent: () => void;
+  handleAddEvent: (event: Event) => void;
   setShowModal: (value: React.SetStateAction<boolean>) => void;
   firstInputRef?: React.RefObject<HTMLInputElement | null>;
 }
@@ -61,6 +61,7 @@ export const initialEvents: Event[] = [
 
 // Dropdown options
 export const scheduleOptions = [
+  { id: "daily", name: "daily" },
   { id: "weekly", name: "Weekly" },
   { id: "monthly", name: "Monthly" },
   { id: "yearly", name: "Yearly" },
@@ -75,11 +76,4 @@ export const dayOptions = [
   { id: "friday", name: "Friday" },
   { id: "saturday", name: "Saturday" },
   { id: "sunday", name: "Sunday" },
-];
-
-// Fixed times mapped to backend "HH:MM:SS"
-export const timeOptions = [
-  { id: "08:00:00", name: "Morning (08:00 AM)" },
-  { id: "13:00:00", name: "Afternoon (01:00 PM)" },
-  { id: "18:00:00", name: "Evening (06:00 PM)" },
 ];

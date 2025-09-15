@@ -1,90 +1,55 @@
-import { useEffect, useRef, useState } from "react";
+import { useState, useCallback } from "react";
+import ReactDOM from "react-dom";
 import { Button } from "../../../components/ui/Button";
 import { FaCalendarPlus, FaCalendarAlt } from "react-icons/fa";
 import DashboardLayout from "../components/Layout";
 import { initialEvents, type Event } from "../types";
 import { EventCard } from "../components/EventCard";
-import { EventModal } from "../components/EventModal";
+import { EventModalWrapper } from "../components/EventModal";
+import { useEventModal } from "../hook/useEventModal";
 
-/* ---------------- Page ---------------- */
 export default function Events() {
-  // initial demo events
   const [events, setEvents] = useState<Event[]>(initialEvents);
 
-  // modal state + form model
-  const [showModal, setShowModal] = useState(false);
-
-  // Define a reusable empty event object
-  const emptyEvent: Event = {
-    id: 0,
-    name: "",
-    venue: "",
-    descr: "",
-    date: "",
-    time: "",
-    recurrent: false,
-    schedule: { period: "", day: "" },
-  };
-
-  // State
-  const [newEvent, setNewEvent] = useState<Event>(emptyEvent);
-
-  // modal ref for overlay click handling
-  const modalRef = useRef<HTMLDivElement | null>(null);
-
-  /* Prevent body scroll when modal opens */
-  useEffect(() => {
-    document.body.style.overflow = showModal ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [showModal]);
-
-  /* Close modal with Escape key */
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setShowModal(false);
-    };
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
+  const handleAddEvent = useCallback((event: Event) => {
+    setEvents((prev) =>
+      [...prev.filter((e) => e.id !== event.id), event].sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return a.time.localeCompare(b.time);
+      })
+    );
   }, []);
 
-  /* ---------------- Handlers ---------------- */
-  const handleAddEvent = () => {
-    if (!newEvent) return;
+  const {
+    modalRef,
+    showModal,
+    newEvent,
+    setNewEvent,
+    openModal,
+    closeModal,
+    submitEvent,
+  } = useEventModal({
+    handleAddEvent,
+  });
 
-    if (newEvent.id) {
-      // update existing event
-      setEvents((prev) =>
-        prev.map((ev) => (ev.id === newEvent.id ? newEvent : ev))
-      );
-    } else {
-      // create new event
-      const next: Event = { ...newEvent, id: Date.now() };
-      setEvents((prev) => [next, ...prev]); // newest first
-    }
-
-    setNewEvent(emptyEvent);
-    setShowModal(false);
-  };
-
-  const handleDelete = (id: number) => {
+  const handleDeleteEvent = useCallback((id: number) => {
     if (!confirm("Are you sure you want to delete this event?")) return;
     setEvents((prev) => prev.filter((e) => e.id !== id));
-  };
+  }, []);
 
-  const handleEdit = (event: Event) => {
-    setNewEvent(event);
-    setShowModal(true);
-  };
+  // const handleEditEvent = useCallback(
+  //   (event: Event) => openModal(event),
+  //   [openModal]
+  // );
 
-  const handleModalClick = (e: React.MouseEvent) => {
-    if (e.target === modalRef.current) {
-      setShowModal(false);
-    }
-  };
+  const handleEditEvent = useCallback(
+    (event: Event) => {
+      setNewEvent(event);
+      openModal(event);
+    },
+    [setNewEvent, openModal]
+  );
 
-  /* ---------------- Render ---------------- */
   return (
     <DashboardLayout>
       <main className="max-w-6xl mx-auto space-y-8 lg:py-8 py-6">
@@ -94,32 +59,17 @@ export default function Events() {
             <FaCalendarAlt className="text-accent text-2xl" />
             <h1 className="text-xl sm:text-2xl font-bold text-text">Events</h1>
           </div>
-
-          <div className="flex gap-3">
-            <Button
-              variant="primary"
-              textSize="xs"
-              className="gap-2"
-              onClick={() => {
-                setNewEvent({
-                  id: 0,
-                  name: "",
-                  venue: "",
-                  descr: "",
-                  date: "",
-                  time: "",
-                  recurrent: false,
-                  schedule: { period: "", day: "" },
-                });
-                setShowModal(true);
-              }}
-            >
-              <FaCalendarPlus /> Add Event
-            </Button>
-          </div>
+          <Button
+            variant="primary"
+            textSize="xs"
+            className="gap-2"
+            onClick={() => openModal()}
+          >
+            <FaCalendarPlus /> Add Event
+          </Button>
         </section>
 
-        {/* Events grid */}
+        {/* Events Grid */}
         <section>
           {events.length === 0 ? (
             <div className="py-16 text-center">
@@ -133,26 +83,29 @@ export default function Events() {
                 <EventCard
                   key={ev.id}
                   event={ev}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
+                  onEdit={handleEditEvent}
+                  onDelete={handleDeleteEvent}
                 />
               ))}
             </div>
           )}
         </section>
-      </main>
 
-      {/* Modal — Add / Edit Event */}
-      {showModal && newEvent && (
-        <EventModal
-          modalRef={modalRef}
-          handleModalClick={handleModalClick}
-          newEvent={newEvent}
-          setNewEvent={setNewEvent}
-          handleAddEvent={handleAddEvent}
-          setShowModal={setShowModal}
-        />
-      )}
+        {/* Modal Portal */}
+        {showModal &&
+          ReactDOM.createPortal(
+            <EventModalWrapper
+              modalRef={modalRef}
+              handleModalClick={(e) => {
+                if (e.target === modalRef.current) closeModal();
+              }}
+              event={newEvent}
+              submitEvent={submitEvent}
+              closeModal={closeModal}
+            />,
+            document.body
+          )}
+      </main>
     </DashboardLayout>
   );
 }
