@@ -3,7 +3,7 @@ import { GoChevronDown } from "react-icons/go";
 import type { IconType } from "react-icons";
 import type { DropdownOption } from "../../types/auth.types";
 import { Loader } from "./Loader";
-import { CheckboxField } from "../../modules/auth/components/CheckBoxField";
+import { CheckboxField } from "./CheckBoxField";
 
 /* ==============================
    🔹 Base Dropdown Props

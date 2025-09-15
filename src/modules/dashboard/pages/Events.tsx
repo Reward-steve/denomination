@@ -13,27 +13,28 @@ export default function Events() {
 
   // modal state + form model
   const [showModal, setShowModal] = useState(false);
-  const [newEvent, setNewEvent] = useState<Event>({
-    id: 0,
-    title: "",
-    date: "",
-    description: "",
-  });
-  const [formError, setFormError] = useState<string | null>(null);
 
-  // refs for accessibility & focus management
-  const firstInputRef = useRef<HTMLInputElement | null>(null);
+  // Define a reusable empty event object
+  const emptyEvent: Event = {
+    id: 0,
+    name: "",
+    venue: "",
+    descr: "",
+    date: "",
+    time: "",
+    recurrent: false,
+    schedule: { period: "", day: "" },
+  };
+
+  // State
+  const [newEvent, setNewEvent] = useState<Event>(emptyEvent);
+
+  // modal ref for overlay click handling
   const modalRef = useRef<HTMLDivElement | null>(null);
 
-  /* Focus first input when modal opens and prevent body scroll */
+  /* Prevent body scroll when modal opens */
   useEffect(() => {
-    if (showModal) {
-      firstInputRef.current?.focus();
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-
+    document.body.style.overflow = showModal ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
@@ -50,42 +51,34 @@ export default function Events() {
 
   /* ---------------- Handlers ---------------- */
   const handleAddEvent = () => {
-    // basic validation
-    if (!newEvent.title.trim()) {
-      setFormError("Title is required.");
-      return;
-    }
-    if (!newEvent.date) {
-      setFormError("Date is required.");
-      return;
+    if (!newEvent) return;
+
+    if (newEvent.id) {
+      // update existing event
+      setEvents((prev) =>
+        prev.map((ev) => (ev.id === newEvent.id ? newEvent : ev))
+      );
+    } else {
+      // create new event
+      const next: Event = { ...newEvent, id: Date.now() };
+      setEvents((prev) => [next, ...prev]); // newest first
     }
 
-    const next: Event = {
-      ...newEvent,
-      id: Date.now(), // simple unique id
-      title: newEvent.title.trim(),
-    };
-
-    setEvents((prev) => [next, ...prev]); // newest first
-    setNewEvent({ id: 0, title: "", date: "", description: "" });
-    setFormError(null);
+    setNewEvent(emptyEvent);
     setShowModal(false);
   };
 
   const handleDelete = (id: number) => {
-    // naive delete with confirm (you can replace with nicer UI)
     if (!confirm("Are you sure you want to delete this event?")) return;
     setEvents((prev) => prev.filter((e) => e.id !== id));
   };
 
   const handleEdit = (event: Event) => {
-    // Simple "edit in modal" behavior: populate form and open modal
     setNewEvent(event);
     setShowModal(true);
   };
 
   const handleModalClick = (e: React.MouseEvent) => {
-    // close modal when clicking on the overlay background
     if (e.target === modalRef.current) {
       setShowModal(false);
     }
@@ -108,8 +101,16 @@ export default function Events() {
               textSize="xs"
               className="gap-2"
               onClick={() => {
-                setNewEvent({ id: 0, title: "", date: "", description: "" });
-                setFormError(null);
+                setNewEvent({
+                  id: 0,
+                  name: "",
+                  venue: "",
+                  descr: "",
+                  date: "",
+                  time: "",
+                  recurrent: false,
+                  schedule: { period: "", day: "" },
+                });
                 setShowModal(true);
               }}
             >
@@ -142,16 +143,14 @@ export default function Events() {
       </main>
 
       {/* Modal — Add / Edit Event */}
-      {showModal && (
+      {showModal && newEvent && (
         <EventModal
           modalRef={modalRef}
           handleModalClick={handleModalClick}
           newEvent={newEvent}
           setNewEvent={setNewEvent}
-          formError={formError}
           handleAddEvent={handleAddEvent}
           setShowModal={setShowModal}
-          firstInputRef={firstInputRef}
         />
       )}
     </DashboardLayout>
