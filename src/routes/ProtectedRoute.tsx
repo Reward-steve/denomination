@@ -1,10 +1,9 @@
-import { useEffect } from "react";
+import { useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { Navigate } from "react-router-dom";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  onRequireLogin?: () => void; // optional if you want to show a modal
+  onRequireLogin?: () => void; // optional modal
 }
 
 export default function ProtectedRoute({
@@ -12,16 +11,15 @@ export default function ProtectedRoute({
   onRequireLogin,
 }: ProtectedRouteProps) {
   const { isAuthenticated } = useAuth();
-
-  useEffect(() => {
-    if (!isAuthenticated && onRequireLogin) {
-      onRequireLogin(); // optionally open a login modal
-    }
-  }, [isAuthenticated, onRequireLogin]);
+  const location = useLocation();
 
   if (!isAuthenticated) {
-    // 🚀 Redirect instead of blank page
-    return <Navigate to="/auth" replace />;
+    if (onRequireLogin) {
+      onRequireLogin(); // open modal if provided
+      return null; // don't render children
+    }
+    // Redirect to auth page and save intended path
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;
