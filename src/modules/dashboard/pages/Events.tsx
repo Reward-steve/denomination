@@ -37,11 +37,6 @@ export default function Events() {
     setEvents((prev) => prev.filter((e) => e.id !== id));
   }, []);
 
-  // const handleEditEvent = useCallback(
-  //   (event: Event) => openModal(event),
-  //   [openModal]
-  // );
-
   const handleEditEvent = useCallback(
     (event: Event) => {
       setNewEvent(event);
