@@ -19,7 +19,7 @@ export default function Form({
   const { step } = useRegistration();
 
   return (
-    <div className="flex flex-col py-6 px-4 text-text animate-fade">
+    <div className="flex flex-col py-6 px-4 text-text animate-slide-up">
       <div className="flex-grow flex items-center justify-center mb-4 sm:mt-28 mt-10">
         <form
           onSubmit={onSubmit}

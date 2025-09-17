@@ -26,16 +26,21 @@ interface FormData {
 export function Login({ showLogin, handleCloseLogin }: ModalProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const modalRef = useRef<HTMLDivElement>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>({ defaultValues: { phoneNumber: "", password: "" } });
+  } = useForm<FormData>({
+    defaultValues: { phoneNumber: "", password: "" },
+  });
 
-  const from = location.state?.from?.pathname || "/dashboard";
+  const from =
+    location.state?.from?.pathname ||
+    localStorage.getItem("prevRoute") ||
+    "/dashboard";
 
   const onSubmit = async (formData: FormData) => {
     try {
@@ -50,26 +55,32 @@ export function Login({ showLogin, handleCloseLogin }: ModalProps) {
       }
 
       login(res.data.token, res.data.user as User);
+
       toast.success(res.message || "Logged in successfully!");
       handleCloseLogin();
+
+      // ✅ Redirect to stored route or fallback
+      localStorage.removeItem("prevRoute");
       navigate(from, { replace: true });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unexpected error.");
     }
   };
 
-  // Close on ESC / tab trapping
+  // Handle ESC + focus trap
   useEffect(() => {
     if (!showLogin) return;
 
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") handleCloseLogin();
     };
+
     const handleTab = (e: KeyboardEvent) => {
       const focusable = modalRef.current?.querySelectorAll(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
       if (!focusable) return;
+
       const first = focusable[0] as HTMLElement;
       const last = focusable[focusable.length - 1] as HTMLElement;
 
@@ -95,12 +106,12 @@ export function Login({ showLogin, handleCloseLogin }: ModalProps) {
     };
   }, [showLogin, handleCloseLogin]);
 
-  if (!showLogin || isAuthenticated) return null;
+  if (!showLogin) return null;
 
   return ReactDOM.createPortal(
     <div
       ref={modalRef}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4 sm:px-0"
       onClick={(e) => {
         if (e.target === modalRef.current) handleCloseLogin();
       }}
@@ -109,9 +120,11 @@ export function Login({ showLogin, handleCloseLogin }: ModalProps) {
     >
       <div
         className={clsx(
-          "bg-surface rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl transition-all duration-500 transform scale-100 animate-fade"
+          "relative w-full max-w-md bg-surface rounded-2xl shadow-2xl",
+          "p-6 sm:p-8 animate-fade transition-all duration-500"
         )}
       >
+        {/* Close button */}
         <button
           onClick={handleCloseLogin}
           aria-label="Close login form"
@@ -120,62 +133,114 @@ export function Login({ showLogin, handleCloseLogin }: ModalProps) {
           <FaTimes className="h-5 w-5" />
         </button>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="space-y-6 py-6"
-          noValidate
-        >
-          <header className="text-center">
-            <h2 className="text-xl font-semibold text-text">Login</h2>
-            <p className="text-sm text-text-placeholder mt-1">
-              Enter your phone number and password to continue.
+        {isAuthenticated ? (
+          // 🔹 Already logged in view
+          <div className="text-center space-y-6">
+            <h2 className="text-2xl font-bold text-text">
+              You’re already logged in
+            </h2>
+            <p className="text-sm text-text-placeholder">
+              Signed in as{" "}
+              <span className="font-medium">{user?.primary_phone}</span>
             </p>
-          </header>
-
-          <FormInput
-            label="Phone Number"
-            placeholder="e.g., 08012345678"
-            icon={FaPhone}
-            register={register("phoneNumber", {
-              required: "Phone number is required",
-              pattern: {
-                value: /^[0-9]+$/,
-                message: "Please enter a valid phone number",
-              },
-            })}
-            error={errors.phoneNumber}
-          />
-
-          <FormInput
-            label="Password"
-            placeholder="Enter your password"
-            type="password"
-            icon={FaLock}
-            register={register("password", {
-              required: "Password is required",
-            })}
-            error={errors.password}
-          />
-
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            variant="auth"
-            className="w-full flex items-center justify-center gap-2"
+            <div className="flex flex-col gap-3">
+              <Button
+                variant="auth"
+                onClick={() => {
+                  handleCloseLogin();
+                  navigate("/dashboard");
+                }}
+              >
+                Go to Dashboard
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  handleCloseLogin();
+                  navigate("/dashboard/events");
+                }}
+              >
+                View Events
+              </Button>
+            </div>
+          </div>
+        ) : (
+          // 🔹 Normal login form
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col space-y-6"
+            noValidate
           >
-            {isSubmitting ? (
-              <>
-                <Loader />
-                <span>Logging in...</span>
-              </>
-            ) : (
-              <>
-                <span>Login</span>
-                <FaArrowRightToBracket className="text-sm" />
-              </>
-            )}
-          </Button>
-        </form>
+            {/* Header */}
+            <header className="text-center">
+              <h2 className="text-2xl font-bold text-text">Welcome Back</h2>
+              <p className="text-sm text-text-placeholder mt-1">
+                Log in with your phone number and password to continue.
+              </p>
+            </header>
+
+            {/* Inputs */}
+            <FormInput
+              label="Phone Number"
+              placeholder="e.g., 08012345678"
+              icon={FaPhone}
+              register={register("phoneNumber", {
+                required: "Phone number is required",
+                pattern: {
+                  value: /^[0-9]+$/,
+                  message: "Please enter a valid phone number",
+                },
+              })}
+              error={errors.phoneNumber}
+            />
+
+            <FormInput
+              label="Password"
+              placeholder="Enter your password"
+              type="password"
+              icon={FaLock}
+              register={register("password", {
+                required: "Password is required",
+              })}
+              error={errors.password}
+            />
+
+            {/* Submit */}
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              variant="auth"
+              className="w-full flex items-center justify-center gap-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader />
+                  <span>Logging in...</span>
+                </>
+              ) : (
+                <>
+                  <span>Login</span>
+                  <FaArrowRightToBracket className="text-sm" />
+                </>
+              )}
+            </Button>
+
+            {/* Footer: Signup link */}
+            <footer className="text-center text-sm text-text-placeholder">
+              Don’t have an account?{" "}
+              <button
+                type="button"
+                className="text-accent font-medium hover:underline"
+                onClick={() => {
+                  handleCloseLogin();
+                  navigate("/auth");
+                }}
+              >
+                Sign up
+              </button>
+            </footer>
+          </form>
+        )}
       </div>
     </div>,
     document.body

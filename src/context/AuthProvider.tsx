@@ -1,12 +1,16 @@
 import { useState, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import type { User } from "../types/auth.types";
 import { AuthContext } from "./AuthContext";
 import { getFromStore, saveInStore } from "../utils/appHelpers";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  // Initialize token and user from encrypted localStorage
   const USER_KEY = import.meta.env.VITE_USER_KEY;
   const TOKEN_KEY = import.meta.env.VITE_TOKEN_KEY;
+  const PREV_ROUTE_KEY = "prevRoute";
+
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [token, setToken] = useState<string | null>(() =>
     getFromStore<string>(TOKEN_KEY, "local")
@@ -17,7 +21,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const isAuthenticated = !!token;
 
-  // Login updates state and encrypted storage
+  // ✅ Login: only updates state & storage (no redirect here)
   const login = useCallback((newToken: string, newUser: User) => {
     setToken(newToken);
     setUser(newUser);
@@ -25,22 +29,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     saveInStore(TOKEN_KEY, newToken, "local");
     saveInStore(USER_KEY, newUser, "local");
 
-    // Keep sessionStorage for quick runtime access if needed
     sessionStorage.setItem(TOKEN_KEY, newToken);
     sessionStorage.setItem(USER_KEY, JSON.stringify(newUser));
   }, []);
 
-  // Logout clears both state and storage
+  // ✅ Logout: clears storage, saves last route, redirects home
   const logout = useCallback(() => {
+    if (isAuthenticated && location.pathname !== "/") {
+      localStorage.setItem(PREV_ROUTE_KEY, location.pathname);
+    }
+
     setToken(null);
     setUser(null);
 
     sessionStorage.removeItem(TOKEN_KEY);
     sessionStorage.removeItem(USER_KEY);
-
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
-  }, []);
+
+    navigate("/", { replace: true });
+  }, [isAuthenticated, location.pathname, navigate]);
 
   return (
     <AuthContext.Provider
