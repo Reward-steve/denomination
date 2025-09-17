@@ -255,7 +255,9 @@ function PersonalInfo() {
 
       {/* Basic Details */}
       <section className="space-y-6">
-        <h2 className="font-semibold text-lg text-gray-800">Basic Details</h2>
+        <h2 className="font-semibold text-lg text-text-placeholder">
+          Basic Details
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormInput
             label="First Name"
@@ -305,7 +307,7 @@ function PersonalInfo() {
 
       {/* Contact Information */}
       <section className="space-y-6">
-        <h2 className="font-semibold text-lg text-gray-800">
+        <h2 className="font-semibold text-lg text-text-placeholder">
           Contact Information
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -355,7 +357,7 @@ function PersonalInfo() {
 
       {/* Geographic Information */}
       <section className="space-y-6">
-        <h2 className="font-semibold text-lg text-gray-800">
+        <h2 className="font-semibold text-lg text-text-placeholder">
           Geographic Information
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -410,7 +412,7 @@ function PersonalInfo() {
 
       {/* Additional Info */}
       <section className="space-y-6">
-        <h2 className="font-semibold text-lg text-gray-800">
+        <h2 className="font-semibold text-lg text-text-placeholder">
           Additional Information
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -433,7 +435,9 @@ function PersonalInfo() {
 
       {/* Account Details */}
       <section className="space-y-6">
-        <h2 className="font-semibold text-lg text-gray-800">Account Details</h2>
+        <h2 className="font-semibold text-lg text-text-placeholder">
+          Account Details
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormInput
             label="Password"

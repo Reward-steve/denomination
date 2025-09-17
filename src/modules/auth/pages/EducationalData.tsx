@@ -134,7 +134,9 @@ export function EducationData() {
       onSubmit={handleSubmit(onSubmit)}
     >
       {/* Education Section */}
-      <h2 className="text-lg font-semibold mb-3">Education</h2>
+      <h2 className="text-lg font-semibold mb-3 text-text-placeholder">
+        Education
+      </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormInput
           label="Certificate"
@@ -160,8 +162,10 @@ export function EducationData() {
 
       {/* Skills Section */}
       <div className="mt-8">
-        <h2 className="text-lg font-semibold mb-3">Skills</h2>
-        <p className="text-sm text-muted mb-2 text-text-placeholder">
+        <h2 className="text-lg font-semibold mb-3 text-text-placeholder">
+          Skills
+        </h2>
+        <p className="text-xs text-muted mb-2 text-text-placeholder">
           Add your skills one by one, press <strong>Enter</strong> or paste a
           list separated by commas.
         </p>

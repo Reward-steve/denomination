@@ -1,11 +1,9 @@
-import type { SubmitHandler } from "react-hook-form";
-import type { FormEvent } from "react";
+import type { ReactNode, FormEventHandler } from "react";
 import { useRegistration } from "../../hooks/useReg";
 
 interface FormProps {
-  to?: string;
-  onSubmit: SubmitHandler<FormEvent>;
-  children: React.ReactNode;
+  onSubmit: FormEventHandler<HTMLFormElement>;
+  children: ReactNode;
   pageTitle?: string;
   title?: string;
   description?: string;
@@ -21,7 +19,7 @@ export default function Form({
   const { step } = useRegistration();
 
   return (
-    <div className="flex flex-col py-6 text-text animate-fade">
+    <div className="flex flex-col py-6 px-4 text-text animate-fade">
       <div className="flex-grow flex items-center justify-center mb-4 sm:mt-28 mt-10">
         <form
           onSubmit={onSubmit}
@@ -46,20 +44,24 @@ export default function Form({
               </div>
             </div>
           ) : (
-            <>
-              {pageTitle && (
-                <header className="text-center">
-                  <h2 className="text-2xl font-bold text-text">{pageTitle}</h2>
-                </header>
-              )}
-            </>
+            pageTitle && (
+              <header className="text-center">
+                <h2 className="text-2xl font-bold text-text">{pageTitle}</h2>
+              </header>
+            )
           )}
 
           {/* Header */}
           {(title || description) && (
             <header className="text-center py-4">
-              <h2 className="text-xl font-semibold text-text mb-1">{title}</h2>
-              <p className="text-sm text-text-placeholder">{description}</p>
+              {title && (
+                <h2 className="text-xl font-semibold text-text mb-1">
+                  {title}
+                </h2>
+              )}
+              {description && (
+                <p className="text-sm text-text-placeholder">{description}</p>
+              )}
             </header>
           )}
 

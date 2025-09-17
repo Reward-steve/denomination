@@ -80,7 +80,7 @@ const getRecurrenceText = (event: Event): string => {
       return "Repeats monthly";
     case "yearly":
       return day
-        ? `Repeats yearly on ${day}${monthStr}`
+        ? `Repeats yearly on ${getOrdinalSuffix(Number(day))}${monthStr}`
         : month
         ? `Repeats yearly in ${monthStr}`
         : "Repeats yearly";
