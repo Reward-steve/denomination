@@ -12,6 +12,7 @@ import ReactDOM from "react-dom";
 import clsx from "clsx";
 import { toast } from "react-toastify";
 import type { User } from "../../../types/auth.types";
+import { getFromStore } from "../../../utils/appHelpers";
 
 interface ModalProps {
   showLogin: boolean;
@@ -37,9 +38,11 @@ export function Login({ showLogin, handleCloseLogin }: ModalProps) {
     defaultValues: { phoneNumber: "", password: "" },
   });
 
+  const PREV_ROUTE_KEY = import.meta.env.VITE_PREV_ROUTE_KEY;
+
   const from =
     location.state?.from?.pathname ||
-    localStorage.getItem("prevRoute") ||
+    getFromStore(PREV_ROUTE_KEY, "local") ||
     "/dashboard";
 
   const onSubmit = async (formData: FormData) => {

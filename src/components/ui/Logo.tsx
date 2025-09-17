@@ -4,7 +4,7 @@ import logo from "../../../public/logo.png";
 export default function Logo({ isCollapsed }: { isCollapsed?: boolean }) {
   return (
     <Link
-      to="#"
+      to="/"
       className="flex items-center gap-2 text-lg font-bold text-secondary"
     >
       {!isCollapsed && (

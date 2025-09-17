@@ -7,7 +7,7 @@ import { getFromStore, saveInStore } from "../utils/appHelpers";
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const USER_KEY = import.meta.env.VITE_USER_KEY;
   const TOKEN_KEY = import.meta.env.VITE_TOKEN_KEY;
-  const PREV_ROUTE_KEY = "prevRoute";
+  const PREV_ROUTE_KEY = import.meta.env.VITE_PREV_ROUTE_KEY;
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ✅ Logout: clears storage, saves last route, redirects home
   const logout = useCallback(() => {
     if (isAuthenticated && location.pathname !== "/") {
-      localStorage.setItem(PREV_ROUTE_KEY, location.pathname);
+      saveInStore(PREV_ROUTE_KEY, location.pathname, "local");
     }
 
     setToken(null);
