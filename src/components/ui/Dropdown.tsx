@@ -3,7 +3,7 @@ import { GoChevronDown } from "react-icons/go";
 import type { IconType } from "react-icons";
 import type { DropdownOption } from "../../types/auth.types";
 import { Loader } from "./Loader";
-import { CheckboxField } from "../../modules/auth/components/CheckBoxField";
+import { CheckboxField } from "./CheckBoxField";
 
 /* ==============================
    🔹 Base Dropdown Props
@@ -172,7 +172,7 @@ export function Dropdown<T extends DropdownOption>({
         {/* Input Display */}
         <input
           type="text"
-          className={`bg-surface w-full rounded-xl border transition-colors outline-none pr-9
+          className={`bg-surface w-full text-text-secondary rounded-xl border transition-colors outline-none pr-9
             ${Icon ? "pl-9" : "pl-3"}
             ${inputSize}
             ${
@@ -221,12 +221,12 @@ export function Dropdown<T extends DropdownOption>({
               return (
                 <div
                   key={i}
-                  className={`px-3 py-2 flex items-center gap-2
+                  className={`px-3 py-2 flex items-center gap-2 
                     cursor-pointer
                     ${
                       active
                         ? "bg-primary/10 text-primary font-medium"
-                        : "hover:bg-border"
+                        : "hover:bg-border text-text-secondary"
                     }`}
                   // Only toggle when clicking outside the checkbox
                   onClick={(e) => {

@@ -64,7 +64,7 @@ export default function Header() {
   const handleBack = () => navigate(-1);
 
   return (
-    <nav className="sticky md:top-2 top-0 z-50 bg-background sm:border-none border-b border-border">
+    <nav className="sticky top-0 z-50 bg-background sm:border-none border-b border-border">
       {isMobile ? (
         <MobileHeader
           title={pageTitle}
@@ -180,46 +180,48 @@ function DesktopHeader({
   menuRef,
 }: any) {
   return (
-    <div className="h-14 flex items-center justify-between bg-surface border border-border px-4 rounded-md relative">
-      {/* Search Bar */}
-      <form className="flex-1 max-w-md">
-        <label className="flex items-center gap-2 p-2 border border-border rounded-md w-full bg-smooth">
-          <FaSearch className="text-surface" />
-          <input
-            type="text"
-            placeholder="Search..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 border-none outline-none bg-transparent text-text"
-          />
-        </label>
-      </form>
+    <div className="h-16 flex justify-center items-end w-full">
+      <div className="h-[87%] w-full flex items-center justify-between bg-surface border border-border px-4 rounded-md relative">
+        {/* Search Bar */}
+        <form className="flex-1 max-w-md">
+          <label className="flex items-center gap-2 p-2 border border-border rounded-md w-full bg-smooth">
+            <FaSearch className="text-surface" />
+            <input
+              type="text"
+              placeholder="Search..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="flex-1 border-none outline-none bg-transparent text-text"
+            />
+          </label>
+        </form>
 
-      {/* Right Side */}
-      <div className="flex items-center gap-4 ml-4 relative" ref={menuRef}>
-        <FaBell className="text-primary text-lg cursor-pointer" />
+        {/* Right Side */}
+        <div className="flex items-center gap-4 ml-4 relative" ref={menuRef}>
+          <FaBell className="text-primary text-lg cursor-pointer" />
 
-        <button
-          onClick={() => setMenuOpen((p: boolean) => !p)}
-          className="flex items-center gap-2"
-        >
-          <img
-            src={img}
-            alt="user_profile"
-            className="w-8 h-8 rounded-full object-cover"
-          />
-          <span className="text-sm font-medium text-text">
-            {user?.first_name}
-          </span>
-        </button>
+          <button
+            onClick={() => setMenuOpen((p: boolean) => !p)}
+            className="flex items-center gap-2"
+          >
+            <img
+              src={img}
+              alt="user_profile"
+              className="w-8 h-8 rounded-full object-cover"
+            />
+            <span className="text-sm font-medium text-text">
+              {user?.first_name}
+            </span>
+          </button>
 
-        {menuOpen && (
-          <ProfileMenu
-            theme={theme}
-            toggleTheme={toggleTheme}
-            logout={logout}
-          />
-        )}
+          {menuOpen && (
+            <ProfileMenu
+              theme={theme}
+              toggleTheme={toggleTheme}
+              logout={logout}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

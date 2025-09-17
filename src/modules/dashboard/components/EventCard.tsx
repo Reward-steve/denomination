@@ -1,61 +1,92 @@
 import { MdEdit } from "react-icons/md";
-import { FaTrash } from "react-icons/fa6";
+import { FaTrash, FaClock, FaRepeat } from "react-icons/fa6";
+import { FaMapMarkerAlt, FaCalendarAlt } from "react-icons/fa";
 import { Button } from "../../../components/ui/Button";
-import type { Event } from "../types";
+import type { EventCardProps } from "../types";
+import { formatTimeToAMPM, getRecurrenceText } from "../utils/Helper";
 
-/* ---------------- Event Card ----------------
-   Small, reusable presentational card for an event.
-   Buttons are wired to handlers passed from parent for extensibility.
-*/
-export const EventCard = ({
-  event,
-  onEdit,
-  onDelete,
-}: {
-  event: Event;
-  onEdit: (e: Event) => void;
-  onDelete: (id: number) => void;
-}) => {
+export const EventCard = ({ event, onEdit, onDelete }: EventCardProps) => {
+  /** ---------- Date & Time ---------- */
+  const parsedDate = event.date ? new Date(event.date) : null;
+  const dateString =
+    parsedDate && !isNaN(parsedDate.getTime())
+      ? parsedDate.toLocaleDateString(undefined, {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        })
+      : null;
+
+  const timeString = event.time ? formatTimeToAMPM(event.time) : null;
+  const recurrenceText = getRecurrenceText(event);
+
   return (
     <article
-      className="p-4 rounded-xl bg-surface transition-colors duration-200 hover:shadow-sm hover:bg-surface/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border border-border"
+      className="p-5 rounded-2xl bg-surface border border-border 
+                 hover:border-accent transition duration-200 
+                 space-y-3"
+      role="region"
       aria-labelledby={`event-title-${event.id}`}
     >
-      <div>
-        <h3
-          id={`event-title-${event.id}`}
-          className="text-lg font-semibold text-text"
-        >
-          {event.title}
-        </h3>
-        <p className="text-xs text-text-placeholder">{event.date}</p>
-        {event.description && (
-          <p className="mt-2 text-text-secondary text-sm">
-            {event.description}
+      {/* Title */}
+      <h3
+        id={`event-title-${event.id}`}
+        className="text-lg font-bold text-text truncate"
+      >
+        {event.name || "Untitled Event"}
+      </h3>
+
+      {/* Core Details */}
+      <div className="text-sm text-text-secondary space-y-2">
+        {dateString && (
+          <p className="flex items-center gap-2">
+            <FaCalendarAlt className="text-accent shrink-0" />
+            <span>{dateString}</span>
+          </p>
+        )}
+        {timeString && (
+          <p className="flex items-center gap-2">
+            <FaClock className="text-accent shrink-0" />
+            <span>{timeString}</span>
+          </p>
+        )}
+        {event.venue && (
+          <p className="flex items-center gap-2">
+            <FaMapMarkerAlt className="text-accent shrink-0" />
+            <span>{event.venue}</span>
+          </p>
+        )}
+        {recurrenceText && (
+          <p className="flex items-center gap-2">
+            <FaRepeat className="text-accent shrink-0" />
+            <span>{recurrenceText}</span>
           </p>
         )}
       </div>
 
-      <div className="flex gap-2 items-center">
+      {/* Actions */}
+      <div className="flex gap-2 justify-end">
         <Button
           variant="outline"
           textSize="xs"
           size="sm"
-          aria-label={`Edit ${event.title}`}
           onClick={() => onEdit(event)}
+          aria-label={`Edit event: ${event.name || "Untitled"}`}
         >
           <MdEdit className="text-accent" />
         </Button>
-
-        <Button
-          variant="outline"
-          textSize="xs"
-          size="sm"
-          aria-label={`Delete ${event.title}`}
-          onClick={() => onDelete(event.id)}
-        >
-          <FaTrash className="text-error" />
-        </Button>
+        {event.id && (
+          <Button
+            variant="outline"
+            textSize="xs"
+            size="sm"
+            onClick={() => onDelete(event.id!)}
+            aria-label={`Delete event: ${event.name || "Untitled"}`}
+          >
+            <FaTrash className="text-error" />
+          </Button>
+        )}
       </div>
     </article>
   );

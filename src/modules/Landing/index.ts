@@ -5,6 +5,7 @@ import img2 from "./images/domin2.jpg";
 import img3 from "./images/domin3.jpg";
 import img4 from "./images/domin4.jpg";
 import img5 from "./images/domin5.jpg";
+import img6 from "./images/domin6.jpg";
 
 // const images = [
 //   "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80", // ocean sunrise
@@ -18,6 +19,6 @@ import img5 from "./images/domin5.jpg";
 //   "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1920&q=80", // dawn light church
 //   "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1920&q=80", // community gathering
 // ];
-const images = [img1, img2, img3, img4, img5];
+const images = [img1, img2, img3, img4, img5, img6];
 
 export default images;

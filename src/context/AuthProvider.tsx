@@ -1,36 +1,59 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import type { User } from "../types/auth.types";
 import { AuthContext } from "./AuthContext";
-// import { useNavigate } from "react-router-dom";
+import { getFromStore, saveInStore } from "../utils/appHelpers";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(null);
-  // const navigate = useNavigate();
+  const USER_KEY = import.meta.env.VITE_USER_KEY;
+  const TOKEN_KEY = import.meta.env.VITE_TOKEN_KEY;
+  const PREV_ROUTE_KEY = import.meta.env.VITE_PREV_ROUTE_KEY;
 
-  // ✅ Initialize from sessionStorage on first load
-  useEffect(() => {
-    const storedToken = sessionStorage.getItem("tk");
-    if (storedToken) {
-      setToken(storedToken);
-    }
-  }, []);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // ✅ Login saves the token in sessionStorage
-  const login = useCallback((newToken: string) => {
-    setToken(newToken);
-    sessionStorage.setItem("tk", newToken);
-  }, []);
-
-  // ✅ Logout clears from sessionStorage
-  const logout = useCallback(() => {
-    setToken(null);
-    sessionStorage.removeItem("tk"); // clears token
-    sessionStorage.removeItem("curr_user"); // clears
-  }, []);
+  const [token, setToken] = useState<string | null>(() =>
+    getFromStore<string>(TOKEN_KEY, "local")
+  );
+  const [user, setUser] = useState<User | null>(() =>
+    getFromStore<User>(USER_KEY, "local")
+  );
 
   const isAuthenticated = !!token;
 
+  // ✅ Login: only updates state & storage (no redirect here)
+  const login = useCallback((newToken: string, newUser: User) => {
+    setToken(newToken);
+    setUser(newUser);
+
+    saveInStore(TOKEN_KEY, newToken, "local");
+    saveInStore(USER_KEY, newUser, "local");
+
+    sessionStorage.setItem(TOKEN_KEY, newToken);
+    sessionStorage.setItem(USER_KEY, JSON.stringify(newUser));
+  }, []);
+
+  // ✅ Logout: clears storage, saves last route, redirects home
+  const logout = useCallback(() => {
+    if (isAuthenticated && location.pathname !== "/") {
+      saveInStore(PREV_ROUTE_KEY, location.pathname, "local");
+    }
+
+    setToken(null);
+    setUser(null);
+
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(USER_KEY);
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+
+    navigate("/", { replace: true });
+  }, [isAuthenticated, location.pathname, navigate]);
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, token, login, logout }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, token, user, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
