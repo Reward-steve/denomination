@@ -9,13 +9,14 @@ export const apiRequest = async <T>(
 ): Promise<{ success: boolean; message: string; data: T | null }> => {
   const url = XCache(`${endpoint}`, xcache);
 
-  const token = getFromStore("token");
-  const userData = getFromStore("user_id") as { id: string };
-  const userId = userData ? userData.id : null;
+  // ✅ Use correct keys from AuthProvider
+  const token = getFromStore<string>("tk", "local");
+  const user = getFromStore<{ id: string }>("curr_user", "local");
+  const userId = user?.id ?? null;
 
   const headers: Record<string, string> = {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(userId ? { "X-School-ID": userId } : {}),
+    ...(userId ? { user_id: userId } : {}),
   };
 
   try {

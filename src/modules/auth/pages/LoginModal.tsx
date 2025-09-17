@@ -43,6 +43,7 @@ export function Login({ showLogin, handleCloseLogin }: ModalProps) {
         phone: formData.phoneNumber,
         password: formData.password,
       });
+
       if (!res.success || !res.data?.token) {
         toast.error(res.message || "Login failed. Please try again.");
         return;

@@ -1,101 +1,78 @@
 import { MdEdit } from "react-icons/md";
-import { FaTrash, FaRepeat, FaCalendarDays, FaClock } from "react-icons/fa6";
-import { FaMapMarkerAlt } from "react-icons/fa";
+import { FaTrash, FaClock, FaRepeat } from "react-icons/fa6";
+import { FaMapMarkerAlt, FaCalendarAlt } from "react-icons/fa";
 import { Button } from "../../../components/ui/Button";
-import type { Event } from "../types";
+import type { EventCardProps } from "../types";
+import { formatTimeToAMPM, getRecurrenceText } from "../utils/Helper";
 
-export const EventCard = ({
-  event,
-  onEdit,
-  onDelete,
-}: {
-  event: Event;
-  onEdit: (e: Event) => void;
-  onDelete: (id: number) => void;
-}) => {
-  // Ensure time is in HH:MM format
-  const normalizedTime =
-    event.time?.length === 5 ? event.time : event.time?.slice(0, 5) || "00:00";
-  const parsedDate = new Date(`${event.date}T${normalizedTime}`);
+export const EventCard = ({ event, onEdit, onDelete }: EventCardProps) => {
+  /** ---------- Date & Time ---------- */
+  const parsedDate = event.date ? new Date(event.date) : null;
+  const dateString =
+    parsedDate && !isNaN(parsedDate.getTime())
+      ? parsedDate.toLocaleDateString(undefined, {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        })
+      : null;
 
-  const dateString = !isNaN(parsedDate.getTime())
-    ? parsedDate.toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
-    : event.date;
-
-  const timeString = !isNaN(parsedDate.getTime())
-    ? parsedDate.toLocaleTimeString(undefined, {
-        hour: "numeric",
-        minute: "2-digit",
-      })
-    : event.time;
-
-  // Format recurrence info
-  let recurrence = "";
-  if (event.recurrent && event.schedule) {
-    const s = event.schedule as Event["schedule"];
-    switch (s?.period) {
-      case "daily":
-        recurrence = "Daily";
-        break;
-      case "weekly":
-        recurrence = `Weekly — ${s.day || "N/A"}`;
-        break;
-      case "monthly":
-        if (s.day) {
-          recurrence = `Monthly — ${s.day}`;
-        } else if (s.nth && s.weekday) {
-          recurrence = `Monthly — ${s.nth} ${s.weekday}`;
-        } else {
-          recurrence = "Monthly — N/A";
-        }
-        break;
-      case "yearly":
-        recurrence = `Yearly — ${s.day}${
-          s.month ? ` (Month: ${s.month})` : ""
-        }`;
-        break;
-      default:
-        recurrence = "";
-    }
-  }
+  const timeString = event.time ? formatTimeToAMPM(event.time) : null;
+  const recurrenceText = getRecurrenceText(event);
 
   return (
-    <article className="p-4 rounded-xl bg-surface transition-colors duration-200 hover:shadow-sm hover:bg-surface/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border border-border">
-      <div className="flex flex-col gap-1">
-        <h3 className="text-lg font-semibold text-text">
-          {event.name || "Unnamed Event"}
-        </h3>
+    <article
+      className="p-5 rounded-2xl bg-surface border border-border 
+                 hover:shadow-lg hover:border-accent transition duration-200 
+                 space-y-3"
+      role="region"
+      aria-labelledby={`event-title-${event.id}`}
+    >
+      {/* Title */}
+      <h3
+        id={`event-title-${event.id}`}
+        className="text-lg font-bold text-text truncate"
+      >
+        {event.name || "Untitled Event"}
+      </h3>
 
-        <p className="text-xs text-text-placeholder flex items-center gap-1">
-          <FaMapMarkerAlt className="text-sm" /> {event.venue || "No venue"}
-        </p>
-
-        <p className="text-xs text-text-placeholder flex items-center gap-2">
-          <FaCalendarDays className="text-sm" /> {dateString}
-          <FaClock className="text-sm ml-2" /> {timeString}
-        </p>
-
-        {recurrence && (
-          <p className="text-xs text-text-placeholder flex items-center gap-1">
-            <FaRepeat className="text-sm" /> {recurrence}
+      {/* Core Details */}
+      <div className="text-sm text-text-secondary space-y-2">
+        {dateString && (
+          <p className="flex items-center gap-2">
+            <FaCalendarAlt className="text-accent shrink-0" />
+            <span>{dateString}</span>
           </p>
         )}
-
-        {event.descr && (
-          <p className="mt-2 text-text-secondary text-sm">{event.descr}</p>
+        {timeString && (
+          <p className="flex items-center gap-2">
+            <FaClock className="text-accent shrink-0" />
+            <span>{timeString}</span>
+          </p>
+        )}
+        {event.venue && (
+          <p className="flex items-center gap-2">
+            <FaMapMarkerAlt className="text-accent shrink-0" />
+            <span>{event.venue}</span>
+          </p>
+        )}
+        {recurrenceText && (
+          <p className="flex items-center gap-2">
+            <FaRepeat className="text-accent shrink-0" />
+            <span>{recurrenceText}</span>
+          </p>
         )}
       </div>
 
-      <div className="flex gap-2 items-center">
+      {/* Actions */}
+      <div className="flex gap-2 justify-end">
         <Button
           variant="outline"
           textSize="xs"
           size="sm"
           onClick={() => onEdit(event)}
+          aria-label={`Edit event: ${event.name || "Untitled"}`}
         >
           <MdEdit className="text-accent" />
         </Button>
@@ -104,7 +81,8 @@ export const EventCard = ({
             variant="outline"
             textSize="xs"
             size="sm"
-            onClick={() => onDelete(event.id)}
+            onClick={() => onDelete(event.id!)}
+            aria-label={`Delete event: ${event.name || "Untitled"}`}
           >
             <FaTrash className="text-error" />
           </Button>
