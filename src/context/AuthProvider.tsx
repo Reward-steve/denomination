@@ -5,11 +5,14 @@ import { getFromStore, saveInStore } from "../utils/appHelpers";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Initialize token and user from encrypted localStorage
+  const USER_KEY = import.meta.env.VITE_USER_KEY;
+  const TOKEN_KEY = import.meta.env.VITE_TOKEN_KEY;
+
   const [token, setToken] = useState<string | null>(() =>
-    getFromStore<string>("tk", "local")
+    getFromStore<string>(TOKEN_KEY, "local")
   );
   const [user, setUser] = useState<User | null>(() =>
-    getFromStore<User>("curr_user", "local")
+    getFromStore<User>(USER_KEY, "local")
   );
 
   const isAuthenticated = !!token;
@@ -19,12 +22,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(newToken);
     setUser(newUser);
 
-    saveInStore("tk", newToken, "local");
-    saveInStore("curr_user", newUser, "local");
+    saveInStore(TOKEN_KEY, newToken, "local");
+    saveInStore(USER_KEY, newUser, "local");
 
     // Keep sessionStorage for quick runtime access if needed
-    sessionStorage.setItem("tk", newToken);
-    sessionStorage.setItem("curr_user", JSON.stringify(newUser));
+    sessionStorage.setItem(TOKEN_KEY, newToken);
+    sessionStorage.setItem(USER_KEY, JSON.stringify(newUser));
   }, []);
 
   // Logout clears both state and storage
@@ -32,11 +35,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
     setUser(null);
 
-    sessionStorage.removeItem("tk");
-    sessionStorage.removeItem("curr_user");
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(USER_KEY);
 
-    localStorage.removeItem("tk");
-    localStorage.removeItem("curr_user");
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
   }, []);
 
   return (

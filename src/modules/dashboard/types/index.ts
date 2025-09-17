@@ -10,8 +10,14 @@ export interface EventModalProps {
   firstInputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
+export interface EventCardProps {
+  event: Event;
+  onEdit: (event: Event) => void;
+  onDelete: (id: number) => void;
+}
+
 export interface Event {
-  id: number;
+  id?: number;
   name: string;
   venue: string;
   descr?: string;
@@ -23,45 +29,13 @@ export interface Event {
     dateOfMonth?: number; // only for monthly
     weekday?: string; // "Monday", "Tuesday", etc.
     day?: string; // "3rd Sunday", "15", "Monday", etc.
-    period: "daily" | "weekly" | "monthly" | "yearly" | string;
+    period: "weekly" | "monthly" | "yearly";
     month?: number; // only for yearly
   };
 }
 
-// Example events
-export const initialEvents: Event[] = [
-  {
-    id: 1,
-    name: "UCCA fasting and divine service",
-    venue: "UCCA Church, Abak Uyo",
-    descr: "Monthly gathering for fasting and fellowship.",
-    date: "2025-09-24",
-    time: "15:00:00",
-    recurrent: true,
-    schedule: {
-      period: "monthly",
-      day: "4th wednesday", // nth weekday of the month
-    },
-  },
-  {
-    id: 2,
-    name: "UCCA End of the year get together",
-    venue: "UCCA Church, Abak Uyo",
-    descr: "Annual celebration — friends & family welcome.",
-    date: "2025-12-31",
-    time: "16:30:00",
-    recurrent: true,
-    schedule: {
-      period: "yearly",
-      day: "31", // day of the month
-      month: 12, // December
-    },
-  },
-];
-
 // Dropdown options
 export const scheduleOptions = [
-  { id: "daily", name: "daily" },
   { id: "weekly", name: "Weekly" },
   { id: "monthly", name: "Monthly" },
   { id: "yearly", name: "Yearly" },
@@ -69,11 +43,26 @@ export const scheduleOptions = [
 
 // Base weekdays (for weekly schedules)
 export const dayOptions = [
-  { id: "monday", name: "Monday" },
-  { id: "tuesday", name: "Tuesday" },
-  { id: "wednesday", name: "Wednesday" },
-  { id: "thursday", name: "Thursday" },
-  { id: "friday", name: "Friday" },
-  { id: "saturday", name: "Saturday" },
-  { id: "sunday", name: "Sunday" },
+  { id: "Monday", name: "Monday" },
+  { id: "Tuesday", name: "Tuesday" },
+  { id: "Wednesday", name: "Wednesday" },
+  { id: "Thursday", name: "Thursday" },
+  { id: "Friday", name: "Friday" },
+  { id: "Saturday", name: "Saturday" },
+  { id: "Sunday", name: "Sunday" },
+];
+
+export const monthOptions = [
+  { id: 1, name: "January" },
+  { id: 2, name: "February" },
+  { id: 3, name: "March" },
+  { id: 4, name: "April" },
+  { id: 5, name: "May" },
+  { id: 6, name: "June" },
+  { id: 7, name: "July" },
+  { id: 8, name: "August" },
+  { id: 9, name: "September" },
+  { id: 10, name: "October" },
+  { id: 11, name: "November" },
+  { id: 12, name: "December" },
 ];

@@ -33,6 +33,7 @@ export default function Layout({
   return (
     <div className="flex min-h-screen bg-background relative">
       <ResponsiveNav items={Items} disabled={disabled} />
+
       <main
         style={{ scrollbarWidth: "none" }}
         className="flex-1 transition-all duration-200 overflow-y-auto h-screen md:pr-2"
