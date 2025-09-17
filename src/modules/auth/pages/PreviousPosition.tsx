@@ -129,7 +129,7 @@ export default function PrevPosition() {
       <h3 className="text-base font-semibold text-text mt-6">
         Previous Positions (optional)
       </h3>
-      <p className="text-sm text-text-placeholder mb-4">
+      <p className="text-xs text-text-placeholder mb-4">
         Add one or more positions you’ve held in the past. If none, simply skip.
       </p>
 
@@ -163,26 +163,45 @@ export default function PrevPosition() {
           />
 
           {/* Years */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormInput
-              label="Start Year"
-              placeholder="YYYY"
-              type="number"
-              icon={FaCalendar}
-              register={register(`prev_positions.${index}.start_year`)}
-              optional
-              error={errors.prev_positions?.[index]?.start_year}
-            />
-            <FormInput
-              label="End Year"
-              placeholder="YYYY"
-              type="number"
-              icon={FaCalendar}
-              register={register(`prev_positions.${index}.end_year`)}
-              optional
-              error={errors.prev_positions?.[index]?.end_year}
-            />
-          </div>
+          <FormInput
+            label="Start Year"
+            placeholder="YYYY"
+            type="number"
+            icon={FaCalendar}
+            register={register(`prev_positions.${index}.start_year`, {
+              valueAsNumber: true,
+              min: { value: 1900, message: "Year must be >= 1900" },
+              max: {
+                value: new Date().getFullYear(),
+                message: "Year cannot be in the future",
+              },
+            })}
+            optional
+            error={errors.prev_positions?.[index]?.start_year}
+          />
+
+          <FormInput
+            label="End Year"
+            placeholder="YYYY"
+            type="number"
+            icon={FaCalendar}
+            register={register(`prev_positions.${index}.end_year`, {
+              valueAsNumber: true,
+              validate: (value, formValues) => {
+                const start = formValues.prev_positions?.[index]?.start_year;
+                if (!value) return true; // allow empty
+                if (start && value < start) {
+                  return "End year cannot be earlier than start year";
+                }
+                if (Number(value) > new Date().getFullYear()) {
+                  return "Year cannot be in the future";
+                }
+                return true;
+              },
+            })}
+            optional
+            error={errors.prev_positions?.[index]?.end_year}
+          />
         </div>
       ))}
 

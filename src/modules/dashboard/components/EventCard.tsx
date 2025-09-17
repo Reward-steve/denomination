@@ -24,7 +24,7 @@ export const EventCard = ({ event, onEdit, onDelete }: EventCardProps) => {
   return (
     <article
       className="p-5 rounded-2xl bg-surface border border-border 
-                 hover:shadow-lg hover:border-accent transition duration-200 
+                 hover:border-accent transition duration-200 
                  space-y-3"
       role="region"
       aria-labelledby={`event-title-${event.id}`}

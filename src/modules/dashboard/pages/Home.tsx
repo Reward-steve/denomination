@@ -2,10 +2,9 @@ import { Button } from "../../../components/ui/Button";
 import { FaEnvelope, FaCalendar } from "react-icons/fa6";
 import { FaFileAlt } from "react-icons/fa";
 import clsx from "clsx";
-import { getFromStore } from "../../../utils/appHelpers";
-import type { User } from "../../../types/auth.types";
 import DashboardLayout from "../components/Layout";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../../hooks/useAuth";
 
 /* -------------------- TYPES -------------------- */
 interface StatCardProps {
@@ -36,7 +35,7 @@ const StatCard = ({ title, value, description, icon: Icon }: StatCardProps) => (
 
 /* -------------------- PAGE -------------------- */
 export default function Home() {
-  const user = getFromStore("curr_user") as User | null;
+  const { user } = useAuth();
 
   // Gracefully handle missing user
   const fullName = user

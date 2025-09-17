@@ -9,7 +9,7 @@ import ResponsiveProvider from "./context/ResponsiveProvider";
 import { authMenu, dashboardMenu } from "./constant";
 import NotFound from "./modules/auth/pages/NotFound";
 import { useState } from "react";
-import ProtectedRoute from "./routes/ProtectedRoute";
+import { ProtectedRouteWithModal } from "./routes/ProtectedRoute";
 import { Login } from "./modules/auth/pages/LoginModal";
 import { AuthProvider } from "./context/AuthProvider";
 
@@ -46,9 +46,9 @@ function ThemedAppContent() {
         <Route
           path="/dashboard/*"
           element={
-            <ProtectedRoute onRequireLogin={() => setShowLogin(true)}>
+            <ProtectedRouteWithModal onRequireLogin={() => setShowLogin(true)}>
               <Layout Items={dashboardMenu} />
-            </ProtectedRoute>
+            </ProtectedRouteWithModal>
           }
         >
           <Route index element={<Navigate to="home" replace />} />
@@ -63,7 +63,7 @@ function ThemedAppContent() {
       {/* Modal for login */}
       <Login
         showLogin={showLogin}
-        handleCloseLogin={() => setShowLogin(false)}
+        handleCloseLogin={() => setShowLogin(!showLogin)}
       />
     </>
   );
