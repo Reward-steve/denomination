@@ -130,7 +130,7 @@ export default function UCCAInfo() {
       {/* Previous Pew */}
       <FormInput
         label="Previous Pew"
-        placeholder="e.g., UCCA Zone 1"
+        placeholder="e.g TCW"
         icon={FaHome}
         register={register("bio.previous_pew")}
         optional
