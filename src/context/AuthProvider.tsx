@@ -28,9 +28,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     saveInStore(TOKEN_KEY, newToken, "local");
     saveInStore(USER_KEY, newUser, "local");
-
-    sessionStorage.setItem(TOKEN_KEY, newToken);
-    sessionStorage.setItem(USER_KEY, JSON.stringify(newUser));
   }, []);
 
   // ✅ Logout: clears storage, saves last route, redirects home
@@ -42,8 +39,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
     setUser(null);
 
-    sessionStorage.removeItem(TOKEN_KEY);
-    sessionStorage.removeItem(USER_KEY);
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
 
