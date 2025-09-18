@@ -30,5 +30,5 @@ export const fetchAllEvents = async (): Promise<{
   message: string;
   data: Event[];
 }> => {
-  return fetcher("/events/fetch");
+  return fetcher("events/fetch");
 };
