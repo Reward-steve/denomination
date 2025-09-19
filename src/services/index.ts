@@ -16,7 +16,7 @@ axiosInstance.interceptors.request.use(
     const token = getFromStore(TOKEN_KEY, "local");
 
     if (token) {
-      config.headers.set("Authorization", `Bearer ${token}`);
+      config.headers["Authorization"] = `Bearer ${token}`;
     } else {
       console.warn(`[Axios] No token found under key: ${TOKEN_KEY}`);
     }
