@@ -2,7 +2,7 @@ import Axios from "axios";
 import { getFromStore } from "../utils/appHelpers";
 
 // 🔑 Use environment-based token key (must match what you set during login)
-const TOKEN_KEY = import.meta.env.VITE_TOKEN_KEY || "token";
+const TOKEN_KEY = import.meta.env.VITE_TOKEN_KEY;
 
 // 🔗 Base Axios instance
 export const axiosInstance = Axios.create({
@@ -16,7 +16,7 @@ axiosInstance.interceptors.request.use(
     const token = getFromStore(TOKEN_KEY, "local");
 
     if (token) {
-      config.headers.set("Authorization", `Bearer ${token}`);
+      config.headers.Authorization = `Bearer ${token}`;
     } else {
       console.warn(`[Axios] No token found under key: ${TOKEN_KEY}`);
     }

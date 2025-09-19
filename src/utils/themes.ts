@@ -67,7 +67,7 @@ export const lightTheme: Theme = {
     error: "rgb(239, 68, 68)", // Red for errors
   },
   typography: {
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "TASA Explorer, sans-serif !important",
     fontSize: {
       xs: "0.75rem",
       sm: "0.875rem",
@@ -80,7 +80,7 @@ export const lightTheme: Theme = {
       medium: 500,
       bold: 700,
     },
-    lineHeight: "1.5",
+    lineHeight: "1.3",
   },
   spacing: {
     unit: 8,
@@ -115,7 +115,7 @@ export const darkTheme: Theme = {
     error: "rgb(248, 113, 113)", // Softer red for errors
   },
   typography: {
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "TASA Explorer, sans-serif !important",
     fontSize: {
       xs: "0.75rem",
       sm: "0.875rem",

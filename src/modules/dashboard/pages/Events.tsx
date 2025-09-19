@@ -36,7 +36,7 @@ export default function Events() {
     setLoading(true);
     try {
       const res = await fetchAllEvents();
-      if (res?.status && Array.isArray(res.data)) {
+      if (Array.isArray(res.data)) {
         const mapped = res.data.map(mapApiEventToEvent);
         setEvents(sortEvents(mapped));
       } else {
@@ -44,7 +44,7 @@ export default function Events() {
       }
     } catch (err) {
       console.error("Fetch error:", err);
-      toast.error("Could not fetch events. Please try again.");
+      toast.error("Could not fetch events. Please try again." + err);
     } finally {
       setLoading(false);
     }

@@ -26,9 +26,9 @@ export const deleteEvent = async (eventId: number) => {
 // Fetch all events
 // Correct async function with return type
 export const fetchAllEvents = async (): Promise<{
-  status: boolean;
+  success: boolean;
   message: string;
   data: Event[];
 }> => {
-  return fetcher("/events/fetch");
+  return fetcher("events/fetch");
 };
