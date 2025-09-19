@@ -9,6 +9,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const TOKEN_KEY = import.meta.env.VITE_TOKEN_KEY;
   const PREV_ROUTE_KEY = import.meta.env.VITE_PREV_ROUTE_KEY;
 
+  if (!USER_KEY || !TOKEN_KEY || !PREV_ROUTE_KEY) {
+    throw new Error(
+      "❌ Missing required environment variables (VITE_USER_KEY, VITE_TOKEN_KEY, VITE_PREV_ROUTE_KEY)"
+    );
+  }
+
   const navigate = useNavigate();
   const location = useLocation();
 

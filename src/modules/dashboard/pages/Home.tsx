@@ -4,12 +4,10 @@ import clsx from "clsx";
 import {
   formatDateTime,
   formatNum,
-  getFromStore,
   handleDownload,
 } from "../../../utils/appHelpers";
-import type { User } from "../../../types/auth.types";
 import DashboardLayout from "../components/Layout";
-import { data, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useResponsive } from "../../../hooks/useResponsive";
 import { Modal } from "../components/Modal";
 import FormInput from "../../../components/ui/FormInput";
@@ -22,6 +20,7 @@ import {
   fetchEvents,
   readAnnouncments,
 } from "../services/home";
+import { useAuth } from "../../../hooks/useAuth";
 
 /* -------------------- TYPES -------------------- */
 interface StatCardProps {
@@ -42,7 +41,7 @@ const OutStanding = ({ amount, fee, times, onPayNow }: StatCardProps) => (
     <div>
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-bold text-text">{amount}</h2>
-        <div className="text-[red]">{times}</div>
+        <div className="text-error">{times}</div>
       </div>
       <p className="mt-0.5 text-[16px] text-text-placeholder">{fee}</p>
       {/* <p className="mt-1 text-2xl font-bold text-primary">{fee}</p> */}
@@ -72,8 +71,8 @@ const Cta = ({ status = false, onClick = () => null }) => (
 
 /* -------------------- PAGE -------------------- */
 export default function Home() {
-  const user = getFromStore("curr_user") as User | null;
-  const { isMobile, isTablet, isDesktop } = useResponsive();
+  const { user } = useAuth();
+  const { isMobile } = useResponsive();
 
   // Gracefully handle missing user
   const fullName = user
@@ -140,14 +139,14 @@ export default function Home() {
     });
   }, []);
 
-  const fetchEventAttendanceUser = (id: number) => {};
+  const fetchEventAttendanceUser = () => {};
 
   return (
     <DashboardLayout>
       {openModal && (
         <Modal title={"Mark Attendance"} setClose={setOpenModal}>
           <div className="p-4 md:w-[700px] w-full flex flex-col items-center">
-            <div className="text-gray-700 font-semibold text-[18px] mb-3">
+            <div className="text-text-secondary font-semibold text-[18px] mb-3">
               Take Monthly Meeting Attendance{" "}
             </div>
             <FormInput
@@ -158,7 +157,7 @@ export default function Home() {
               onChange={() => console.log("sds")}
             />
 
-            {/* <div className="w-full h-[1px] bg-gray-200 mt-4"></div> */}
+            {/* <div className="w-full h-[1px] bg-border mt-4"></div> */}
 
             <div className="users-list w-full py-3 mt-4 flex-col flex gap-3 overflow-y-scroll max-h-[750px]">
               {[...Array(15)].map(() => (
@@ -208,7 +207,7 @@ export default function Home() {
                     <div className="text-xl font-semibold text-text mb-1">
                       {announcements[index]?.title}
                     </div>
-                    <p className="w-[100%] text-gray-500">
+                    <p className="w-[100%] text-text-placeholder">
                       {announcements[index]?.body}
                     </p>
                   </div>
@@ -274,7 +273,7 @@ export default function Home() {
                 Ongoing Events
               </h2>
 
-              {ongoingEvents.map(({ id, name }) => (
+              {ongoingEvents.map(({ name }) => (
                 <div className="border border-border bg-surface rounded-2xl p-3 sm:p-3 lg:p-3 max-w-5xl mx-auto space-y-8">
                   <div className="flex items-center justify-between flex-col sm:flex-row gap-4">
                     <div className="text-xl flex justify-center items-center font-semibold text-text mb-1">
@@ -289,7 +288,7 @@ export default function Home() {
                       size="lg"
                       className="w-full sm:w-auto"
                       onClick={() => {
-                        fetchEventAttendanceUser(id);
+                        fetchEventAttendanceUser();
                         setOpenModal(true);
                       }}
                     >
@@ -304,7 +303,7 @@ export default function Home() {
           <section className="grid gap-4 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2">
             <div className="border border-border bg-surface rounded-2xl p-3 sm:p-3 lg:p-3 space-y-3">
               <div className="flex justify-between items-center w-full">
-                <h2 className="text-gray-600">Next Events</h2>
+                <h2 className="text-text-placeholder">Next Events</h2>
                 <Link to={"/dashboard/events"} className="text-primary">
                   See all
                 </Link>
@@ -316,13 +315,13 @@ export default function Home() {
                   ({ name, day, date, time, venue, month }: any, idx) => (
                     <div
                       key={idx}
-                      className="flex justify-between items-center border-b-2 border-gray-200 p-2"
+                      className="flex justify-between items-center border-b-2 border-border p-2"
                     >
                       <div>
-                        <div className="text-[18px]">{name}</div>
-                        <p className="text-gray-600">{venue}</p>
+                        <div className="text-[18px] text-text">{name}</div>
+                        <p className="text-text-placeholder">{venue}</p>
                       </div>
-                      <div className="text-gray-500">
+                      <div className="text-text-placeholder">
                         {date
                           ? formatDateTime(date, time)
                           : day?.includes("5th")
@@ -344,7 +343,7 @@ export default function Home() {
 
             <div className="border border-border bg-surface rounded-2xl p-3 sm:p-3 lg:p-3 space-y-2">
               <div className="flex justify-between items-center w-full">
-                <h2 className="text-gray-600">Documents</h2>
+                <h2 className="text-text-placeholder">Documents</h2>
                 <Link to={"/dashboard/events"} className="text-primary">
                   See all
                 </Link>
@@ -353,10 +352,10 @@ export default function Home() {
               {
                 ((docs.length = 3),
                 docs.map(({ paths, name, descr, type }: any) => (
-                  <div className="flex justify-between items-center rounded-xl border-2 border-gray-200 py-3 px-4">
+                  <div className="flex justify-between items-center rounded-xl border-2 border-border py-3 px-4">
                     <div>
-                      <div className="text-[18px]">{name}</div>
-                      <p className="text-gray-600">
+                      <div className="text-[18px] text-text">{name}</div>
+                      <p className="text-text-placeholder">
                         {!descr || descr?.length === 0 ? type : descr}
                       </p>
                     </div>

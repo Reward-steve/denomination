@@ -155,7 +155,6 @@ export const buildFormData = (
 };
 
 export function formatDateTime(date: string, time: string) {
-
   const dt = new Date(`${date}T${time}`);
   const options: Intl.DateTimeFormatOptions = {
     month: "short",
@@ -167,19 +166,23 @@ export function formatDateTime(date: string, time: string) {
   // Example output: "Sep 21, 08:00 PM"
   let formatted = dt.toLocaleString("en-US", options);
   // Convert "PM" to "pm" and remove seconds if present
-  formatted = formatted.replace(", ", ", ").replace(" AM", "am").replace(" PM", "pm");
+  formatted = formatted
+    .replace(", ", ", ")
+    .replace(" AM", "am")
+    .replace(" PM", "pm");
   return formatted;
 }
 
 export function formatNum(number: string | number) {
   let num = +number;
-  return num < 10 ? '0' + num : num;
+  return num < 10 ? "0" + num : num;
 }
-
 
 export const handleDownload = async (paths: Array<string>, name: string) => {
   const zip = new JSZip();
-  const server_folder: string = import.meta.env.VITE_BASE_URL.split('/api/')[0] || "https://ucca-api.skoolpilot.com.ng";
+  const server_folder: string =
+    import.meta.env.VITE_BASE_URL.split("/api/")[0] ||
+    "https://ucca-api.skoolpilot.com.ng";
   // If you want to add a folder
   if (paths.length === 1) {
     saveAs(`${server_folder}/${paths[0]}`, name);
@@ -188,7 +191,7 @@ export const handleDownload = async (paths: Array<string>, name: string) => {
     const imgFolder = zip.folder(name);
     paths.forEach((p) => {
       imgFolder?.file(`${server_folder}/${p}`);
-    })
+    });
   }
   // Generate the zip
   const content = await zip.generateAsync({ type: "blob" });
