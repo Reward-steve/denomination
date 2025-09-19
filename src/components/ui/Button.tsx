@@ -9,6 +9,7 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
     | "ghost"
     | "danger"
     | "link"
+    | "gray"
     | "auth";
   size?: "sm" | "md" | "lg" | "icon";
   textSize?: "xs" | "sm" | "base" | "lg" | "xl";
@@ -47,6 +48,7 @@ export const Button: React.FC<ButtonProps> = ({
     ghost: "text-text hover:bg-neutral/10",
     danger: "bg-error text-text hover:bg-error/80",
     link: "text-secondary underline-offset-4 hover:underline bg-transparent",
+    gray: "bg-gray-300 text-gray-700 hover:bg-gray-400",
     auth: `
       w-full flex justify-center items-center
       bg-accent text-white

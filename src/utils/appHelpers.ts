@@ -1,5 +1,7 @@
 import { toast } from "react-toastify";
 import SimpleCrypto from "simple-crypto-js";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 /**
  * Handle image upload from input
@@ -150,4 +152,50 @@ export const buildFormData = (
   } else {
     formData.append(parentKey, String(data));
   }
+};
+
+export function formatDateTime(date: string, time: string) {
+  const dt = new Date(`${date}T${time}`);
+  const options: Intl.DateTimeFormatOptions = {
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  };
+  // Example output: "Sep 21, 08:00 PM"
+  let formatted = dt.toLocaleString("en-US", options);
+  // Convert "PM" to "pm" and remove seconds if present
+  formatted = formatted
+    .replace(", ", ", ")
+    .replace(" AM", "am")
+    .replace(" PM", "pm");
+  return formatted;
+}
+
+export function formatNum(number: string | number) {
+  let num = +number;
+  return num < 10 ? "0" + num : num;
+}
+
+export const handleDownload = async (paths: Array<string>, name: string) => {
+  const zip = new JSZip();
+  const server_folder: string =
+    import.meta.env.VITE_BASE_URL.split("/api/")[0] ||
+    "https://ucca-api.skoolpilot.com.ng";
+  // If you want to add a folder
+  if (paths.length === 1) {
+    saveAs(`${server_folder}/${paths[0]}`, name);
+    return;
+  } else {
+    const imgFolder = zip.folder(name);
+    paths.forEach((p) => {
+      imgFolder?.file(`${server_folder}/${p}`);
+    });
+  }
+  // Generate the zip
+  const content = await zip.generateAsync({ type: "blob" });
+
+  // Trigger download
+  saveAs(content, "ucca-files.zip");
 };
