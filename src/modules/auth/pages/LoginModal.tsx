@@ -57,6 +57,7 @@ export function Login({ showLogin, handleCloseLogin }: ModalProps) {
       }
 
       login(res.data.token);
+      saveInStore("token", res.data.token);
       saveInStore("curr_user", res?.data?.user as User);
       toast.success(res.message || "Logged in successfully!");
       navigate("/dashboard");

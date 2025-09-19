@@ -14,14 +14,10 @@ axiosInstance.interceptors.request.use(
   (config) => {
     // Retrieve token and school ID dynamically
     const token = getFromStore("token");
-    const userData = getFromStore("user_id") as { id: string };
-    const userId = userData ? userData.id : null;
+    console.log(token);
+ 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    if (userId) {
-      config.headers["X-School-ID"] = userId;
     }
 
     return config;
