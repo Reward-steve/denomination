@@ -10,6 +10,22 @@ export interface EventModalProps {
   firstInputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
+// Define allowed values for visibility
+export type Visibility = "public" | "private" | "admins";
+
+// Main interface
+export interface DocumentFile {
+  document: string[]; // array of file paths
+  type: "song" | "video" | "document" | string; // can extend if more types
+  size: number; // in bytes
+  uploadedAt: string; // ISO date string
+  uploadedBy?: string; // user ID or name
+  id?: number; // optional, for existing documents
+  name: string;
+  descr?: string; // optional
+  visibility: Visibility;
+}
+
 export interface EventCardProps {
   event: Event;
   onEdit: (event: Event) => void;

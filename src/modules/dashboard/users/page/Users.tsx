@@ -1,6 +1,6 @@
 import { useState } from "react";
-import DashboardLayout from "../components/Layout";
-import { Button } from "../../../components/ui/Button";
+import DashboardLayout from "../../components/Layout";
+import { Button } from "../../../../components/ui/Button";
 import { FaUserPlus, FaUserCircle } from "react-icons/fa";
 
 export default function Users() {
