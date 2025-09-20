@@ -281,8 +281,11 @@ export default function Home() {
 
                 {
                   ((docs.length = 3),
-                  docs.map(({ paths, name, descr, type }: any) => (
-                    <div className="flex justify-between items-center rounded-xl border-2 border-border py-3 px-4">
+                  docs.map(({ paths, name, descr, type }: any, id) => (
+                    <div
+                      key={id}
+                      className="flex justify-between items-center rounded-xl border-2 border-border py-3 px-4"
+                    >
                       <div>
                         <div className="text-[18px] text-text">{name}</div>
                         <p className="text-text-placeholder">
