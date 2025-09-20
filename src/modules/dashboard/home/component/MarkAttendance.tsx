@@ -30,7 +30,7 @@ export function MarkAttendance({ setOpenModal, data: { name, id } }: any) {
 
     markAttendance(id, { user_id: uid }, type)
       .then(({ data: { data } }) => {
-        // console.log(data);
+        console.log(data);
       })
       .catch((e) => {
         console.log(e);
