@@ -128,7 +128,7 @@ export const darkTheme: Theme = {
       medium: 500,
       bold: 700,
     },
-    lineHeight: "1.5",
+    lineHeight: "1.3",
   },
   spacing: {
     unit: 8,

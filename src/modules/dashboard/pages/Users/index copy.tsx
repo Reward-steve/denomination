@@ -1,10 +1,10 @@
 import { useState } from "react";
-import DashboardLayout from "../components/Layout";
-import { Button } from "../../../components/ui/Button";
+import DashboardLayout from "../../components/Layout";
+import { Button } from "../../../../components/ui/Button";
 import { FaUserPlus, FaUserCircle } from "react-icons/fa";
 
 export default function Users() {
-  const [users, setUsers] = useState<string[]>([]);
+  const [users, setUsers] = useState<string[]>(['Ubong']);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newUser, setNewUser] = useState("");
 

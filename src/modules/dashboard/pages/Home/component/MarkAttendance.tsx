@@ -82,10 +82,10 @@ export function MarkAttendance({ setOpenModal, data: { name, id } }: any) {
                                     />
                                 </div>
                                 <div className="flex flex-col">
-                                    <div className="text-xl font-semibold text-gray-800">
+                                    <div className="text-xl text-text">
                                         {`${user.first_name} ${user.middle_name} ${user.last_name}`}
                                     </div>
-                                    <div>{user.primary_phone}</div>
+                                    <div className="text-xl text-text-secondary/60">{user.primary_phone}</div>
                                 </div>
                             </div>
                             <Cta status={hasMarked} onClick={() => mark(user.id, hasMarked ? 'unmark' : 'mark')} />
