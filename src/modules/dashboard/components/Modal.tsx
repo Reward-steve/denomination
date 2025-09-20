@@ -17,7 +17,7 @@ export const Modal = ({ children, title = "", setClose = null }: any) => {
     >
       <div className={className} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div className="flex items-center justify-between mb-4 border-b-2 p-3 border-gray-200">
+        <div className="flex items-center justify-between mb-4 border-b-2 p-3 border-border">
           <h2
             id="event-modal-title"
             className="text-xl font-semibold text-text"
@@ -32,7 +32,7 @@ export const Modal = ({ children, title = "", setClose = null }: any) => {
             {isMobile ? (
               <div className="text-primary">Close</div>
             ) : (
-              <FaTimes className="h-5 w-5 text-gray-700" />
+              <FaTimes className="h-5 w-5 text-text-secondary" />
             )}
           </button>
         </div>

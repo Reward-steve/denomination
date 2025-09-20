@@ -1,6 +1,6 @@
 import type { IconType } from "react-icons";
-import { FaCoins, FaUser } from "react-icons/fa6";
-import { FaFileAlt } from "react-icons/fa";
+import { FaCoins, FaNewspaper, FaUser } from "react-icons/fa6";
+import { FaBroadcastTower, FaFileAlt } from "react-icons/fa";
 import { TbCalendarEventFilled, TbHome2 } from "react-icons/tb";
 
 // Interfaces
@@ -26,6 +26,7 @@ export const ROUTES = {
     FINANCE: "finance",
     USERS: "users",
     DOCUMENTS: "documents",
+    ANNOUNCEMENT: "announcements",
   },
   AUTH: {
     PERSONAL_INFO: "personal-info",
@@ -101,5 +102,10 @@ export const dashboardMenu: DashboardSidebarProps[] = [
     label: "Documents",
     path: validatePath(ROUTES.DASHBOARD.DOCUMENTS),
     Icon: FaFileAlt,
+  },
+  {
+    label: "Announcement",
+    path: validatePath(ROUTES.DASHBOARD.ANNOUNCEMENT),
+    Icon: FaBroadcastTower,
   },
 ];
