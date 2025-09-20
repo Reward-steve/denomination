@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, useRef } from "react";
 import type { Event as AppEvent } from "../types";
 import { getNthWeekday } from "../utils/Helper";
-import { createEvent } from "../services/intex";
+import { createEvent } from "../services/events";
 
 interface UseEventModalProps {
   initialEvent?: AppEvent;

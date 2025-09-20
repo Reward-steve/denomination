@@ -100,7 +100,7 @@ export const SidebarLink = memo(
         "cursor-not-allowed": disabled,
 
         // Default fallback
-        "bg-smooth": isDashboard && !isActive,
+        "bg-transparent": isDashboard && !isActive,
       }
     );
 

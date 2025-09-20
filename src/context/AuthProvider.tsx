@@ -15,6 +15,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(() =>
     getFromStore<string>(TOKEN_KEY, "local")
   );
+
   const [user, setUser] = useState<User | null>(() =>
     getFromStore<User>(USER_KEY, "local")
   );
