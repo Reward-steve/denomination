@@ -1,14 +1,22 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import ReactDOM from "react-dom";
-import { Button } from "../../../components/ui/Button";
+import { Button } from "../../../../components/ui/Button";
 import { FaCalendarPlus, FaCalendarAlt } from "react-icons/fa";
-import DashboardLayout from "../components/Layout";
-import { type Event as AppEvent } from "../types";
+import DashboardLayout from "../../components/Layout";
+import { type Event as AppEvent } from "../../types";
 import { EventCard } from "../components/EventCard";
 import { EventModalWrapper } from "../components/EventModal";
-import { useEventModal } from "../hook/useEventModal";
-import { deleteEvent, fetchAllEvents, updateEvent } from "../services/intex";
-import { mapApiEventToEvent, normalizeTime, sortEvents } from "../utils/Helper";
+import { useEventModal } from "../../hook/useEventModal";
+import {
+  deleteEvent,
+  fetchAllEvents,
+  updateEvent,
+} from "../../services/events";
+import {
+  mapApiEventToEvent,
+  normalizeTime,
+  sortEvents,
+} from "../../utils/Helper";
 import { toast } from "react-toastify";
 
 /** ---------- Skeleton Loader ---------- */

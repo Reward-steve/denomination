@@ -1,49 +1,55 @@
 import { useState } from "react";
 import { FaX } from "react-icons/fa6";
-import { Button } from "../../../components/ui/Button";
-import { useForm } from "react-hook-form";
-import { type Event } from "../types";
-import { BasicInfoSection } from "./BasicInfoSection";
-import { DateTimeSection } from "./DateTimeSection";
-import { RecurringSection } from "./RecurringSection";
-import { Loader } from "../../../components/ui/Loader";
+import { Button } from "./Button";
+import { Loader } from "./Loader";
+import { useForm, type FieldValues, type UseFormReturn } from "react-hook-form";
 
-interface EventModalWrapperProps {
+interface BaseModalProps<T extends FieldValues> {
   modalRef: React.RefObject<HTMLDivElement | null>;
   handleModalClick: (e: React.MouseEvent) => void;
-  event: Event;
-  submitEvent: (data: Event) => Promise<void>;
   closeModal: () => void;
+
+  // Customization
+  title: string;
+  submitLabel?: string;
+  cancelLabel?: string;
+
+  // Form props
+  defaultValues: T;
+  submitHandler: (data: T) => Promise<void>;
+
+  // Dynamic form sections (form API is provided)
+  children: (form: UseFormReturn<T>) => React.ReactNode;
 }
 
-export const EventModalWrapper = ({
+export function BaseModal<T extends FieldValues>({
   modalRef,
   handleModalClick,
-  event,
-  submitEvent,
   closeModal,
-}: EventModalWrapperProps) => {
+  title,
+  submitLabel = "Save",
+  cancelLabel = "Cancel",
+  defaultValues,
+  submitHandler,
+  children,
+}: BaseModalProps<T>) {
+  const form = useForm<T>(defaultValues);
   const {
-    register,
     handleSubmit,
-    control,
-    formState: { errors, isSubmitting },
-    watch,
-  } = useForm<Event>({ defaultValues: event });
+    formState: { isSubmitting },
+  } = form;
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const onSubmit = async (data: Event) => {
+  const onSubmit = async (data: T) => {
     setErrorMessage(null);
     try {
-      await submitEvent(data);
+      await submitHandler(data);
     } catch (err) {
-      console.error("Failed to submit event:", err);
+      console.error("Failed to submit:", err);
       setErrorMessage("Something went wrong. Please try again.");
     }
   };
-
-  const isLoading = isSubmitting;
 
   return (
     <div
@@ -52,7 +58,7 @@ export const EventModalWrapper = ({
       className="fixed inset-0 z-50 flex items-end bg-black/50 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="event-modal-title"
+      aria-labelledby="modal-title"
     >
       <div
         className="
@@ -70,10 +76,10 @@ export const EventModalWrapper = ({
         {/* Header */}
         <header className="sticky top-0 flex items-center justify-between mb-4 border-b border-border py-4 bg-surface z-10">
           <h2
-            id="event-modal-title"
+            id="modal-title"
             className="text-lg sm:text-xl md:text-2xl font-semibold text-text"
           >
-            {event.id ? "Edit Event" : "Add New Event"}
+            {title}
           </h2>
           <button
             onClick={closeModal}
@@ -89,9 +95,8 @@ export const EventModalWrapper = ({
           onSubmit={handleSubmit(onSubmit)}
           className="space-y-5 sm:space-y-6"
         >
-          <BasicInfoSection register={register} errors={errors} />
-          <DateTimeSection register={register} errors={errors} />
-          <RecurringSection control={control} watch={watch} />
+          {/* Dynamic Sections */}
+          {children(form)}
 
           {/* Error Message */}
           {errorMessage && (
@@ -108,28 +113,24 @@ export const EventModalWrapper = ({
               type="button"
               className="w-full sm:w-1/2"
               size="lg"
-              disabled={isLoading}
+              disabled={isSubmitting}
             >
-              Cancel
+              {cancelLabel}
             </Button>
             <Button
               variant="primary"
               type="submit"
               className="w-full sm:w-1/2"
               size="lg"
-              disabled={isLoading}
+              disabled={isSubmitting}
             >
-              {isLoading ? (
+              {isSubmitting ? (
                 <div className="flex items-center justify-center gap-2">
                   <Loader size={16} />
-                  <span className="text-sm sm:text-base">
-                    {event.id ? "Updating..." : "Saving..."}
-                  </span>
+                  <span className="text-sm sm:text-base">{submitLabel}...</span>
                 </div>
               ) : (
-                <span className="text-sm sm:text-base">
-                  {event.id ? "Update" : "Save"}
-                </span>
+                <span className="text-sm sm:text-base">{submitLabel}</span>
               )}
             </Button>
           </div>
@@ -137,4 +138,4 @@ export const EventModalWrapper = ({
       </div>
     </div>
   );
-};
+}

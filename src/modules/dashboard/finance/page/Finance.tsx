@@ -1,7 +1,7 @@
 import { useState } from "react";
-import DashboardLayout from "../components/Layout";
+import DashboardLayout from "../../components/Layout";
 import { FaArrowUp, FaArrowDown, FaWallet } from "react-icons/fa";
-import { Button } from "../../../components/ui/Button";
+import { Button } from "../../../../components/ui/Button";
 
 /* -------------------- Types -------------------- */
 interface Transaction {

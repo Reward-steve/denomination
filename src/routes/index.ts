@@ -4,11 +4,14 @@ import PersonalInfo from "../modules/auth/pages/PersonalInfo";
 import PrevPosition from "../modules/auth/pages/PreviousPosition";
 import RegistrationSuccess from "../modules/auth/pages/RegistrationSuccess";
 import UCCAInfo from "../modules/auth/pages/UCCAInfo";
-import Documents from "../modules/dashboard/pages/Documents";
-import Events from "../modules/dashboard/pages/Events";
-import Finance from "../modules/dashboard/pages/Finance";
-import Home from "../modules/dashboard/pages/Home";
-import Users from "../modules/dashboard/pages/Users";
+import Announcement from "../modules/dashboard/announcement/Announcement";
+import Documents from "../modules/dashboard/documents/page/Documents";
+import Events from "../modules/dashboard/events/page/Events";
+import Finance from "../modules/dashboard/finance/page/Finance";
+import Home from "../modules/dashboard/home/page/Home";
+import Sermon from "../modules/dashboard/sermon/Sermon";
+import Songs from "../modules/dashboard/songs/page/Songs";
+import Users from "../modules/dashboard/users/page/Users";
 
 export const auth = [
   { path: "personal-info", element: PersonalInfo },
@@ -25,4 +28,7 @@ export const dashboard = [
   { path: "finance", element: Finance },
   { path: "users", element: Users },
   { path: "documents", element: Documents },
+  { path: "Songs", element: Songs },
+  { path: "sermon", element: Sermon },
+  { path: "announcement", element: Announcement },
 ];

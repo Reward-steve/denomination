@@ -1,17 +1,17 @@
-import { Button } from "../../../components/ui/Button";
+import { Button } from "../../../../components/ui/Button";
 import { FaUser } from "react-icons/fa6";
 import clsx from "clsx";
 import {
   formatDateTime,
   formatNum,
   handleDownload,
-} from "../../../utils/appHelpers";
-import DashboardLayout from "../components/Layout";
+} from "../../../../utils/appHelpers";
+import DashboardLayout from "../../components/Layout";
 import { Link } from "react-router-dom";
-import { useResponsive } from "../../../hooks/useResponsive";
-import { Modal } from "../components/Modal";
-import FormInput from "../../../components/ui/FormInput";
-import img from "../../../assets/images/9p4gBgL2_400x400.jpg";
+import { useResponsive } from "../../../../hooks/useResponsive";
+import { Modal } from "../../components/Modal";
+import FormInput from "../../../../components/ui/FormInput";
+import img from "../../../../assets/images/9p4gBgL2_400x400.jpg";
 import { FaCheck } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import {
@@ -19,8 +19,9 @@ import {
   fetchDocs,
   fetchEvents,
   readAnnouncments,
-} from "../services/home";
-import { useAuth } from "../../../hooks/useAuth";
+} from "../../services/home";
+
+import { useAuth } from "../../../../hooks/useAuth";
 
 /* -------------------- TYPES -------------------- */
 interface StatCardProps {

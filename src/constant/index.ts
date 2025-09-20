@@ -1,7 +1,8 @@
 import type { IconType } from "react-icons";
-import { FaCoins, FaUser } from "react-icons/fa6";
-import { FaFileAlt } from "react-icons/fa";
+import { FaCoins, FaMusic, FaUser } from "react-icons/fa6";
+import { FaFileAlt, FaPray } from "react-icons/fa";
 import { TbCalendarEventFilled, TbHome2 } from "react-icons/tb";
+import { MdAnnouncement } from "react-icons/md";
 
 // Interfaces
 export interface AuthSidebarProps {
@@ -26,6 +27,9 @@ export const ROUTES = {
     FINANCE: "finance",
     USERS: "users",
     DOCUMENTS: "documents",
+    SONGS: "songs",
+    SERMON: "sermon",
+    ANNOUNCEMENT: "announcement",
   },
   AUTH: {
     PERSONAL_INFO: "personal-info",
@@ -101,5 +105,20 @@ export const dashboardMenu: DashboardSidebarProps[] = [
     label: "Documents",
     path: validatePath(ROUTES.DASHBOARD.DOCUMENTS),
     Icon: FaFileAlt,
+  },
+  {
+    label: "Songs",
+    path: validatePath(ROUTES.DASHBOARD.SONGS),
+    Icon: FaMusic,
+  },
+  {
+    label: "Sermon",
+    path: validatePath(ROUTES.DASHBOARD.SERMON),
+    Icon: FaPray,
+  },
+  {
+    label: "Announcement",
+    path: validatePath(ROUTES.DASHBOARD.ANNOUNCEMENT),
+    Icon: MdAnnouncement,
   },
 ];

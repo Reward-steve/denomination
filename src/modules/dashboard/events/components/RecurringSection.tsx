@@ -4,8 +4,8 @@ import {
   type Control,
   type UseFormWatch,
 } from "react-hook-form";
-import { Dropdown } from "../../../components/ui/Dropdown";
-import { CheckboxField } from "../../../components/ui/CheckBoxField";
+import { Dropdown } from "../../../../components/ui/Dropdown";
+import { CheckboxField } from "../../../../components/ui/CheckBoxField";
 import { FaCalendarDays, FaRepeat } from "react-icons/fa6";
 
 import {
@@ -13,13 +13,13 @@ import {
   monthOptions,
   scheduleOptions,
   type Event,
-} from "../types";
+} from "../../types";
 
 import {
   getNthWeekday,
   getOrdinalSuffix,
   getWeekdayName,
-} from "../utils/Helper";
+} from "../../utils/Helper";
 
 /**
  * RecurringSection
