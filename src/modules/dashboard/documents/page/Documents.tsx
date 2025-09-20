@@ -20,7 +20,7 @@ const Document = ({ type = "document" }) => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <h1 className="text-xl sm:text-2xl font-semibold capitalize">
-            {type} Dashboard
+            {type}
           </h1>
           <Button
             variant="primary"
