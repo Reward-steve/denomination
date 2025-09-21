@@ -148,7 +148,7 @@ export default function Events() {
   /** ---------- Render ---------- */
   return (
     <DashboardLayout>
-      <main className="max-w-6xl mx-auto space-y-6 lg:py-8 py-6 animate-fade">
+      <main className="space-y-6 lg:py-8 py-6 animate-fade">
         {/* Page Header */}
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-start sm:items-center gap-3">
