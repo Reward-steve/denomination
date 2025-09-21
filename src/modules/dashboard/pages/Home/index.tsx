@@ -1,17 +1,12 @@
-import { Button } from "../../../../components/ui/Button";
-
-import OutStanding from "../component/OutStanding";
-
-import {
-  formatDateTime,
-  formatNum,
-  handleDownload,
-} from "../../../../utils/appHelpers";
-import DashboardLayout from "../../components/Layout";
-import { Link } from "react-router-dom";
-import { useResponsive } from "../../../../hooks/useResponsive";
-
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+
+import { Button } from "../../../../components/ui/Button";
+import OutStanding from "./components/OutStanding";
+import DashboardLayout from "../../components/Layout";
+import { useResponsive } from "../../../../hooks/useResponsive";
+import { useAuth } from "../../../../hooks/useAuth";
+
 import {
   fetchAnnouncments,
   fetchDocs,
@@ -19,23 +14,52 @@ import {
   readAnnouncments,
 } from "../../services/home";
 
-import { useAuth } from "../../../../hooks/useAuth";
-import { MarkAttendance } from "../component/MarkAttendance";
-import DocumentSkeleton from "../component/DocumentSkeleton";
+import {
+  formatDateTime,
+  formatNum,
+  handleDownload,
+} from "../../../../utils/appHelpers";
 
+import { MarkAttendance } from "./components/MarkAttendance";
+import DocumentSkeleton from "./components/DocumentSkeleton";
+import { FaCalendar, FaPhone } from "react-icons/fa6";
+import { FaFileAlt } from "react-icons/fa";
+
+// ---------------- Reusable EmptyState ----------------
+function EmptyState({
+  title,
+  description,
+  icon,
+  action,
+}: {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center text-center rounded-2xl border border-border bg-surface p-8 space-y-4 animate-fade">
+      <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary">
+        {icon}
+      </div>
+      <h3 className="text-lg font-semibold text-text">{title}</h3>
+      <p className="text-sm text-text-placeholder max-w-sm">{description}</p>
+      {action && <div className="mt-3">{action}</div>}
+    </div>
+  );
+}
+
+// ---------------- Home Page ----------------
 export default function Home() {
   const { user } = useAuth();
   const { isMobile } = useResponsive();
 
-  // Gracefully handle missing user
   const fullName = user
     ? `${user.first_name} ${user.last_name}`.trim()
     : "Guest";
 
   const [openModal, setOpenModal] = useState(false);
-  // const [selectEventID, setSelectEventID] = useState(0);
   const [announcements, setAnnouncments] = useState<any>([]);
-
   const [index, setIndex] = useState(0);
   const [anim, setAnim] = useState("slideInRight");
   const [ongoingEvents, setOngoingEvents] = useState([]);
@@ -43,9 +67,9 @@ export default function Home() {
   const [docs, setDocs] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState({});
   const [loadingDocs, SetLoadingDocs] = useState(true);
-  // const [loadingOngoing, SetLoadingOngoing] = useState(true);
   const [loadingUpcoming, SetLoadingUpcoming] = useState(true);
 
+  // Animation cycle for announcements
   const move = () => {
     setAnim("slideOutLeft");
     setTimeout(() => {
@@ -55,7 +79,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const timer = setInterval(move, 30_000); // 30sec
+    const timer = setInterval(move, 30_000);
     return () => clearInterval(timer);
   }, [announcements.length]);
 
@@ -71,38 +95,23 @@ export default function Home() {
       .then(({ data: { data } }) => {
         setAnnouncments(data.filter((d: any) => !d.read));
       })
-      .catch((e) => {
-        console.log(e);
-      });
+      .catch(console.error);
   };
 
   useEffect(fetchAnn, []);
 
   useEffect(() => {
-    //fetch ongoing events
-    fetchEvents().then(({ data: { data } }) => {
-      setOngoingEvents(data);
-    });
+    fetchEvents().then(({ data: { data } }) => setOngoingEvents(data));
 
-    //fetch upcoming (Next) events
     fetchEvents("upcoming")
-      .then(({ data: { data } }) => {
-        setUpcomingEvents(data);
-      })
+      .then(({ data: { data } }) => setUpcomingEvents(data))
       .catch(() => {})
-      .finally(() => {
-        SetLoadingUpcoming(false);
-      });
+      .finally(() => SetLoadingUpcoming(false));
 
-    //fetch documents
     fetchDocs()
-      .then(({ data: { data } }) => {
-        setDocs(data);
-      })
+      .then(({ data: { data } }) => setDocs(data))
       .catch(() => {})
-      .finally(() => {
-        SetLoadingDocs(false);
-      });
+      .finally(() => SetLoadingDocs(false));
   }, []);
 
   return (
@@ -120,20 +129,19 @@ export default function Home() {
         </section>
 
         <div className="rounded-2xl p-3 sm:p-3 lg:p-3 max-w-5xl mx-auto space-y-8">
-          {/* ---------------- Quick Stats ---------------- */}
-          {Array.isArray(announcements) && announcements.length > 0 && (
+          {/* ---------------- Announcements ---------------- */}
+          {announcements.length > 0 ? (
             <section className="space-y-3 overflow-hidden">
               <h2 className="text-xl font-semibold text-text">Announcements</h2>
-
               <div
-                className={`animated ${anim} border border-border bg-surface rounded-2xl p-3 sm:p-3 lg:p-3 max-w-5xl mx-auto space-y-8`}
+                className={`animated ${anim} border border-border bg-surface rounded-2xl p-3 sm:p-3 lg:p-3 space-y-8`}
               >
                 <div className="flex items-end justify-between">
-                  <div className="md:max-w-[80%] max-w-[100%]">
+                  <div className="md:max-w-[80%] max-w-full">
                     <div className="text-xl font-semibold text-text mb-1">
                       {announcements[index]?.title}
                     </div>
-                    <p className="w-[100%] text-text-placeholder">
+                    <p className="text-text-placeholder">
                       {announcements[index]?.body}
                     </p>
                   </div>
@@ -141,7 +149,6 @@ export default function Home() {
                     <Button
                       variant="outline"
                       size="lg"
-                      className="w-full sm:w-auto"
                       onClick={() => readAnn(announcements[index]?.id)}
                     >
                       Got it
@@ -150,18 +157,21 @@ export default function Home() {
                 </div>
               </div>
             </section>
+          ) : (
+            <EmptyState
+              title="No Announcements"
+              description="You’re all caught up! No new announcements at the moment."
+              icon={<FaPhone size={28} />}
+            />
           )}
 
+          {/* ---------------- Due Payments ---------------- */}
           <section className="space-y-3">
-            <div className="flex justify-between items-left flex-col sm:flex-row gap-[10px]">
+            <div className="flex justify-between items-left flex-col sm:flex-row gap-3">
               <h2 className="text-xl font-semibold text-text">Due payments</h2>
-              <div className="w-full max-w-[150px] ">
-                <Button
-                  variant="primary"
-                  size="md"
-                  className="w-full animate-fade transition-all"
-                >
-                  Pay All (N14,750){" "}
+              <div className="w-full max-w-[150px]">
+                <Button variant="primary" size="md" className="w-full">
+                  Pay All (N14,750)
                 </Button>
               </div>
             </div>
@@ -193,26 +203,27 @@ export default function Home() {
             </div>
           </section>
 
-          {ongoingEvents?.length > 0 && (
+          {/* ---------------- Ongoing Events ---------------- */}
+          {ongoingEvents.length > 0 ? (
             <section className="space-y-3">
               <h2 className="text-xl font-semibold text-text">
                 Ongoing Events
               </h2>
-
               {ongoingEvents.map((ev: any, idx) => (
-                <div key={idx} className="border border-border bg-surface rounded-2xl p-3 sm:p-3 lg:p-3 max-w-5xl mx-auto space-y-8">
+                <div
+                  key={idx}
+                  className="border border-border bg-surface rounded-2xl p-3 space-y-8"
+                >
                   <div className="flex items-center justify-between flex-col sm:flex-row gap-4">
-                    <div className="text-xl flex justify-center items-center font-semibold text-text mb-1">
+                    <div className="text-xl flex items-center font-semibold text-text">
                       {ev?.name}
-                      <small className="text-[red] text-[12px] bg-[#ff00002a] px-[4px] rounded ml-[7px]">
+                      <small className="text-red-600 text-xs bg-red-100 px-2 rounded ml-2">
                         LIVE
                       </small>
                     </div>
-
                     <Button
                       variant="primary"
                       size="lg"
-                      className="w-full sm:w-auto"
                       onClick={() => {
                         setSelectedEvent(ev);
                         setOpenModal(true);
@@ -224,70 +235,86 @@ export default function Home() {
                 </div>
               ))}
             </section>
+          ) : (
+            <EmptyState
+              title="No Ongoing Events"
+              description="There are no live events happening right now. Check back later!"
+              icon={<FaCalendar size={28} />}
+            />
           )}
 
-          <section className="grid gap-4 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2">
-            {loadingUpcoming && <DocumentSkeleton />}
-            {!loadingUpcoming && upcomingEvents.length > 0 && (
-              <div className="border border-border bg-surface rounded-2xl p-3 sm:p-3 lg:p-3 space-y-3">
+          {/* ---------------- Upcoming Events & Documents ---------------- */}
+          <section className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+            {/* Next Events */}
+            {loadingUpcoming ? (
+              <DocumentSkeleton />
+            ) : upcomingEvents.length ? (
+              <div className="border border-border bg-surface rounded-2xl p-3 space-y-3">
                 <div className="flex justify-between items-center w-full">
                   <h2 className="text-text-placeholder">Next Events</h2>
-                  <Link to={"/dashboard/events"} className="text-primary">
+                  <Link to="/dashboard/events" className="text-primary">
                     See all
                   </Link>
                 </div>
-
-                {
-                  ((upcomingEvents.length = 3),
-                  upcomingEvents.map(
-                    ({ name, day, date, time, venue, month }: any, idx) => (
-                      <div
-                        key={idx}
-                        className="flex justify-between items-center border-b-2 border-border p-2"
-                      >
-                        <div>
-                          <div className="text-[18px] text-text">{name}</div>
-                          <p className="text-text-placeholder">{venue}</p>
-                        </div>
-                        <div className="text-text-placeholder">
-                          {date
-                            ? formatDateTime(date, time)
-                            : day?.includes("5th")
-                            ? "Last Sunday"
-                            : isNaN(day)
-                            ? day
-                            : formatDateTime(
-                                `2025-${formatNum(month)}-${formatNum(day)}`,
-                                time
-                              )}
-                        </div>
+                {upcomingEvents
+                  .slice(0, 3)
+                  .map(({ name, day, date, time, venue, month }: any, idx) => (
+                    <div
+                      key={idx}
+                      className="flex justify-between items-center border-b border-border p-2"
+                    >
+                      <div>
+                        <div className="text-lg text-text">{name}</div>
+                        <p className="text-text-placeholder">{venue}</p>
                       </div>
-                    )
-                  ))
-                }
+                      <div className="text-sm text-text-placeholder">
+                        {date
+                          ? formatDateTime(date, time)
+                          : day?.includes("5th")
+                          ? "Last Sunday"
+                          : isNaN(day)
+                          ? day
+                          : formatDateTime(
+                              `2025-${formatNum(month)}-${formatNum(day)}`,
+                              time
+                            )}
+                      </div>
+                    </div>
+                  ))}
               </div>
+            ) : (
+              <EmptyState
+                title="No Upcoming Events"
+                description="Stay tuned! Upcoming events will appear here."
+                icon={<FaCalendar size={28} />}
+                action={
+                  <Button variant="primary" size="sm">
+                    <Link to="/dashboard/events/">Create Event</Link>
+                  </Button>
+                }
+              />
             )}
 
             {/* Documents */}
-            {loadingDocs && <DocumentSkeleton />}
-            {!loadingDocs && docs.length > 0 && (
-              <div className="border border-border bg-surface rounded-2xl p-3 sm:p-3 lg:p-3 space-y-2">
+            {loadingDocs ? (
+              <DocumentSkeleton />
+            ) : docs.length > 0 ? (
+              <div className="border border-border bg-surface rounded-2xl p-3 space-y-2">
                 <div className="flex justify-between items-center w-full">
                   <h2 className="text-text-placeholder">Documents</h2>
-                  <Link to={"/dashboard/events"} className="text-primary">
+                  <Link to="/dashboard/documents" className="text-primary">
                     See all
                   </Link>
                 </div>
-
-                {
-                  ((docs.length = 3),
-                  docs.map(({ paths, name, descr, type }: any, id) => (
+                {docs
+                  .slice(0, 3)
+                  .map(({ paths, name, descr, type }: any, id) => (
                     <div
                       key={id}
-                      className="flex justify-between items-center rounded-xl border-2 border-border py-3 px-4"
+                      className="flex justify-between items-center rounded-xl border border-border py-3 px-4"
                     >
                       <div>
-                        <div className="text-[18px] text-text">{name}</div>
+                        <div className="text-lg text-text">{name}</div>
                         <p className="text-text-placeholder">
                           {!descr || descr?.length === 0 ? type : descr}
                         </p>
@@ -297,13 +324,22 @@ export default function Home() {
                         size="sm"
                         onClick={() => handleDownload(paths, name)}
                       >
-                        {" "}
-                        Download{" "}
+                        Download
                       </Button>
                     </div>
-                  )))
-                }
+                  ))}
               </div>
+            ) : (
+              <EmptyState
+                title="No Documents Yet"
+                description="You haven’t uploaded or received any documents."
+                icon={<FaFileAlt size={28} />}
+                action={
+                  <Button variant="primary" size="sm">
+                    <Link to="/dashboard/documents/">Upload Document</Link>
+                  </Button>
+                }
+              />
             )}
           </section>
         </div>

@@ -1,6 +1,6 @@
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
-import type { Event } from "../../types";
-import FormInput from "../../../../components/ui/FormInput";
+import type { Event } from "../../../types";
+import FormInput from "../../../../../components/ui/FormInput";
 import { FaCalendarDays } from "react-icons/fa6";
 
 interface DateTimeSectionProps {

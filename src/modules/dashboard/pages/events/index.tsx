@@ -4,8 +4,8 @@ import { Button } from "../../../../components/ui/Button";
 import { FaCalendarPlus, FaCalendarAlt } from "react-icons/fa";
 import DashboardLayout from "../../components/Layout";
 import { type Event as AppEvent } from "../../types";
-import { EventCard } from "../components/EventCard";
-import { EventModalWrapper } from "../components/EventModal";
+import { EventCard } from "./components/EventCard";
+import { EventModal } from "./components/EventModal";
 import { useEventModal } from "../../hook/useEventModal";
 import {
   deleteEvent,
@@ -18,6 +18,7 @@ import {
   sortEvents,
 } from "../../utils/Helper";
 import { toast } from "react-toastify";
+import { EmptyState } from "../../../../components/ui/EmptyState";
 
 /** ---------- Skeleton Loader ---------- */
 const EventCardSkeleton = () => (
@@ -33,7 +34,7 @@ export default function Events() {
   const [loading, setLoading] = useState(true);
 
   /** ---------- Modal Hook ---------- */
-  const { modalRef, showModal, newEvent, openModal, closeModal, submitEvent } =
+  const { showModal, newEvent, openModal, closeModal, submitEvent } =
     useEventModal({
       handleAddEvent: (fresh: AppEvent) =>
         setEvents((prev) => (fresh ? [fresh, ...prev] : prev)),
@@ -147,55 +148,57 @@ export default function Events() {
   /** ---------- Render ---------- */
   return (
     <DashboardLayout>
-      <main className="max-w-6xl mx-auto space-y-8 lg:py-8 py-6">
-        {/* Header */}
-        <section className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+      <main className="max-w-6xl mx-auto space-y-6 lg:py-8 py-6 animate-fade">
+        {/* Page Header */}
+        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3">
             <FaCalendarAlt className="text-accent text-2xl" />
-            <h1 className="text-xl sm:text-2xl font-bold text-text">Events</h1>
+            <div>
+              <h2 className="text-2xl font-bold text-text">Events</h2>
+              <p className="text-text-placeholder mt-1">
+                Stay on track and manage upcoming activities
+              </p>
+            </div>
           </div>
 
           <Button
             variant="primary"
-            textSize="xs"
             className="gap-2"
             onClick={() => openModal()}
           >
             <FaCalendarPlus /> Add Event
           </Button>
-        </section>
+        </header>
 
         {/* Events List */}
-        <section>
-          {loading && events.length === 0 ? (
-            <div className="grid gap-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <EventCardSkeleton key={i} />
-              ))}
-            </div>
-          ) : events.length === 0 ? (
-            <div className="py-16 text-center space-y-4">
-              <p className="text-text-placeholder">No events available.</p>
-              <Button variant="primary" size="sm" onClick={() => openModal()}>
-                Add Your First Event
-              </Button>
-            </div>
-          ) : (
-            <div className="grid gap-4">{renderedEvents}</div>
+        <div className="grid gap-4">
+          {loading &&
+            events.length === 0 &&
+            Array.from({ length: 3 }).map((_, i) => (
+              <EventCardSkeleton key={i} />
+            ))}
+
+          {!loading && events.length > 0 && renderedEvents}
+
+          {!loading && events.length === 0 && (
+            <EmptyState
+              title="No Events Yet"
+              description="You haven’t created any events yet. Start by adding your first event to keep track of your schedule."
+              icon={<FaCalendarAlt className="w-16 h-16 text-primary/80" />}
+              actionLabel="Create Event"
+              onAction={() => openModal()}
+            />
           )}
-        </section>
+        </div>
 
         {/* Modal */}
         {showModal &&
           ReactDOM.createPortal(
-            <EventModalWrapper
-              modalRef={modalRef}
-              handleModalClick={(e) => {
-                if (e.target === modalRef.current) closeModal();
-              }}
+            <EventModal
+              isOpen={showModal}
+              onClose={closeModal}
               event={newEvent}
               submitEvent={handleSubmitEvent}
-              closeModal={closeModal}
             />,
             document.body
           )}

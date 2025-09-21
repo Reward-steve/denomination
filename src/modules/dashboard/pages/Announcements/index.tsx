@@ -34,13 +34,13 @@ export default function Announcements() {
     create: {
       text: "Submit",
       busy: "Submitting...",
-      action: (x: any) => postAnnc(x)
+      action: (x: any) => postAnnc(x),
     },
     edit: {
       text: "Save",
       busy: "Saving...",
-      action: (x: any) => saveEdit(x)
-    }
+      action: (x: any) => saveEdit(x),
+    },
   };
   const [annc, setAnnc] = useState<iAnnouncements[]>([]);
   const [buttonState, setButtonState] = useState(btnState.create);
@@ -48,29 +48,34 @@ export default function Announcements() {
   const [postingAnnc, setPostingAnnc] = useState(false);
   const [openModal, setOpenModal] = useState(false);
 
-
-  const [formData, setFormData] = useState<iAnnouncements>({ title: "", body: "", id: 0 });
+  const [formData, setFormData] = useState<iAnnouncements>({
+    title: "",
+    body: "",
+    id: 0,
+  });
 
   const [options, setOptions] = useState<any>({
-    search: "", page: 1, per_page: 100
+    search: "",
+    page: 1,
+    per_page: 100,
   });
 
   // Handle file selection
   useEffect(() => {
-    FetchAnnc(options).then(({ data: { data } }) => {
-      setAnnc(data);
-    }).catch(() => {
-
-    }).finally(() => {
-      setLoading(false);
-    })
+    FetchAnnc(options)
+      .then(({ data: { data } }) => {
+        setAnnc(data);
+      })
+      .catch(() => {})
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
-
 
   const handleModalClosing = () => {
     setFormData({ title: "", body: "", id: 0 });
     setOpenModal(false);
-  }
+  };
 
   // Delete announcement
 
@@ -89,65 +94,93 @@ export default function Announcements() {
     setButtonState(btnState.edit);
   };
 
-  const saveEdit = useCallback((f: any) => {
-    setPostingAnnc(true);
-    console.log(f);
-    
-    UpdateAnnc(f, f.id).then(({ data: { data } }) => {
-      //find id in annc and update it with data
-      setAnnc((p) => p.map((item) => (item.id === data.id ? data : item)));
-      setOpenModal(false);
-      setFormData({ title: "", body: "", id: 0 });
-      setButtonState(btnState.create);
-    }).catch((e) => {
-      console.log(e);
+  const saveEdit = useCallback(
+    (f: any) => {
+      setPostingAnnc(true);
+      console.log(f);
 
-    }).finally(() => {
-      setPostingAnnc(false);
-    })
-
-  }, [formData.body, formData.title, formData.id]);
+      UpdateAnnc(f, f.id)
+        .then(({ data: { data } }) => {
+          //find id in annc and update it with data
+          setAnnc((p) => p.map((item) => (item.id === data.id ? data : item)));
+          setOpenModal(false);
+          setFormData({ title: "", body: "", id: 0 });
+          setButtonState(btnState.create);
+        })
+        .catch((e) => {
+          console.log(e);
+        })
+        .finally(() => {
+          setPostingAnnc(false);
+        });
+    },
+    [formData.body, formData.title, formData.id]
+  );
 
   const postAnnc = (a = null) => {
-    CreateAnnc(formData).then(({ data: { data } }) => {
-      toast.success("Announcement Broadcasted!!!");
-      setOpenModal(false);
-      setAnnc([data, ...annc]);
-      sendNotification({ title: data.title, body: data.body });
-      setFormData({ title: "", body: "", id: 0 });
-    }).catch((e) => {
-      console.log(e);
-      toast.error("Could not Broadcast your announcement. Try again later");
-
-    }).finally(() => {
-      setPostingAnnc(false);
-    });
-
+    CreateAnnc(formData)
+      .then(({ data: { data } }) => {
+        toast.success("Announcement Broadcasted!!!");
+        setOpenModal(false);
+        setAnnc([data, ...annc]);
+        sendNotification({ title: data.title, body: data.body });
+        setFormData({ title: "", body: "", id: 0 });
+      })
+      .catch((e) => {
+        console.log(e);
+        toast.error("Could not Broadcast your announcement. Try again later");
+      })
+      .finally(() => {
+        setPostingAnnc(false);
+      });
   };
 
   return (
     <DashboardLayout>
-
-      {openModal && <Modal title={"New Announcement"} setClose={handleModalClosing}>
-        <div className="p-4 min-w-[200px] sm:min-w-[500px]">
-          <FormInput value={formData.title} label="Title" placeholder="Announcement Title" type="text" className="mb-4"
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
-          <TextArea value={formData.body} label="Body" placeholder="What is the announcement?" className="mb-4" rows={7}
-            onChange={(e) => setFormData({ ...formData, body: e.target.value })} />
-          <div className="flex justify-end gap-2 mt-4">
-            <Button variant="gray" onClick={handleModalClosing}>Cancel</Button>
-            <Button variant="primary" onClick={() => buttonState.action(formData)}>
-              {
-                postingAnnc ? (<>
-                  <Loader />
-                  <span>{buttonState.busy}</span>
-                </>) : <span>{buttonState.text}</span>
+      {openModal && (
+        <Modal title={"New Announcement"} onClose={handleModalClosing}>
+          <div className="p-4 min-w-[200px] sm:min-w-[500px]">
+            <FormInput
+              value={formData.title}
+              label="Title"
+              placeholder="Announcement Title"
+              type="text"
+              className="mb-4"
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
               }
-            </Button>
+            />
+            <TextArea
+              value={formData.body}
+              label="Body"
+              placeholder="What is the announcement?"
+              className="mb-4"
+              rows={7}
+              onChange={(e) =>
+                setFormData({ ...formData, body: e.target.value })
+              }
+            />
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="gray" onClick={handleModalClosing}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => buttonState.action(formData)}
+              >
+                {postingAnnc ? (
+                  <>
+                    <Loader />
+                    <span>{buttonState.busy}</span>
+                  </>
+                ) : (
+                  <span>{buttonState.text}</span>
+                )}
+              </Button>
+            </div>
           </div>
-        </div>
-      </Modal>}
-
+        </Modal>
+      )}
 
       <section className="space-y-6 animate-fade">
         {/* Page Header */}
@@ -159,19 +192,31 @@ export default function Announcements() {
             </p>
           </div>
 
-          <Button variant="primary" className="gap-2" onClick={() => setOpenModal(true)}>
+          <Button
+            variant="primary"
+            className="gap-2"
+            onClick={() => setOpenModal(true)}
+          >
             Make Announcement
           </Button>
         </header>
 
         <div className="grid gap-4">
-          {loading && Array.from({ length: 3 }).map((_, i) => (
-            <AnncCardSkeleton key={i} />
-          ))}
+          {loading &&
+            Array.from({ length: 3 }).map((_, i) => (
+              <AnncCardSkeleton key={i} />
+            ))}
 
-          {!loading && annc.map((a, idx) => (<AnncCard data={a} key={idx} onEdit={() => handleEdit(a)} onDelete={() => handleDelete(a.id)} />))}
+          {!loading &&
+            annc.map((a, idx) => (
+              <AnncCard
+                data={a}
+                key={idx}
+                onEdit={() => handleEdit(a)}
+                onDelete={() => handleDelete(a.id)}
+              />
+            ))}
         </div>
-
       </section>
     </DashboardLayout>
   );

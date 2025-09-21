@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { Button } from "../../../../components/ui/Button";
+import { Button } from "../../../../../components/ui/Button";
 interface StatCardProps {
   amount: string;
   fee: string;

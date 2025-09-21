@@ -1,9 +1,9 @@
 import { MdEdit } from "react-icons/md";
 import { FaTrash, FaClock, FaRepeat } from "react-icons/fa6";
 import { FaMapMarkerAlt, FaCalendarAlt } from "react-icons/fa";
-import { Button } from "../../../../components/ui/Button";
-import type { EventCardProps } from "../../types";
-import { formatTimeToAMPM, getRecurrenceText } from "../../utils/Helper";
+import { Button } from "../../../../../components/ui/Button";
+import type { EventCardProps } from "../../../types";
+import { formatTimeToAMPM, getRecurrenceText } from "../../../utils/Helper";
 
 export const EventCard = ({ event, onEdit, onDelete }: EventCardProps) => {
   /** ---------- Date & Time ---------- */

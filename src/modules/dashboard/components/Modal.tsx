@@ -1,44 +1,126 @@
+// components/ui/Modal.tsx
+import { useEffect, useRef } from "react";
+import clsx from "clsx";
+import { FaX } from "react-icons/fa6";
 import { useResponsive } from "../../../hooks/useResponsive";
-import { FaTimes } from "react-icons/fa";
 
-export const Modal = ({ children, title = "", setClose = null }: any) => {
+interface ModalProps {
+  isOpen?: boolean;
+  onClose: () => void;
+  title?: string;
+  children: React.ReactNode;
+  size?: "sm" | "md" | "lg";
+  closeOnOverlayClick?: boolean;
+  closeOnEsc?: boolean;
+}
+
+export const Modal = ({
+  isOpen,
+  onClose,
+  title = "",
+  children,
+  size = "md",
+  closeOnOverlayClick = true,
+  closeOnEsc = true,
+}: ModalProps) => {
   const { isMobile } = useResponsive();
+  const modalRef = useRef<HTMLDivElement>(null);
 
-  const className = isMobile
-    ? "bg-surface rounded-t-3xl w-full h-full shadow-2xl relative"
-    : "bg-surface rounded-2xl w-auto shadow-2xl relative";
+  // --- Lock body scroll when open ---
+  useEffect(() => {
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isOpen]);
+
+  // --- Escape key handling ---
+  useEffect(() => {
+    if (!isOpen || !closeOnEsc) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [isOpen, closeOnEsc, onClose]);
+
+  // --- Autofocus first focusable ---
+  useEffect(() => {
+    if (!isOpen) return;
+    const el = modalRef.current?.querySelector<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    el?.focus();
+  }, [isOpen]);
+
+  // --- Sizes ---
+  const sizeClass = {
+    sm: "max-w-md",
+    md: "max-w-xl",
+    lg: "max-w-2xl",
+  }[size];
+
+  // --- Overlay ---
+  const overlayClasses = clsx(
+    "fixed inset-0 z-50 flex bg-black/50 backdrop-blur-sm",
+    isMobile ? "items-end justify-center" : "items-center justify-center",
+    "animate-fade-in"
+  );
+
+  // --- Modal Panel ---
+  const panelClasses = clsx(
+    "relative w-full max-h-[90vh] overflow-y-auto shadow-xl bg-surface pt-0",
+    "p-4 md:p-6",
+    isMobile
+      ? "rounded-t-3xl animate-slide-up"
+      : `rounded-2xl ${sizeClass} animate-zoom-in`
+  );
+
+  // --- Overlay click ---
+  const handleOverlayClick = () => {
+    if (closeOnOverlayClick) onClose();
+  };
+
+  // --- Don’t render UI if closed ---
+  if (!isOpen) return null;
 
   return (
     <div
-      className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fadeIn"
+      className={overlayClasses}
       role="dialog"
       aria-modal="true"
-      aria-labelledby="event-modal-title"
+      aria-labelledby="modal-title"
+      onClick={handleOverlayClick}
     >
-      <div className={className} onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4 border-b-2 p-3 border-border">
+      <div
+        ref={modalRef}
+        className={panelClasses}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* --- Header --- */}
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-surface py-4">
           <h2
-            id="event-modal-title"
-            className="text-xl font-semibold text-text"
+            id="modal-title"
+            className="text-lg sm:text-xl font-semibold text-text"
           >
             {title}
           </h2>
           <button
-            onClick={() => setClose && setClose(false)}
-            className="p-2 rounded-full hover:bg-background/70 transition-colors"
+            onClick={onClose}
             aria-label="Close modal"
+            className="p-2 rounded-full hover:bg-background/70 transition-colors"
           >
-            {isMobile ? (
-              <div className="text-primary">Close</div>
-            ) : (
-              <FaTimes className="h-5 w-5 text-text-secondary" />
-            )}
+            <FaX size={16} className="text-primary" />
           </button>
-        </div>
+        </header>
 
-        <div className="content">{children}</div>
+        {/* --- Body --- */}
+        <div className="space-y-5">{children}</div>
       </div>
     </div>
   );
 };
+
+export default Modal;

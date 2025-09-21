@@ -29,7 +29,7 @@ export const ROUTES = {
     DOCUMENTS: "documents",
     SONGS: "songs",
     SERMON: "sermon",
-    ANNOUNCEMENT: "announcement",
+    ANNOUNCEMENT: "announcements",
   },
   AUTH: {
     PERSONAL_INFO: "personal-info",

@@ -1,82 +1,197 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/Layout";
 import { Button } from "../../../../components/ui/Button";
-import { FaUserPlus, FaUserCircle } from "react-icons/fa";
 import img from "../../../../assets/images/avater.jpg";
 import { fetchUsers } from "./services";
 import UserCardSkeleton from "./component/UserCardSkeleton";
 
-interface iTab {
-  all?: boolean;
-  exco?: boolean;
-  data: Array<Record<string, any>>;
+// Types
+interface User {
+  id: string | number;
+  first_name: string;
+  middle_name?: string;
+  last_name: string;
+  photo?: string;
+  is_exco?: boolean;
+  positions?: string[];
 }
 
-//type for tab state, e.g all,ex
+interface TabState {
+  all: boolean;
+  exco: boolean;
+  data: User[];
+}
+
+interface FetchOptions {
+  search: string;
+  page: number;
+  per_page: number;
+}
 
 export default function Users() {
-  const [users, setUsers] = useState<Array<Record<string, any>>>([]);
-  const [loadingUser, setLoadingUser] = useState(true);
+  // States
+  const [users, setUsers] = useState<User[]>([]);
+  const [loadingUser, setLoadingUser] = useState<boolean>(true);
 
-  const [tab, setTab] = useState<iTab>({
-    "all": true, "exco": false, data: []
+  const [tab, setTab] = useState<TabState>({
+    all: true,
+    exco: false,
+    data: [],
   });
 
-  const [options, setOptions] = useState<any>({
-    search: "", page: 1, per_page: 100
+  const [options, setOptions] = useState<FetchOptions>({
+    search: "",
+    page: 1,
+    per_page: 12,
   });
 
-  const handleTabClicking = (type: "all" | "exco" = "all") => {
+  // Handle tab switching
+  const handleTabClicking = (type: "all" | "exco") => {
     setTab({
       all: type === "all",
       exco: type === "exco",
-      data: type === "all" ? users : users.filter((u) => u.is_exco)
+      data: type === "all" ? users : users.filter((u) => u.is_exco),
     });
   };
 
-  useEffect(() => {
-    fetchUsers(options).then(({ data: { data } }) => {
-      setTab({
-        all: true,
-        exco: false,
-        data: data
-      });
-      setUsers(data);
-    }).catch((e) => {
-      console.log(e);
+  // Handle search
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setOptions((prev) => ({
+      ...prev,
+      search: e.target.value,
+      page: 1, // reset to first page
+    }));
+  };
 
-    }).finally(() => {
-      setLoadingUser(false);
-    })
-  }, [])
+  // Handle pagination
+  const handleNextPage = () => {
+    setOptions((prev) => ({ ...prev, page: prev.page + 1 }));
+  };
+
+  const handlePrevPage = () => {
+    setOptions((prev) => ({ ...prev, page: Math.max(1, prev.page - 1) }));
+  };
+
+  // Fetch users on mount & when options change
+  useEffect(() => {
+    const loadUsers = async () => {
+      setLoadingUser(true);
+      try {
+        const {
+          data: { data },
+        } = await fetchUsers(options);
+
+        setUsers(data);
+        setTab({
+          all: true,
+          exco: false,
+          data,
+        });
+      } catch (error) {
+        console.error("Failed to fetch users:", error);
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+
+    loadUsers();
+  }, [options]);
 
   return (
     <DashboardLayout>
+      {/* Header with search & tabs */}
+      <header className="flex flex-col border-b border-border sticky bg-background top-[56px] sm:top-[64px] gap-4 mb-4">
+        <div className="flex items-center justify-between">
+          {/* Tabs */}
+          <div className="flex gap-6">
+            <div
+              className={`${
+                tab.all ? "border-b-4" : ""
+              } border-primary hover:bg-[#3b82f830]`}
+            >
+              <Button variant="ghost" onClick={() => handleTabClicking("all")}>
+                All
+              </Button>
+            </div>
+            <div
+              className={`${
+                tab.exco ? "border-b-4" : ""
+              } border-primary hover:bg-[#3b82f830]`}
+            >
+              <Button variant="ghost" onClick={() => handleTabClicking("exco")}>
+                Executive
+              </Button>
+            </div>
+          </div>
 
-      <header className="flex flex-col border-b border-border sticky bg-background top-[56px] sm:top-[64px] sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-        <div className="flex gap-6">
-          <div className={`${tab?.all ? 'border-b-4' : ''} border-primary hover:bg-[#3b82f830]`}><Button variant="ghost" onClick={() => handleTabClicking('all')}>All</Button></div>
-          <div className={`${tab?.exco ? 'border-b-4' : ''} border-primary hover:bg-[#3b82f830]`}><Button variant="ghost" onClick={() => handleTabClicking('exco')}>Executive</Button></div>
+          {/* Search Bar */}
+          <input
+            type="text"
+            placeholder="Search users..."
+            value={options.search}
+            onChange={handleSearch}
+            className="px-3 py-2 border rounded-md text-sm"
+          />
         </div>
       </header>
 
+      {/* User List */}
+      {loadingUser ? (
+        <UserCardSkeleton />
+      ) : (
+        <>
+          <section className="grid gap-3 sm:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            {tab.data.map((user) => (
+              <article
+                key={user.id}
+                className="flex flex-col items-start gap-3 p-4 bg-surface text-text rounded-xl shadow-sm"
+              >
+                {/* User Image */}
+                <div className="w-full h-[12rem] overflow-hidden rounded">
+                  <img
+                    src={
+                      user.photo
+                        ? `${import.meta.env.VITE_BASE_URL.split("/api/")[0]}/${
+                            user.photo
+                          }`
+                        : img
+                    }
+                    alt={`${user.first_name} ${user.last_name}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
 
-      {/* <section className="overflow-scroll "> h-[calc(100vh-250px)] sm:h-[calc(100vh-200px)]*/}
-      {loadingUser && <UserCardSkeleton />}
+                {/* User Info */}
+                <div className="flex flex-col items-start gap-1">
+                  <div>
+                    {`${user.first_name} ${user.middle_name || ""} ${
+                      user.last_name
+                    }`}
+                  </div>
+                  <div className="text-gray-500">
+                    {user.is_exco ? user.positions?.join(", ") : "Member"}
+                  </div>
+                </div>
+              </article>
+            ))}
+          </section>
 
-      {!loadingUser && <div className="grid gap-3 sm:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 ">
-        {tab.data.map((user) => (<div className="flex flex-col items-start gap-3 p-4 bg-surface text-text rounded-xl shadow-sm">
-          <div className="w-full h-[12rem] overflow-hidden rounded">
-            <img src={user.photo ? `${import.meta.env.VITE_BASE_URL.split("/api/")[0]}/${user.photo}` : img} alt=" " className="w-full h-full object-cover" />
+          {/* Pagination Controls */}
+          <div className="flex justify-center items-center gap-4 mt-6">
+            <Button
+              variant="outline"
+              onClick={handlePrevPage}
+              disabled={options.page === 1}
+            >
+              Previous
+            </Button>
+            <span>Page {options.page}</span>
+            <Button variant="outline" onClick={handleNextPage}>
+              Next
+            </Button>
           </div>
-          <div className="flex flex-col items-start gap-1">
-            <div>{`${user?.first_name} ${user?.middle_name || ''} ${user?.last_name}`}</div>
-            <div className="text-gray-500">{user.is_exco ? user?.positions?.join(', ') : 'Member'}</div>
-          </div>
-        </div>))}
-      </div>}
-
-      {/* </section> */}
+        </>
+      )}
     </DashboardLayout>
   );
 }
