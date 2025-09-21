@@ -115,7 +115,7 @@ export default function Home() {
         {/* ---------------- Intro Section ---------------- */}
         <section className="space-y-2 my-4 sm:my-8">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-text animate-fade">
-            Welcome back, <span className="text-primary">{fullName}</span> 👋
+            Welcome back, <span className="text-primary">{fullName}</span>
           </h1>
         </section>
 
@@ -199,8 +199,8 @@ export default function Home() {
                 Ongoing Events
               </h2>
 
-              {ongoingEvents.map((ev: any) => (
-                <div className="border border-border bg-surface rounded-2xl p-3 sm:p-3 lg:p-3 max-w-5xl mx-auto space-y-8">
+              {ongoingEvents.map((ev: any, idx) => (
+                <div key={idx} className="border border-border bg-surface rounded-2xl p-3 sm:p-3 lg:p-3 max-w-5xl mx-auto space-y-8">
                   <div className="flex items-center justify-between flex-col sm:flex-row gap-4">
                     <div className="text-xl flex justify-center items-center font-semibold text-text mb-1">
                       {ev?.name}

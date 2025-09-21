@@ -190,6 +190,13 @@ export function buildPersonalInfoPayload(
 /* ----------------------------------------
  * Reusable form component props
  * --------------------------------------*/
+export type TextAreaProps = ComponentPropsWithoutRef<"textarea"> & {
+  label?: string;
+  register?: UseFormRegisterReturn;
+  error?: FieldError;
+  styles?: Record<string, string>;
+  optional?: boolean;
+};
 export type FormInputProps = ComponentPropsWithoutRef<"input"> & {
   label?: string;
   icon?: IconType;

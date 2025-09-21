@@ -199,3 +199,15 @@ export const handleDownload = async (paths: Array<string>, name: string) => {
   // Trigger download
   saveAs(content, "ucca-files.zip");
 };
+
+export function objectToQueryParam<T extends Record<string, any>>(obj: T): string {
+  // Filter out properties that are undefined, null, or empty strings.
+  const filteredEntries = Object.entries(obj).filter(([_, value]) =>
+    value !== undefined && value !== null && value !== ''
+  );
+
+  // Map each entry to a URL-encoded key-value pair.
+  const queryString = new URLSearchParams(filteredEntries as any).toString();
+
+  return (queryString.length > 0) ? '?' + queryString : queryString;
+}
