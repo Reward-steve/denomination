@@ -181,7 +181,7 @@ function DesktopHeader({
 }: any) {
   return (
     <div className="h-16 flex justify-center items-end w-full">
-      <div className="h-[87%] w-full flex items-center justify-between bg-surface border border-border px-4 rounded-md relative">
+      <div className="h-full w-full flex items-center justify-between bg-surface px-4 rounded-md relative">
         {/* Search Bar */}
         <form className="flex-1 max-w-md">
           <label className="flex items-center gap-2 p-2 border border-border rounded-md w-full bg-smooth">

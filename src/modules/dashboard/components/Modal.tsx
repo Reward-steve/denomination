@@ -64,7 +64,7 @@ export const Modal = ({
 
   // --- Overlay ---
   const overlayClasses = clsx(
-    "fixed inset-0 z-50 flex bg-black/50 backdrop-blur-sm",
+    "fixed inset-0 z-[9999] w-screen h-screen flex bg-black/50 backdrop-blur-sm",
     isMobile ? "items-end justify-center" : "items-center justify-center",
     "animate-fade-in"
   );
