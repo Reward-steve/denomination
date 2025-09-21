@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { FaCheck, FaUser } from "react-icons/fa6";
 
 import FormInput from "../../../../../components/ui/FormInput";
-import { Modal } from "../../../components/Modal";
 import { Button } from "../../../../../components/ui/Button";
 import ListingSkeleton from "./ListingSkeleton";
 
@@ -12,6 +11,7 @@ import {
   fetchUsersForAttendance,
   markAttendance,
 } from "../../../services/home";
+import { BaseModal } from "../../../../../components/ui/BaseModal";
 
 /* -------------------- Types -------------------- */
 interface User {
@@ -25,7 +25,7 @@ interface User {
 }
 
 interface MarkAttendanceProps {
-  setOpenModal: () => void;
+  setOpenModal: (b:boolean) => void;
   data: { id: string; name: string };
 }
 
@@ -95,7 +95,7 @@ export function MarkAttendance({
   }, [debouncedQuery]);
 
   return (
-    <Modal title="Mark Attendance" onClose={setOpenModal}>
+    <BaseModal title="Mark Attendance" setClose={setOpenModal}>
       <div className="p-4 md:w-[700px] w-full flex flex-col items-center">
         <div className="text-text-secondary font-semibold text-lg mb-3">
           Take {name} Attendance
@@ -157,6 +157,6 @@ export function MarkAttendance({
             })}
         </div>
       </div>
-    </Modal>
+    </BaseModal>
   );
 }
