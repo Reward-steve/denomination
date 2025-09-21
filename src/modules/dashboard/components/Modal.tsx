@@ -72,7 +72,7 @@ export const Modal = ({
   // --- Modal Panel ---
   const panelClasses = clsx(
     "relative w-full max-h-[90vh] overflow-y-auto shadow-xl bg-surface pt-0",
-    "p-4 md:p-6",
+    "px-4 sm:px-6 pb-6",
     isMobile
       ? "rounded-t-3xl animate-slide-up"
       : `rounded-2xl ${sizeClass} animate-zoom-in`
@@ -100,10 +100,10 @@ export const Modal = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* --- Header --- */}
-        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-surface py-4">
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-surface p-4">
           <h2
             id="modal-title"
-            className="text-lg sm:text-xl font-semibold text-text"
+            className="text-lg sm:text-xl font-semibold text-text top-0"
           >
             {title}
           </h2>

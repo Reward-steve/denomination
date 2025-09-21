@@ -95,7 +95,9 @@ export const FileUploadSection = ({
           onClick={() => document.getElementById("fileInput")?.click()}
         >
           <FaUpload className="text-primary mb-2" size={24} />
-          <span className="text-sm">Drag & Drop or Click to Upload</span>
+          <span className="text-sm text-primary">
+            Drag & Drop or Click to Upload
+          </span>
           <input
             id="fileInput"
             type="file"

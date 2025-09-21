@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
+import ReactDOM from "react-dom";
 import { Button } from "../../../../components/ui/Button";
 import DashboardLayout from "../../components/Layout";
 import { DocumentUploadModal } from "./components/DocumentUploadModal";
@@ -120,13 +121,15 @@ const Document = ({ type = "document" }) => {
         </div>
 
         {/* ---------- Upload Modal ---------- */}
-        {isModalOpen && (
-          <DocumentUploadModal
-            isOpen={isModalOpen}
-            onClose={handleCloseModal}
-            handleAddFile={handleAddFile}
-          />
-        )}
+        {isModalOpen &&
+          ReactDOM.createPortal(
+            <DocumentUploadModal
+              isOpen={isModalOpen}
+              onClose={handleCloseModal}
+              handleAddFile={handleAddFile}
+            />,
+            document.body
+          )}
       </div>
     </DashboardLayout>
   );
