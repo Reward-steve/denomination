@@ -180,7 +180,7 @@ function DesktopHeader({
   menuRef,
 }: any) {
   return (
-    <div className="h-16 flex justify-center items-end w-full">
+    <div className="h-16 flex justify-center items-end w-full border border-border">
       <div className="h-full w-full flex items-center justify-between bg-surface px-4 rounded-md relative">
         {/* Search Bar */}
         <form className="flex-1 max-w-md">
