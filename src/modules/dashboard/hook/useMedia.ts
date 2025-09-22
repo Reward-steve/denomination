@@ -46,8 +46,6 @@ export function useMedia(type: MediaType = "document") {
   /* ---------------- Create Document ---------------- */
   const createDocumentMutation = useMutation({
     mutationFn: (doc: DocumentPayload) => createDocument(doc),
-    onMutate: () =>
-      toast.loading(`Creating ${type}...`, { toastId: `${type}-create` }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents", type] });
     },

@@ -31,10 +31,8 @@ export const ROUTES = {
     DOCUMENTS: "documents",
     SONGS: "songs",
     SERMON: "sermon",
- 
+
     ANNOUNCEMENT: "announcements",
- 
- 
   },
   AUTH: {
     PERSONAL_INFO: "personal-info",
@@ -95,62 +93,51 @@ export const authMenu: AuthSidebarProps[] = [
  */
 export const dashboardMenu: DashboardSidebarProps[] = [
   {
-    label: "Home", path: validatePath(ROUTES.DASHBOARD.HOME), Icon: TbHome2,
-    admin: false
+    label: "Home",
+    path: validatePath(ROUTES.DASHBOARD.HOME),
+    Icon: TbHome2,
+    admin: false,
   },
   {
     label: "Events",
     path: validatePath(ROUTES.DASHBOARD.EVENTS),
     Icon: TbCalendarEventFilled,
-    admin: true
+    admin: true,
   },
   {
     label: "Finance",
     path: validatePath(ROUTES.DASHBOARD.FINANCE),
     Icon: FaCoins,
-    admin: true
+    admin: true,
   },
   {
-    label: "Users", path: validatePath(ROUTES.DASHBOARD.USERS), Icon: FaUser,
-    admin: false
+    label: "Users",
+    path: validatePath(ROUTES.DASHBOARD.USERS),
+    Icon: FaUser,
+    admin: false,
   },
   {
     label: "Documents",
     path: validatePath(ROUTES.DASHBOARD.DOCUMENTS),
     Icon: FaFileAlt,
-    admin: false
+    admin: false,
   },
   {
     label: "Songs",
     path: validatePath(ROUTES.DASHBOARD.SONGS),
     Icon: FaMusic,
-    admin: false
+    admin: false,
   },
   {
     label: "Sermon",
     path: validatePath(ROUTES.DASHBOARD.SERMON),
     Icon: FaPray,
-    admin: false
+    admin: false,
   },
   {
     label: "Announcement",
     path: validatePath(ROUTES.DASHBOARD.ANNOUNCEMENT),
     Icon: MdAnnouncement,
-    admin: true
-  },
-  {
-    label: "Songs",
-    path: validatePath(ROUTES.DASHBOARD.SONGS),
-    Icon: FaMusic,
-  },
-  {
-    label: "Sermon",
-    path: validatePath(ROUTES.DASHBOARD.SERMON),
-    Icon: FaPray,
-  },
-  {
-    label: "Announcement",
-    path: validatePath(ROUTES.DASHBOARD.ANNOUNCEMENT),
-    Icon: MdAnnouncement,
+    admin: true,
   },
 ];
