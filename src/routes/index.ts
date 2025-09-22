@@ -4,6 +4,7 @@ import PersonalInfo from "../modules/auth/pages/PersonalInfo";
 import PrevPosition from "../modules/auth/pages/PreviousPosition";
 import RegistrationSuccess from "../modules/auth/pages/RegistrationSuccess";
 import UCCAInfo from "../modules/auth/pages/UCCAInfo";
+ 
 import Announcements from "../modules/dashboard/pages/Announcements";
 import Document from "../modules/dashboard/pages/documents";
 import Events from "../modules/dashboard/pages/events";
@@ -12,6 +13,7 @@ import Home from "../modules/dashboard/pages/Home";
 import Sermon from "../modules/dashboard/pages/sermon";
 import Songs from "../modules/dashboard/pages/songs";
 import Users from "../modules/dashboard/pages/Users";
+ 
 
 export const auth = [
   { path: "personal-info", element: PersonalInfo },
@@ -27,8 +29,10 @@ export const dashboard = [
   { path: "events", element: Events },
   { path: "finance", element: Finance },
   { path: "users", element: Users },
+ 
   { path: "documents", element: Document },
   { path: "Songs", element: Songs },
   { path: "sermon", element: Sermon },
   { path: "announcements", element: Announcements },
+ 
 ];
