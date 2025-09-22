@@ -10,7 +10,7 @@ import { DocumentCard } from "./components/documentCard";
 
 const Document = ({ type = "document" }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { documents, loading, error, deleteDocument } = useDocuments(type);
+  const { documents = [], loading, error, deleteDocument } = useDocuments(type);
 
   const baseUrl = `${import.meta.env.VITE_BASE_URL.split("/api/")[0]}`;
 
@@ -80,13 +80,12 @@ const Document = ({ type = "document" }) => {
 
         {/* Upload Modal */}
         {isModalOpen &&
-          typeof document !== "undefined" &&
           ReactDOM.createPortal(
             <DocumentUploadModal
               isOpen={isModalOpen}
               onClose={handleCloseModal}
             />,
-            document.body
+            window.document.body // ✅ explicitly use window.document
           )}
       </div>
     </DashboardLayout>

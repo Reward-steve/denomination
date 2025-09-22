@@ -1,4 +1,3 @@
-// components/DocumentCard.tsx
 import {
   FaDownload,
   FaFileAlt,
@@ -6,6 +5,7 @@ import {
   FaFileImage,
   FaTrash,
   FaEye,
+  FaFolderOpen,
 } from "react-icons/fa";
 import { Button } from "../../../../../components/ui/Button";
 import type { DocumentResponse } from "../../../types";
@@ -13,7 +13,7 @@ import { useState } from "react";
 import Modal from "../../../components/Modal";
 
 interface DocumentCardProps {
-  document: DocumentResponse;
+  document: DocumentResponse; // ✅ aligned with parent
   baseUrl?: string;
   onDelete?: (id: number) => void;
 }
@@ -24,53 +24,88 @@ export const DocumentCard = ({
   onDelete,
 }: DocumentCardProps) => {
   const [previewFile, setPreviewFile] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const createdDate = new Date(document.created_at).toLocaleDateString();
-  const paths = Array.isArray(document.paths) ? document.paths : [];
+  // ✅ defensive checks
+  const createdDate = document?.created_at
+    ? new Date(document.created_at).toLocaleDateString()
+    : "Unknown";
+
+  const paths = Array.isArray(document?.paths) ? document.paths : [];
 
   const handlePreview = (path: string) => {
     setPreviewFile(`${baseUrl}/${path}`);
   };
 
   const handleDownload = (path: string) => {
-    const link = document.createElement("a");
-    link.href = `${baseUrl}/${path}`;
-    link.download = path.split("/").pop() || document.name;
-    document.body.appendChild(link);
+    if (typeof window === "undefined") return;
+
+    const url = `${baseUrl}/${path}`;
+    const filename = path.split("/").pop() || "file";
+
+    const link = window.document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", filename);
+    window.document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    window.document.body.removeChild(link);
   };
 
   const renderFileIcon = (path: string) => {
     if (path.match(/\.(jpg|jpeg|png|gif)$/i)) {
-      return <FaFileImage className="text-blue-500 w-6 h-6" />;
+      return <FaFileImage className="text-blue-500 w-5 h-5" />;
     }
     if (path.match(/\.pdf$/i)) {
-      return <FaFilePdf className="text-red-500 w-6 h-6" />;
+      return <FaFilePdf className="text-red-500 w-5 h-5" />;
     }
-    return <FaFileAlt className="text-gray-500 w-6 h-6" />;
+    return <FaFileAlt className="text-gray-500 w-5 h-5" />;
   };
 
   return (
     <>
-      <article className="p-5 rounded-2xl bg-surface border border-border hover:border-accent transition duration-200 space-y-4 shadow-sm">
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          <FaFileAlt className="text-accent w-6 h-6" />
-          <h3 className="text-lg font-bold text-text truncate">
-            {document.name}
-          </h3>
-        </div>
+      <article
+        className="p-5 rounded-2xl bg-surface border border-border hover:border-accent transition duration-200 shadow-sm cursor-pointer"
+        onClick={() => setIsModalOpen(true)}
+      >
+        <div className="flex items-start justify-between">
+          <div className="space-y-2 flex-1">
+            <div className="flex items-center gap-2">
+              <FaFolderOpen className="text-accent w-6 h-6" />
+              <h3 className="text-lg font-semibold text-text truncate">
+                {document?.name || "Untitled"}
+              </h3>
+            </div>
+            <div className="text-sm text-text-secondary space-y-1">
+              <p>Uploaded by: {document?.uploaded_by || "Unknown"}</p>
+              <p>Date: {createdDate}</p>
+              <p>Files: {paths.length}</p>
+            </div>
+          </div>
 
-        {/* Details */}
-        <div className="text-sm text-text-secondary space-y-1">
-          <p>Uploaded by: {document.uploaded_by}</p>
-          <p>Date: {createdDate}</p>
-          <p>Files: {paths.length}</p>
+          {onDelete && document?.id && (
+            <Button
+              variant="danger"
+              size="sm"
+              textSize="xs"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(document.id);
+              }}
+            >
+              <FaTrash className="w-4 h-4" />
+            </Button>
+          )}
         </div>
+      </article>
 
-        {/* File list */}
-        <div className="space-y-2">
+      {/* Files modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={`${document?.name || "Document"} - Files`}
+        size="lg"
+      >
+        <div className="space-y-3">
           {paths.map((path, i) => (
             <div
               key={i}
@@ -103,23 +138,9 @@ export const DocumentCard = ({
             </div>
           ))}
         </div>
+      </Modal>
 
-        {/* Delete Button */}
-        {onDelete && (
-          <div className="flex justify-end">
-            <Button
-              variant="danger"
-              size="sm"
-              textSize="xs"
-              onClick={() => onDelete(document.id)}
-            >
-              <FaTrash className="w-4 h-4" />
-            </Button>
-          </div>
-        )}
-      </article>
-
-      {/* Preview Modal */}
+      {/* File preview modal */}
       {previewFile && (
         <Modal
           isOpen={!!previewFile}
