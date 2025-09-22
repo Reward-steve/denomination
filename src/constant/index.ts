@@ -31,7 +31,10 @@ export const ROUTES = {
     DOCUMENTS: "documents",
     SONGS: "songs",
     SERMON: "sermon",
+ 
     ANNOUNCEMENT: "announcements",
+ 
+ 
   },
   AUTH: {
     PERSONAL_INFO: "personal-info",
@@ -134,5 +137,20 @@ export const dashboardMenu: DashboardSidebarProps[] = [
     path: validatePath(ROUTES.DASHBOARD.ANNOUNCEMENT),
     Icon: MdAnnouncement,
     admin: true
+  },
+  {
+    label: "Songs",
+    path: validatePath(ROUTES.DASHBOARD.SONGS),
+    Icon: FaMusic,
+  },
+  {
+    label: "Sermon",
+    path: validatePath(ROUTES.DASHBOARD.SERMON),
+    Icon: FaPray,
+  },
+  {
+    label: "Announcement",
+    path: validatePath(ROUTES.DASHBOARD.ANNOUNCEMENT),
+    Icon: MdAnnouncement,
   },
 ];

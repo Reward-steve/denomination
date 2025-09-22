@@ -10,6 +10,7 @@ export interface EventModalProps {
   firstInputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
+ 
 export type MediaType = "document" | "song" | "sermon";
 
 export interface BaseMedia {
@@ -58,6 +59,7 @@ export interface DocumentResponse {
   created_at: string;
   updated_at: string;
   paths: string[];
+ 
 }
 
 export interface EventCardProps {
