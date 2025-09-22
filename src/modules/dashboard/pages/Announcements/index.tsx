@@ -10,6 +10,7 @@ import FormInput from "../../../../components/ui/FormInput";
 import TextArea from "../../../../components/ui/TextArea";
 import { Loader } from "../../../../components/ui/Loader";
 import { sendNotification } from "./services/broadcaster";
+import { DashboardHeader } from "../../components/Header";
 
 /* -------------------- Types -------------------- */
 interface iAnnouncements {
@@ -182,25 +183,12 @@ export default function Announcements() {
         </Modal>
       )}
 
-      <section className="space-y-6 animate-fade">
-        {/* Page Header */}
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-text">Announcements</h2>
-            <p className="text-text-placeholder mt-1">
-              Broadcast information to your member
-            </p>
-          </div>
-
-          <Button
-            variant="primary"
-            className="gap-2"
-            onClick={() => setOpenModal(true)}
-          >
-            Make Announcement
-          </Button>
-        </header>
-
+      <DashboardHeader
+        title="Announcements"
+        description="Broadcast information to your member"
+        actionLabel="Make Announcement"
+        onAction={() => setOpenModal(true)}
+      >
         <div className="grid gap-4">
           {loading &&
             Array.from({ length: 3 }).map((_, i) => (
@@ -217,7 +205,7 @@ export default function Announcements() {
               />
             ))}
         </div>
-      </section>
+      </DashboardHeader>
     </DashboardLayout>
   );
 }

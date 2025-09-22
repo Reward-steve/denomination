@@ -1,4 +1,4 @@
-// hooks/useDocuments.ts
+// hooks/useMedia.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   createDocument,
@@ -8,7 +8,8 @@ import {
   fileUpload,
 } from "../services/document";
 
-import type { DocumentPayload, DocumentResponse, DocumentType } from "../types";
+import type { DocumentPayload, DocumentResponse, MediaType } from "../types";
+import { toast } from "react-toastify";
 
 /* -------- Response type for file upload -------- */
 export interface FileUploadResponse {
@@ -19,7 +20,7 @@ export interface FileUploadResponse {
   };
 }
 
-export function useDocuments(type: DocumentType = "document") {
+export function useMedia(type: MediaType = "document") {
   const queryClient = useQueryClient();
 
   /* ---------------- Fetch Documents ---------------- */
@@ -40,12 +41,14 @@ export function useDocuments(type: DocumentType = "document") {
   /* ---------------- Upload a single file ---------------- */
   const uploadFileMutation = useMutation({
     mutationFn: (file: File): Promise<FileUploadResponse> =>
-      fileUpload(type, file), // ✅ pass type ("song" | "document" | "sermon")
+      fileUpload(type, file),
   });
 
-  /* ---------------- Create Document after files uploaded ---------------- */
+  /* ---------------- Create Document ---------------- */
   const createDocumentMutation = useMutation({
     mutationFn: (doc: DocumentPayload) => createDocument(doc),
+    onMutate: () =>
+      toast.loading(`Creating ${type}...`, { toastId: `${type}-create` }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents", type] });
     },
@@ -57,7 +60,12 @@ export function useDocuments(type: DocumentType = "document") {
       updateDocument(id, doc),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents", type] });
+      toast.success(`${type} updated successfully`, {
+        toastId: `${type}-update`,
+      });
     },
+    onError: () =>
+      toast.error(`Failed to update ${type}`, { toastId: `${type}-update` }),
   });
 
   /* ---------------- Delete Document ---------------- */
@@ -65,7 +73,12 @@ export function useDocuments(type: DocumentType = "document") {
     mutationFn: (id: number) => deleteDocument(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents", type] });
+      toast.success(`${type} deleted successfully`, {
+        toastId: `${type}-delete`,
+      });
     },
+    onError: () =>
+      toast.error(`Failed to delete ${type}`, { toastId: `${type}-delete` }),
   });
 
   /* ---------------- Helper: Full Upload Flow ---------------- */
@@ -85,19 +98,20 @@ export function useDocuments(type: DocumentType = "document") {
       const uploadResults = await Promise.all(
         files.map((file) => uploadFileMutation.mutateAsync(file))
       );
-
       const paths = uploadResults.map((res) => res.data.path);
 
       // 2️⃣ Create document with collected paths
-      return await createDocumentMutation.mutateAsync({
+      const result = await createDocumentMutation.mutateAsync({
         document: paths,
         type,
         name,
         descr,
         visibility,
       });
+
+      return result;
     } catch (err) {
-      console.error("Upload & create document failed:", err);
+      console.error(err);
       throw err;
     }
   };

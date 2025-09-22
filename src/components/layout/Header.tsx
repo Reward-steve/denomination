@@ -6,7 +6,7 @@ import {
   FaSignOutAlt,
   FaCog,
 } from "react-icons/fa";
-import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
+
 import { useLocation, useNavigate } from "react-router-dom";
 import { useResponsive } from "../../hooks/useResponsive";
 import { useTheme } from "../../hooks/useTheme";
@@ -26,8 +26,6 @@ export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const { logout } = useAuth();
 
-  const [search, setSearch] = useState("");
-  const [openSearch, setOpenSearch] = useState(false);
   const [user, setUser] = useState<User>();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -55,12 +53,6 @@ export default function Header() {
       ?.replace(/-/g, " ")
       .replace(/\b\w/g, (char) => char.toUpperCase()) || "Dashboard";
 
-  /** Handlers */
-  const handleSearchToggle = () => {
-    setOpenSearch((prev) => !prev);
-    setSearch("");
-  };
-
   const handleBack = () => navigate(-1);
 
   return (
@@ -68,10 +60,6 @@ export default function Header() {
       {isMobile ? (
         <MobileHeader
           title={pageTitle}
-          search={search}
-          setSearch={setSearch}
-          openSearch={openSearch}
-          onToggleSearch={handleSearchToggle}
           onBack={handleBack}
           user={user}
           theme={theme}
@@ -83,8 +71,6 @@ export default function Header() {
         />
       ) : (
         <DesktopHeader
-          search={search}
-          setSearch={setSearch}
           theme={theme}
           toggleTheme={toggleTheme}
           user={user}
@@ -101,11 +87,6 @@ export default function Header() {
 /* ---------------- MOBILE HEADER ---------------- */
 function MobileHeader({
   title,
-  search,
-  setSearch,
-  openSearch,
-  onToggleSearch,
-  onBack,
   theme,
   toggleTheme,
   logout,
@@ -114,54 +95,29 @@ function MobileHeader({
   menuRef,
 }: any) {
   return (
-    <div className="flex items-center justify-between py-2 px-3 relative">
-      {/* Back Button */}
-      <button onClick={onBack} aria-label="Go Back">
-        <MdOutlineKeyboardArrowLeft className="text-2xl text-text-placeholder" />
-      </button>
+    <div className="flex items-center justify-end p-3 relative shadow-sm">
+      <div className="w-[60%] flex justify-between items-center">
+        <h1 className="text-base font-semibold truncate text-text-placeholder">
+          {title}
+        </h1>
+        <div className="flex items-center gap-3 relative" ref={menuRef}>
+          <FaBell className="text-primary text-lg cursor-pointer" />
+          <button onClick={() => setMenuOpen((p: boolean) => !p)}>
+            <img
+              src={img}
+              alt="user_profile"
+              className="w-8 h-8 rounded-full object-cover"
+            />
+          </button>
 
-      {/* Center: Title / Search */}
-      <div className="flex-1 flex items-center justify-center">
-        <input
-          placeholder="Search..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className={`transition-all duration-300 ease-in-out border border-border rounded-lg bg-background px-4 py-2
-            ${
-              openSearch
-                ? "w-[90%] opacity-100"
-                : "w-0 opacity-0 pointer-events-none"
-            }
-          `}
-          autoFocus={openSearch}
-        />
-        {!openSearch && (
-          <h1 className="text-base font-semibold truncate text-text-placeholder">
-            {title}
-          </h1>
-        )}
-      </div>
-
-      {/* Right side: search + avatar */}
-      <div className="flex items-center gap-3 relative" ref={menuRef}>
-        <button onClick={onToggleSearch} aria-label="Search">
-          <FaSearch className="text-md text-text-placeholder" />
-        </button>
-        <button onClick={() => setMenuOpen((p: boolean) => !p)}>
-          <img
-            src={img}
-            alt="user_profile"
-            className="w-8 h-8 rounded-full object-cover"
-          />
-        </button>
-
-        {menuOpen && (
-          <ProfileMenu
-            theme={theme}
-            toggleTheme={toggleTheme}
-            logout={logout}
-          />
-        )}
+          {menuOpen && (
+            <ProfileMenu
+              theme={theme}
+              toggleTheme={toggleTheme}
+              logout={logout}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
@@ -180,8 +136,8 @@ function DesktopHeader({
   menuRef,
 }: any) {
   return (
-    <div className="h-16 flex justify-center items-end w-full border border-border">
-      <div className="h-full w-full flex items-center justify-between bg-surface px-4 rounded-md relative">
+    <div className="h-16 flex justify-center items-end w-full border-b border-border">
+      <div className="h-full w-full flex items-center justify-between bg-surface px-4 relative">
         {/* Search Bar */}
         <form className="flex-1 max-w-md">
           <label className="flex items-center gap-2 p-2 border border-border rounded-md w-full bg-smooth">

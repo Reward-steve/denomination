@@ -29,6 +29,7 @@ interface SidebarLinkProps {
   isOpen?: boolean;
   isActive?: boolean;
   disabled?: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 /* -------------------- Header -------------------- */
@@ -69,7 +70,16 @@ const SidebarHeader = ({
 
 /* -------------------- Sidebar Link -------------------- */
 export const SidebarLink = memo(
-  ({ to, label, num, Icon, isActive, disabled, isOpen }: SidebarLinkProps) => {
+  ({
+    to,
+    label,
+    num,
+    Icon,
+    isActive,
+    disabled,
+    isOpen,
+    setIsOpen,
+  }: SidebarLinkProps) => {
     const { step = 0 } = useRegistration();
     const navigate = useNavigate();
     const isDashboard = useLocation().pathname.includes("dashboard");
@@ -81,6 +91,7 @@ export const SidebarLink = memo(
         return;
       }
       navigate(`${DASHBOARD_BASE_PATH}/${to}`);
+      setIsOpen(false);
     }, [navigate, to, label]);
 
     const buttonClasses = clsx(
@@ -182,6 +193,7 @@ export const ResponsiveNav = ({
                   <li key={label}>
                     <SidebarLink
                       to={path}
+                      setIsOpen={setIsOpen}
                       label={label}
                       num={step!}
                       disabled={disabled}
@@ -204,7 +216,7 @@ export const ResponsiveNav = ({
       {/* Mobile Toggle */}
       {isMobile && (
         <button
-          className="fixed top-3 left-4 z-50 p-2 rounded-md bg-surface text-text border border-border shadow-md"
+          className="fixed top-2.5 left-4 z-50 p-2 rounded-md bg-surface text-text border border-border shadow-sm"
           onClick={() => setIsOpen((prev) => !prev)}
         >
           {isOpen ? <LuPanelRightClose /> : <LuPanelRightOpen />}

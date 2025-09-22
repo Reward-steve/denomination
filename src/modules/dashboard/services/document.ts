@@ -2,10 +2,10 @@
 import { fetcher } from "../../../services";
 import { apiRequest } from "../../../services/apiResquest";
 
-import type { DocumentPayload, DocumentResponse, DocumentType } from "../types";
+import type { DocumentPayload, DocumentResponse, MediaType } from "../types";
 
 export interface ApiResponse<T> {
-  status: boolean;
+  success: boolean;
   message: string;
   data: T;
 }
@@ -15,15 +15,15 @@ export interface ApiResponse<T> {
 // Create a new Document (after file upload gives us paths)
 export const createDocument = async (
   payload: DocumentPayload
-): Promise<ApiResponse<DocumentResponse>> => {
+): Promise<ApiResponse<DocumentResponse | null>> => {
   return apiRequest("docs/info/create", "POST", payload);
 };
 
 // Upload a single file (before creating document)
 export const fileUpload = async (
-  type: DocumentType,
+  type: MediaType,
   file: File
-): Promise<ApiResponse<{ path: string }>> => {
+): Promise<ApiResponse<{ path: string } | null>> => {
   const formData = new FormData();
 
   formData.append("document", file);
@@ -36,7 +36,7 @@ export const fileUpload = async (
 export const updateDocument = async (
   documentId: number,
   payload: Partial<DocumentPayload>
-): Promise<ApiResponse<DocumentResponse>> => {
+): Promise<ApiResponse<DocumentResponse | null>> => {
   return apiRequest(`docs/${documentId}/update`, "PUT", payload);
 };
 
@@ -49,7 +49,7 @@ export const deleteDocument = async (
 
 // Fetch all Documents by type
 export const fetchAllDocuments = async (
-  type: DocumentType
+  type: MediaType
 ): Promise<ApiResponse<DocumentResponse[]>> => {
   return fetcher(`docs/fetch?type=${type}`);
 };

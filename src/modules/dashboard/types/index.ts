@@ -10,11 +10,37 @@ export interface EventModalProps {
   firstInputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
-export type DocumentType = "document" | "song" | "sermon";
+export type MediaType = "document" | "song" | "sermon";
+
+export interface BaseMedia {
+  id: number;
+  name: string;
+  uploaded_by: string;
+  created_at: string;
+  type: MediaType;
+  paths: string[];
+}
+
+export interface DocumentMedia extends BaseMedia {
+  type: "document";
+}
+
+export interface SongMedia extends BaseMedia {
+  type: "song";
+  duration?: string;
+}
+
+export interface SermonMedia extends BaseMedia {
+  type: "sermon";
+  preacher?: string;
+  descr?: string;
+}
+
+export type MediaResponse = DocumentMedia | SongMedia | SermonMedia;
 
 export interface DocumentPayload {
   document: string[]; // file paths returned from fileUpload
-  type: DocumentType;
+  type: MediaType;
   name: string;
   descr?: string;
   visibility: "public" | "private" | "admins";
@@ -24,7 +50,7 @@ export interface DocumentResponse {
   id: number;
   name: string;
   descr?: string;
-  type: DocumentType;
+  type: MediaType;
   size?: number;
   uploaded_by: string;
   visibility: "public" | "private" | "admins";

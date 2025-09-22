@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import ReactDOM from "react-dom";
-import { Button } from "../../../../components/ui/Button";
-import { FaCalendarPlus, FaCalendarAlt } from "react-icons/fa";
+import { FaCalendarAlt } from "react-icons/fa";
 import DashboardLayout from "../../components/Layout";
 import { type Event as AppEvent } from "../../types";
 import { EventCard } from "./components/EventCard";
@@ -19,6 +18,7 @@ import {
 } from "../../utils/Helper";
 import { toast } from "react-toastify";
 import { EmptyState } from "../../../../components/ui/EmptyState";
+import { DashboardHeader } from "../../components/Header";
 
 /** ---------- Skeleton Loader ---------- */
 const EventCardSkeleton = () => (
@@ -148,28 +148,12 @@ export default function Events() {
   /** ---------- Render ---------- */
   return (
     <DashboardLayout>
-      <main className="space-y-6 lg:py-8 py-6 animate-fade">
-        {/* Page Header */}
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-start sm:items-center gap-3">
-            <FaCalendarAlt className="text-accent text-2xl" />
-            <div>
-              <h2 className="text-2xl font-bold text-text">Events</h2>
-              <p className="text-text-placeholder mt-1">
-                Stay on track and manage upcoming activities
-              </p>
-            </div>
-          </div>
-
-          <Button
-            variant="primary"
-            className="gap-2"
-            onClick={() => openModal()}
-          >
-            <FaCalendarPlus /> Add Event
-          </Button>
-        </header>
-
+      <DashboardHeader
+        title="Events"
+        description="Stay on track and manage upcoming activities"
+        actionLabel="Add Event"
+        onAction={() => openModal()}
+      >
         {/* Events List */}
         <div className="grid gap-4">
           {loading &&
@@ -202,7 +186,7 @@ export default function Events() {
             />,
             document.body
           )}
-      </main>
+      </DashboardHeader>
     </DashboardLayout>
   );
 }

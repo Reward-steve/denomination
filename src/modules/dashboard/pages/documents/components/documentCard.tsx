@@ -78,23 +78,24 @@ export const DocumentCard = ({
             <div className="text-sm text-text-secondary space-y-1">
               <p>Uploaded by: {document?.uploaded_by || "Unknown"}</p>
               <p>Date: {createdDate}</p>
-              <p>Files: {paths.length}</p>
+              <div className="flex items-center justify-between w-full">
+                <p>Files: {paths.length}</p>
+                {onDelete && document?.id && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    textSize="xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(document.id);
+                    }}
+                  >
+                    <FaTrash className="w-4 h-4 text-error" />
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
-
-          {onDelete && document?.id && (
-            <Button
-              variant="danger"
-              size="sm"
-              textSize="xs"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(document.id);
-              }}
-            >
-              <FaTrash className="w-4 h-4" />
-            </Button>
-          )}
         </div>
       </article>
 
@@ -113,8 +114,8 @@ export const DocumentCard = ({
             >
               <div className="flex items-center gap-2 truncate">
                 {renderFileIcon(path)}
-                <span className="truncate text-sm">
-                  {path.split("/").pop()}
+                <span className="truncate text-sm text-text">
+                  {document.name.toLowerCase()}
                 </span>
               </div>
               <div className="flex gap-2">

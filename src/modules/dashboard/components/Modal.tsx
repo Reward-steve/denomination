@@ -9,7 +9,7 @@ interface ModalProps {
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   closeOnOverlayClick?: boolean;
   closeOnEsc?: boolean;
 }
@@ -60,11 +60,12 @@ export const Modal = ({
     sm: "max-w-md",
     md: "max-w-xl",
     lg: "max-w-2xl",
+    xl: "max-w-3xl",
   }[size];
 
   // --- Overlay ---
   const overlayClasses = clsx(
-    "fixed inset-0 z-[9999] w-screen h-screen flex bg-black/50 backdrop-blur-sm",
+    "fixed inset-0 z-[9999] w-screen h-screen flex bg-black/50",
     isMobile ? "items-end justify-center" : "items-center justify-center",
     "animate-fade-in"
   );
