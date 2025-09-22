@@ -65,7 +65,7 @@ export default function Home() {
   const [ongoingEvents, setOngoingEvents] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [docs, setDocs] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState({});
+  const [selectedEvent, setSelectedEvent] = useState({ id: "", name: "" });
   const [loadingDocs, SetLoadingDocs] = useState(true);
   const [loadingUpcoming, SetLoadingUpcoming] = useState(true);
 
@@ -105,12 +105,12 @@ export default function Home() {
 
     fetchEvents("upcoming")
       .then(({ data: { data } }) => setUpcomingEvents(data))
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => SetLoadingUpcoming(false));
 
     fetchDocs()
       .then(({ data: { data } }) => setDocs(data))
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => SetLoadingDocs(false));
   }, []);
 
@@ -271,13 +271,13 @@ export default function Home() {
                         {date
                           ? formatDateTime(date, time)
                           : day?.includes("5th")
-                          ? "Last Sunday"
-                          : isNaN(day)
-                          ? day
-                          : formatDateTime(
-                              `2025-${formatNum(month)}-${formatNum(day)}`,
-                              time
-                            )}
+                            ? "Last Sunday"
+                            : isNaN(day)
+                              ? day
+                              : formatDateTime(
+                                `2025-${formatNum(month)}-${formatNum(day)}`,
+                                time
+                              )}
                       </div>
                     </div>
                   ))}

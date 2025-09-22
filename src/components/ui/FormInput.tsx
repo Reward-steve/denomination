@@ -12,6 +12,7 @@ const FormInput = ({
   register,
   error,
   className = "",
+  parentClassName = "",
   optional,
   styles,
   ...rest
@@ -22,9 +23,9 @@ const FormInput = ({
     type === "password" ? (showPassword ? "text" : "password") : type;
 
   return (
-    <label className="w-full block">
+    <label className={`w-full block ${parentClassName}`}>
       {label && (
-        <p className="flex">
+        <p className="flex">  
           <span className="text-sm block font-small mb-2 text-text">
             {label}
           </span>
@@ -34,7 +35,7 @@ const FormInput = ({
         </p>
       )}
       <div className="relative">
-        {Icon && <Icon className="absolute bottom-4 left-3 text-neutral" />}
+        {Icon && <Icon className="absolute top-1/2 -translate-y-1/2 left-3 text-neutral" />}
         <input
           id={id}
           maxLength={maxLength}

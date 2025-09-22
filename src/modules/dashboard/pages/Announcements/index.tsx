@@ -1,14 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { FaUpload, FaFileAlt, FaTrash } from "react-icons/fa";
+import { useCallback, useEffect, useState } from "react";
 import DashboardLayout from "../../components/Layout";
 import { Button } from "../../../../components/ui/Button";
 import { CreateAnnc, DeleteAnnc, FetchAnnc, UpdateAnnc } from "./services";
 import { toast } from "react-toastify";
 import { AnncCard } from "./components/AnncCard";
-import { Modal } from "../../components/Modal";
 import FormInput from "../../../../components/ui/FormInput";
 import TextArea from "../../../../components/ui/TextArea";
 import { Loader } from "../../../../components/ui/Loader";
+import { BaseModal } from "../../../../components/ui/BaseModal";
 import { sendNotification } from "./services/broadcaster";
 import { DashboardHeader } from "../../components/Header";
 
@@ -118,8 +117,8 @@ export default function Announcements() {
     [formData.body, formData.title, formData.id]
   );
 
-  const postAnnc = (a = null) => {
-    CreateAnnc(formData)
+  const postAnnc = (a: iAnnouncements) => {
+    CreateAnnc(a)
       .then(({ data: { data } }) => {
         toast.success("Announcement Broadcasted!!!");
         setOpenModal(false);
@@ -139,7 +138,7 @@ export default function Announcements() {
   return (
     <DashboardLayout>
       {openModal && (
-        <Modal title={"New Announcement"} onClose={handleModalClosing}>
+        <BaseModal title={"New Announcement"} setClose={handleModalClosing}>
           <div className="p-4 min-w-[200px] sm:min-w-[500px]">
             <FormInput
               value={formData.title}
@@ -180,7 +179,7 @@ export default function Announcements() {
               </Button>
             </div>
           </div>
-        </Modal>
+        </BaseModal>
       )}
 
       <DashboardHeader

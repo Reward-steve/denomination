@@ -26,7 +26,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback((newToken: string, newUser: User) => {
     setToken(newToken);
     setUser(newUser);
-
     saveInStore(TOKEN_KEY, newToken, "local");
     saveInStore(USER_KEY, newUser, "local");
   }, []);
