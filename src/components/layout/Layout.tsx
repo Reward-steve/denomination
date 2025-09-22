@@ -36,7 +36,7 @@ export default function Layout({
 
       <main
         style={{ scrollbarWidth: "none" }}
-        className="flex-1 transition-all duration-200 overflow-y-auto h-screen md:pr-2"
+        className="flex-1 transition-all duration-200 overflow-y-auto h-screen"
       >
         <section className="w-full h-auto bg-background min-h-screen">
           <div className="h-auto min-h-svh animate-fadeIn">

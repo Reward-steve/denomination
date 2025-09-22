@@ -1,12 +1,12 @@
 import { XCache, axiosInstance } from "./index";
 import { getFromStore } from "../utils/appHelpers";
 
-export const apiRequest = async <T>(
+export const apiRequest = async (
   endpoint: string,
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
   body?: object | FormData,
   xcache: "cf" | "nf" | "swr" | "co" | "no" = "no"
-): Promise<{ success: boolean; message: string; data: T | null }> => {
+): Promise<{ success: boolean; message: string; data: any }> => {
   const url = XCache(`${endpoint}`, xcache);
 
   // ✅ Use correct keys from AuthProvider

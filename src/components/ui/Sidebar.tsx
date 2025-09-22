@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { LuPanelRightClose, LuPanelRightOpen } from "react-icons/lu";
-import { useState, useCallback, memo } from "react";
+import { useState, memo, useCallback, useEffect } from "react";
 import { FaCircleCheck } from "react-icons/fa6";
+import { LuPanelRightClose, LuPanelRightOpen } from "react-icons/lu";
 import type { IconType } from "react-icons";
 import clsx from "clsx";
 import Logo from "./Logo";
@@ -12,8 +12,9 @@ import {
 } from "../../constant/index";
 import { useRegistration } from "../../hooks/useReg";
 import { useResponsive } from "../../hooks/useResponsive";
-import { Link } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
+/* -------------------- Types -------------------- */
 export interface SidebarProps {
   label: string;
   Icon?: IconType;
@@ -29,8 +30,10 @@ interface SidebarLinkProps {
   isOpen?: boolean;
   isActive?: boolean;
   disabled?: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+/* -------------------- Header -------------------- */
 const SidebarHeader = ({
   isOpen,
   toggleOpen,
@@ -40,20 +43,24 @@ const SidebarHeader = ({
   toggleOpen: () => void;
   hideToggle: boolean;
 }) => {
-  const sidebarBtn = isOpen ? <LuPanelRightOpen /> : <LuPanelRightClose />;
+  const { isMobile } = useResponsive();
+  const sidebarBtn = isOpen ? <LuPanelRightClose /> : <LuPanelRightOpen />;
+
   return (
     <div
       className={clsx(
-        "flex items-center mb-6",
+        "flex items-center mb-6 transition-all duration-300",
         isOpen ? "justify-between" : "justify-center"
       )}
     >
-      <Logo isCollapsed={!isOpen} />
+      {/* Show logo only on desktop */}
+      {!isMobile && <Logo isCollapsed={!isOpen} />}
+
       {!hideToggle && (
         <button
           onClick={toggleOpen}
           aria-label="Toggle sidebar"
-          className="text-md p-2 rounded text-text-secondary hover:bg-neutral/10 transition-colors"
+          className="p-2 rounded text-text-secondary hover:bg-neutral/10 transition-colors"
         >
           {sidebarBtn}
         </button>
@@ -62,8 +69,18 @@ const SidebarHeader = ({
   );
 };
 
+/* -------------------- Sidebar Link -------------------- */
 export const SidebarLink = memo(
-  ({ to, label, num, Icon, isActive, disabled, isOpen }: SidebarLinkProps) => {
+  ({
+    to,
+    label,
+    num,
+    Icon,
+    isActive,
+    disabled,
+    isOpen,
+    setIsOpen,
+  }: SidebarLinkProps) => {
     const { step = 0 } = useRegistration();
     const navigate = useNavigate();
     const isDashboard = useLocation().pathname.includes("dashboard");
@@ -75,6 +92,7 @@ export const SidebarLink = memo(
         return;
       }
       navigate(`${DASHBOARD_BASE_PATH}/${to}`);
+      setIsOpen(false);
     }, [navigate, to, label]);
 
     const buttonClasses = clsx(
@@ -120,6 +138,7 @@ export const SidebarLink = memo(
   }
 );
 
+/* -------------------- Responsive Sidebar -------------------- */
 export const ResponsiveNav = ({
   items,
   disabled,
@@ -128,86 +147,91 @@ export const ResponsiveNav = ({
   disabled?: boolean;
 }) => {
   const location = useLocation();
-  const [isOpen, setIsOpen] = useState(true);
-  const isAuthPage = location.pathname.includes("auth");
   const { isMobile } = useResponsive();
+  const isAuthPage = location.pathname.includes("auth");
 
-  // --- Mobile: Bottom Nav ---
-  if (isMobile) {
-    return disabled ? (
-      <></>
-    ) : (
-      <nav
-        className={clsx(
-          "fixed backdrop-blur-xl border-t border-border bottom-0 left-0 w-full bg-background shadow-lg flex justify-around py-2 z-50 transition-transform duration-300 animate-fade",
-          isMobile ? "translate-y-0" : "translate-y-full"
-        )}
-      >
-        {items.map(({ label, Icon, path }) => {
-          const isActive = location.pathname.includes(path);
-          return (
-            <Link
-              to={`${DASHBOARD_BASE_PATH}/${path}`}
-              key={label}
-              title={label}
-              className={clsx(
-                "flex flex-col items-center text-xs p-2 transition-colors duration-200",
-                isActive
-                  ? "text-accent"
-                  : "text-text-secondary hover:bg-neutral"
-              )}
-            >
-              {Icon && <Icon className="text-xl mb-1" />}
-              <span>{label}</span>
-            </Link>
-          );
-        })}
-      </nav>
-    );
-  }
+  const [isOpen, setIsOpen] = useState(!isMobile);
+  const { user } = useAuth();
+  const is_admin = user?.is_admin || false;
+
+  // Sync open state when switching between mobile & desktop
+  useEffect(() => {
+    setIsOpen(!isMobile);
+  }, [isMobile]);
 
   return (
-    <aside
-      role="navigation"
-      aria-label="Main navigation"
-      className={clsx(
-        "fixed h-screen top-0 left-0 z-40 transition-all flex justify-center items-center duration-500 md:relative md:translate-x-0 bg-background",
-        isOpen
-          ? "md:w-[var(--sidebar-width)]"
-          : "md:w-[var(--sidebar-collapsed-width)]",
-        isOpen ? "translate-x-0" : "-translate-x-full"
+    <>
+      {/* Overlay for mobile */}
+      {isMobile && isOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30"
+          onClick={() => setIsOpen(false)}
+        />
       )}
-    >
-      <div className="h-[98%] w-[96%] bg-surface p-2 md:rounded-md border border-border rounded-none flex flex-col justify-between">
-        <div className="flex flex-col static">
+
+      <aside
+        role="navigation"
+        aria-label="Main navigation"
+        className={clsx(
+          "fixed top-0 left-0 h-screen z-40 transition-all duration-300 bg-background md:relative",
+          isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+          isOpen
+            ? "w-[var(--sidebar-width)]"
+            : "w-[var(--sidebar-collapsed-width)]"
+        )}
+      >
+        <div className="h-full bg-surface p-3 border-r border-border flex flex-col">
+          {/* Header */}
           <SidebarHeader
             isOpen={isOpen}
-            toggleOpen={() => setIsOpen(!isOpen)}
+            toggleOpen={() => setIsOpen((prev) => !prev)}
             hideToggle={isAuthPage}
           />
-          {items.length > 0 ? (
-            <ul className="space-y-1">
-              {items.map(({ label, Icon, path, step }) => (
-                <li key={label}>
-                  <SidebarLink
-                    to={path}
-                    label={label}
-                    num={step!}
-                    disabled={disabled}
-                    Icon={Icon}
-                    isOpen={isOpen}
-                    isActive={location.pathname.includes(path)}
-                  />
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-center text-text-secondary">
-              No navigation items available
-            </p>
-          )}
+
+          {/* Links */}
+          <nav className="flex-1 overflow-y-auto">
+            {items.length > 0 ? (
+              <ul className="space-y-1">
+                {items.map(
+                  ({ label, Icon, path, step, admin }) =>
+                    ((!admin && !is_admin) || is_admin) && (
+                      <li key={label}>
+                        <SidebarLink
+                          to={path}
+                          label={
+                            label === "Users" && !is_admin
+                              ? "Executives"
+                              : label
+                          }
+                          setIsOpen={setIsOpen}
+                          num={step!}
+                          disabled={disabled}
+                          Icon={Icon}
+                          isOpen={isOpen}
+                          isActive={location.pathname.includes(path)}
+                        />
+                      </li>
+                    )
+                )}
+              </ul>
+            ) : (
+              <p className="text-center text-text-secondary">
+                No navigation items
+              </p>
+            )}
+          </nav>
         </div>
-      </div>
-    </aside>
+      </aside>
+
+      {/* Mobile Toggle */}
+      {isMobile && (
+        <button
+          className="fixed top-2.5 left-4 z-50 p-2 rounded-md bg-surface text-text border border-border shadow-sm"
+          onClick={() => setIsOpen((prev) => !prev)}
+        >
+          {isOpen ? <LuPanelRightClose /> : <LuPanelRightOpen />}
+        </button>
+      )}
+    </>
   );
 };
