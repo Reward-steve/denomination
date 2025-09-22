@@ -12,6 +12,7 @@ import {
 } from "../../constant/index";
 import { useRegistration } from "../../hooks/useReg";
 import { useResponsive } from "../../hooks/useResponsive";
+import { useAuth } from "../../hooks/useAuth";
 
 /* -------------------- Types -------------------- */
 export interface SidebarProps {
@@ -139,6 +140,8 @@ export const ResponsiveNav = ({
   const isAuthPage = location.pathname.includes("auth");
 
   const [isOpen, setIsOpen] = useState(!isMobile);
+  const { user } = useAuth();
+  const is_admin =  user?.is_admin || false;
 
   // Sync open state when switching between mobile & desktop
   useEffect(() => {
@@ -178,11 +181,11 @@ export const ResponsiveNav = ({
           <nav className="flex-1 overflow-y-auto">
             {items.length > 0 ? (
               <ul className="space-y-1">
-                {items.map(({ label, Icon, path, step }) => (
-                  <li key={label}>
+                {items.map(({ label, Icon, path, step, admin }) => (
+                  ((!admin && !is_admin) || is_admin) && <li key={label}>
                     <SidebarLink
                       to={path}
-                      label={label}
+                      label={(label === "Users" && !is_admin) ? "Executives" : label}
                       num={step!}
                       disabled={disabled}
                       Icon={Icon}

@@ -204,6 +204,7 @@ export type FormInputProps = ComponentPropsWithoutRef<"input"> & {
   error?: FieldError;
   styles?: Record<string, string>;
   optional?: boolean;
+  parentClassName?: string;
 };
 
 export interface ImageUploaderProps {
@@ -279,4 +280,5 @@ export interface User {
   prev_positions: PreviousPosition[];
   nok: NextOfKin[];
   skills: Skill[];
+  is_admin:boolean;
 }

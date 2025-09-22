@@ -8,8 +8,8 @@ import { AnncCard } from "./components/AnncCard";
 import FormInput from "../../../../components/ui/FormInput";
 import TextArea from "../../../../components/ui/TextArea";
 import { Loader } from "../../../../components/ui/Loader";
-import { sendNotification } from "./services/broadcaster";
 import { BaseModal } from "../../../../components/ui/BaseModal";
+import { sendNotification } from "./services/broadcaster";
 
 /* -------------------- Types -------------------- */
 interface iAnnouncements {

@@ -1,9 +1,13 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import DashboardLayout from "../../components/Layout";
 import { Button } from "../../../../components/ui/Button";
 import img from "../../../../assets/images/avater.jpg";
 import { fetchUsers } from "./services";
 import UserCardSkeleton from "./component/UserCardSkeleton";
+import { useAuth } from "../../../../hooks/useAuth";
+import { useDebounce } from "../../hook/useDebounce";
+import FormInput from "../../../../components/ui/FormInput";
+import { FaSearch } from "react-icons/fa";
 
 // Types
 interface User {
@@ -42,8 +46,13 @@ export default function Users() {
   const [options, setOptions] = useState<FetchOptions>({
     search: "",
     page: 1,
-    per_page: 12,
+    per_page: 100,
   });
+  const [searchValue, setSearchValue] = useState("");
+  const delayed = useDebounce(searchValue, 1000);
+
+  const { user } = useAuth();
+  const is_admin = user?.is_admin || false;
 
   // Handle tab switching
   const handleTabClicking = (type: "all" | "exco") => {
@@ -54,14 +63,13 @@ export default function Users() {
     });
   };
 
-  // Handle search
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
     setOptions((prev) => ({
       ...prev,
-      search: e.target.value,
+      search: delayed,
       page: 1, // reset to first page
     }));
-  };
+  }, [delayed]);
 
   // Handle pagination
   const handleNextPage = () => {
@@ -83,9 +91,9 @@ export default function Users() {
 
         setUsers(data);
         setTab({
-          all: true,
-          exco: false,
-          data,
+          all: is_admin,
+          exco: !is_admin,
+          data: is_admin ? data : data.filter((u: any) => u.is_exco),
         });
       } catch (error) {
         console.error("Failed to fetch users:", error);
@@ -93,6 +101,7 @@ export default function Users() {
         setLoadingUser(false);
       }
     };
+
 
     loadUsers();
   }, [options]);
@@ -104,34 +113,27 @@ export default function Users() {
         <div className="flex items-center justify-between">
           {/* Tabs */}
           <div className="flex gap-6">
-            <div
-              className={`${
-                tab.all ? "border-b-4" : ""
-              } border-primary hover:bg-[#3b82f830]`}
+            {is_admin && <div
+              className={`${tab.all ? "border-b-4" : ""
+                } border-primary hover:bg-[#3b82f830]`}
             >
               <Button variant="ghost" onClick={() => handleTabClicking("all")}>
                 All
               </Button>
-            </div>
+            </div>}
             <div
-              className={`${
-                tab.exco ? "border-b-4" : ""
-              } border-primary hover:bg-[#3b82f830]`}
+              className={`${tab.exco ? "border-b-4" : ""
+                } border-primary hover:bg-[#3b82f830]`}
             >
-              <Button variant="ghost" onClick={() => handleTabClicking("exco")}>
-                Executive
+              <Button variant="ghost" onClick={is_admin ? () => handleTabClicking("exco") : () => null}>
+                Executives
               </Button>
             </div>
           </div>
 
           {/* Search Bar */}
-          <input
-            type="text"
-            placeholder="Search users..."
-            value={options.search}
-            onChange={handleSearch}
-            className="px-3 py-2 border rounded-md text-sm"
-          />
+          <FormInput type="search" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} placeholder={`Search ${is_admin ? 'user' : 'excos'}...`} icon={FaSearch} className="h-[40px] max-w-[300px]" parentClassName ="flex justify-end mb-1"/>
+
         </div>
       </header>
 
@@ -151,9 +153,8 @@ export default function Users() {
                   <img
                     src={
                       user.photo
-                        ? `${import.meta.env.VITE_BASE_URL.split("/api/")[0]}/${
-                            user.photo
-                          }`
+                        ? `${import.meta.env.VITE_BASE_URL.split("/api/")[0]}/${user.photo
+                        }`
                         : img
                     }
                     alt={`${user.first_name} ${user.last_name}`}
@@ -164,9 +165,8 @@ export default function Users() {
                 {/* User Info */}
                 <div className="flex flex-col items-start gap-1">
                   <div>
-                    {`${user.first_name} ${user.middle_name || ""} ${
-                      user.last_name
-                    }`}
+                    {`${user.first_name} ${user.middle_name || ""} ${user.last_name
+                      }`}
                   </div>
                   <div className="text-gray-500">
                     {user.is_exco ? user.positions?.join(", ") : "Member"}
@@ -176,7 +176,7 @@ export default function Users() {
             ))}
           </section>
 
-          {/* Pagination Controls */}
+          {/* Pagination Controls 
           <div className="flex justify-center items-center gap-4 mt-6">
             <Button
               variant="outline"
@@ -190,6 +190,7 @@ export default function Users() {
               Next
             </Button>
           </div>
+          */}
         </>
       )}
     </DashboardLayout>
