@@ -10,20 +10,54 @@ export interface EventModalProps {
   firstInputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
-// Define allowed values for visibility
-export type Visibility = "public" | "private" | "admins";
+export type MediaType = "document" | "song" | "sermon";
 
-// Main interface
-export interface DocumentFile {
-  document: string[]; // array of file paths
-  type: "song" | "video" | "document" | string; // can extend if more types
-  size: number; // in bytes
-  uploadedAt: string; // ISO date string
-  uploadedBy?: string; // user ID or name
-  id?: number; // optional, for existing documents
+export interface BaseMedia {
+  id: number;
   name: string;
-  descr?: string; // optional
-  visibility: Visibility;
+  uploaded_by: string;
+  created_at: string;
+  type: MediaType;
+  paths: string[];
+}
+
+export interface DocumentMedia extends BaseMedia {
+  type: "document";
+}
+
+export interface SongMedia extends BaseMedia {
+  type: "song";
+  duration?: string;
+}
+
+export interface SermonMedia extends BaseMedia {
+  type: "sermon";
+  preacher?: string;
+  descr?: string;
+}
+
+export type MediaResponse = DocumentMedia | SongMedia | SermonMedia;
+
+export interface DocumentPayload {
+  document: string[]; // file paths returned from fileUpload
+  type: MediaType;
+  name: string;
+  descr?: string;
+  visibility: "public" | "private" | "admins";
+}
+
+export interface DocumentResponse {
+  id: number;
+  name: string;
+  descr?: string;
+  type: MediaType;
+  size?: number;
+  uploaded_by: string;
+  visibility: "public" | "private" | "admins";
+  is_enabled: "0" | "1";
+  created_at: string;
+  updated_at: string;
+  paths: string[];
 }
 
 export interface EventCardProps {

@@ -140,7 +140,7 @@ export function EducationData() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormInput
           label="Certificate"
-          placeholder="e.g., BSc, MSc"
+          placeholder="e.g. SSCE, BSc, MSc"
           error={errors.education?.certificate}
           icon={FaGraduationCap}
           register={register("education.certificate", {
@@ -150,12 +150,12 @@ export function EducationData() {
         />
         <FormInput
           label="Field of Study"
-          placeholder="e.g., Computer Science"
+          placeholder="e.g. Computer Science"
           error={errors.education?.study}
           icon={FaGraduationCap}
+          optional={true}
           register={register("education.study", {
-            required: "Field of study is required",
-            maxLength: { value: 80, message: "Max 80 characters." },
+            maxLength: { value: 200, message: "Max 200 characters." },
           })}
         />
       </div>

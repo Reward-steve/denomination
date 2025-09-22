@@ -9,10 +9,12 @@ export interface AuthSidebarProps {
   label: string;
   path: string;
   step: number;
+  admin?: boolean;
   Icon?: IconType;
 }
 
 export interface DashboardSidebarProps {
+  admin: boolean;
   label: string;
   path: string;
   Icon: IconType;
@@ -29,7 +31,7 @@ export const ROUTES = {
     DOCUMENTS: "documents",
     SONGS: "songs",
     SERMON: "sermon",
-    ANNOUNCEMENT: "announcement",
+    ANNOUNCEMENT: "announcements",
   },
   AUTH: {
     PERSONAL_INFO: "personal-info",
@@ -89,36 +91,48 @@ export const authMenu: AuthSidebarProps[] = [
  * Each item includes an icon for visual representation.
  */
 export const dashboardMenu: DashboardSidebarProps[] = [
-  { label: "Home", path: validatePath(ROUTES.DASHBOARD.HOME), Icon: TbHome2 },
+  {
+    label: "Home", path: validatePath(ROUTES.DASHBOARD.HOME), Icon: TbHome2,
+    admin: false
+  },
   {
     label: "Events",
     path: validatePath(ROUTES.DASHBOARD.EVENTS),
     Icon: TbCalendarEventFilled,
+    admin: true
   },
   {
     label: "Finance",
     path: validatePath(ROUTES.DASHBOARD.FINANCE),
     Icon: FaCoins,
+    admin: true
   },
-  { label: "Users", path: validatePath(ROUTES.DASHBOARD.USERS), Icon: FaUser },
+  {
+    label: "Users", path: validatePath(ROUTES.DASHBOARD.USERS), Icon: FaUser,
+    admin: false
+  },
   {
     label: "Documents",
     path: validatePath(ROUTES.DASHBOARD.DOCUMENTS),
     Icon: FaFileAlt,
+    admin: false
   },
   {
     label: "Songs",
     path: validatePath(ROUTES.DASHBOARD.SONGS),
     Icon: FaMusic,
+    admin: false
   },
   {
     label: "Sermon",
     path: validatePath(ROUTES.DASHBOARD.SERMON),
     Icon: FaPray,
+    admin: false
   },
   {
     label: "Announcement",
     path: validatePath(ROUTES.DASHBOARD.ANNOUNCEMENT),
     Icon: MdAnnouncement,
+    admin: true
   },
 ];
