@@ -23,16 +23,16 @@ export const EventCard = ({ event, onEdit, onDelete }: EventCardProps) => {
 
   return (
     <article
-      className="p-5 rounded-2xl bg-surface border border-border 
+      className="p-4 rounded-2xl bg-surface border border-border 
                  hover:border-accent transition duration-200 
-                 space-y-3"
+                 space-y-2"
       role="region"
       aria-labelledby={`event-title-${event.id}`}
     >
       {/* Title */}
       <h3
         id={`event-title-${event.id}`}
-        className="text-lg font-bold text-text truncate"
+        className="text-lg font-bold text-text"
       >
         {event.name || "Untitled Event"}
       </h3>

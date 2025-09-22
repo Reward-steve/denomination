@@ -105,12 +105,12 @@ export default function Home() {
 
     fetchEvents("upcoming")
       .then(({ data: { data } }) => setUpcomingEvents(data))
-      .catch(() => { })
+      .catch(() => {})
       .finally(() => SetLoadingUpcoming(false));
 
     fetchDocs()
       .then(({ data: { data } }) => setDocs(data))
-      .catch(() => { })
+      .catch(() => {})
       .finally(() => SetLoadingDocs(false));
   }, []);
 
@@ -123,12 +123,12 @@ export default function Home() {
       <div className="space-y-12">
         {/* ---------------- Intro Section ---------------- */}
         <section className="space-y-2 my-4 sm:my-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-text animate-fade">
-            Welcome back, <span className="text-primary">{fullName}</span>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-text-secondary animate-fade">
+            Welcome back, <span className="text-accent">{fullName}</span>
           </h1>
         </section>
 
-        <div className="rounded-2xl p-3 sm:p-3 lg:p-3 max-w-5xl mx-auto space-y-8">
+        <div className="rounded-2xl max-w-5xl mx-auto space-y-8">
           {/* ---------------- Announcements ---------------- */}
           {announcements.length > 0 ? (
             <section className="space-y-3 overflow-hidden">
@@ -169,8 +169,12 @@ export default function Home() {
           <section className="space-y-3">
             <div className="flex justify-between items-left flex-col sm:flex-row gap-3">
               <h2 className="text-xl font-semibold text-text">Due payments</h2>
-              <div className="w-full max-w-[150px]">
-                <Button variant="primary" size="md" className="w-full">
+              <div className="w-full sm:max-w-[150px]">
+                <Button
+                  variant="primary"
+                  size="md"
+                  className="w-full sm:w-auto"
+                >
                   Pay All (N14,750)
                 </Button>
               </div>
@@ -271,13 +275,13 @@ export default function Home() {
                         {date
                           ? formatDateTime(date, time)
                           : day?.includes("5th")
-                            ? "Last Sunday"
-                            : isNaN(day)
-                              ? day
-                              : formatDateTime(
-                                `2025-${formatNum(month)}-${formatNum(day)}`,
-                                time
-                              )}
+                          ? "Last Sunday"
+                          : isNaN(day)
+                          ? day
+                          : formatDateTime(
+                              `2025-${formatNum(month)}-${formatNum(day)}`,
+                              time
+                            )}
                       </div>
                     </div>
                   ))}

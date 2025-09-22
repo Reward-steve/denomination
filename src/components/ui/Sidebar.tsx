@@ -223,8 +223,7 @@ export const ResponsiveNav = ({
         </div>
       </aside>
 
-      {/* Mobile Toggle */}
-      {isMobile && (
+      {!disabled && isMobile && (
         <button
           className="fixed top-2.5 left-4 z-50 p-2 rounded-md bg-surface text-text border border-border shadow-sm"
           onClick={() => setIsOpen((prev) => !prev)}

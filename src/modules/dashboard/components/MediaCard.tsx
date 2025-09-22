@@ -154,16 +154,18 @@ export const MediaCard = ({ item, baseUrl = "", onDelete }: MediaCardProps) => {
           )}
 
           {item.type === "sermon" && (
-            <div className="space-y-3">
-              <p className="text-sm font-medium text-text mt-2">
-                {item.descr || "No description provided."}
-              </p>
-              <video
-                ref={videoRef}
-                src={`${baseUrl}/${item.paths[0]}`}
-                controls
-                className="w-full max-w-lg rounded-lg"
-              />
+            <div className="flex justify-center items-center w-full h-full">
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-text mt-2">
+                  {item.descr || "No description provided."}
+                </p>
+                <video
+                  ref={videoRef}
+                  src={`${baseUrl}/${item.paths[0]}`}
+                  controls
+                  className="w-full max-w-lg rounded-lg"
+                />
+              </div>
             </div>
           )}
         </Modal>,
