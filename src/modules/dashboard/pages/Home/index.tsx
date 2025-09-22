@@ -141,7 +141,7 @@ export default function Home() {
                     <div className="text-xl font-semibold text-text mb-1">
                       {announcements[index]?.title}
                     </div>
-                    <p className="text-text-placeholder">
+                    <p className="text-text-placeholder text-sm">
                       {announcements[index]?.body}
                     </p>
                   </div>

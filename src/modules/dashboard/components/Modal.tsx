@@ -72,8 +72,8 @@ export const Modal = ({
 
   // --- Modal Panel ---
   const panelClasses = clsx(
-    "relative w-full max-h-[95vh] overflow-y-auto shadow-xl bg-surface pt-0",
-    "px-4 sm:px-6 pb-6 h-[80%] md:h-auto",
+    "relative w-full max-h-[90vh] overflow-y-auto shadow-xl bg-surface pt-0",
+    "px-4 sm:px-6 pb-6 h-[85%] md:h-auto",
     isMobile
       ? "rounded-t-3xl animate-slide-up"
       : `rounded-2xl ${sizeClass} animate-zoom-in`
