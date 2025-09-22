@@ -9,7 +9,6 @@ import {
 import DashboardLayout from "../../components/Layout";
 import { Link } from "react-router-dom";
 import { useResponsive } from "../../../../hooks/useResponsive";
-import { Modal } from "../../components/Modal";
 import FormInput from "../../../../components/ui/FormInput";
 import img from "../../../../assets/images/9p4gBgL2_400x400.jpg";
 import { FaCheck } from "react-icons/fa";
@@ -22,6 +21,7 @@ import {
 } from "../../services/home";
 
 import { useAuth } from "../../../../hooks/useAuth";
+import { BaseModal } from "../../../../components/ui/BaseModal";
 
 /* -------------------- TYPES -------------------- */
 interface StatCardProps {
@@ -145,7 +145,7 @@ export default function Home() {
   return (
     <DashboardLayout>
       {openModal && (
-        <Modal title={"Mark Attendance"} setClose={setOpenModal}>
+        <BaseModal title={"Mark Attendance"} setClose={setOpenModal}>
           <div className="p-4 md:w-[700px] w-full flex flex-col items-center">
             <div className="text-text-secondary font-semibold text-[18px] mb-3">
               Take Monthly Meeting Attendance{" "}
@@ -172,7 +172,7 @@ export default function Home() {
                       />
                     </div>
                     <div className="flex flex-col">
-                      <div className="text-xl font-semibold text-gray-800">
+                      <div className="text-xl font-semibold text-text-secondary">
                         Ubong Effiong James
                       </div>
                       <div>07085010189</div>
@@ -183,14 +183,14 @@ export default function Home() {
               ))}
             </div>
           </div>
-        </Modal>
+        </BaseModal>
       )}
 
       <div className="space-y-12">
         {/* ---------------- Intro Section ---------------- */}
         <section className="space-y-2 my-4 sm:my-8">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-text animate-fade">
-            Welcome back, <span className="text-primary">{fullName}</span> 👋
+            Welcome back, <span className="text-accenty">{fullName}</span> 👋
           </h1>
         </section>
 
