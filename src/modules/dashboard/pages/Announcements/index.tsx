@@ -54,7 +54,7 @@ export default function Announcements() {
     id: 0,
   });
 
-  const [options, setOptions] = useState<any>({
+  const [options] = useState<any>({
     search: "",
     page: 1,
     per_page: 100,

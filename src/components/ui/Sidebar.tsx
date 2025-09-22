@@ -204,7 +204,6 @@ export const ResponsiveNav = ({
                               : label
                           }
                           setIsOpen={setIsOpen}
-                          label={label}
                           num={step!}
                           disabled={disabled}
                           Icon={Icon}

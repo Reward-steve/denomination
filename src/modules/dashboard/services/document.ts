@@ -20,10 +20,7 @@ export const createDocument = async (
 };
 
 // Upload a single file (before creating document)
-export const fileUpload = async (
-  type: MediaType,
-  file: File
-): Promise<ApiResponse<{ path: string } | null>> => {
+export const fileUpload = async (type: MediaType, file: File) => {
   const formData = new FormData();
 
   formData.append("document", file);

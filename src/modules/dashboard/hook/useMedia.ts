@@ -40,8 +40,7 @@ export function useMedia(type: MediaType = "document") {
 
   /* ---------------- Upload a single file ---------------- */
   const uploadFileMutation = useMutation({
-    mutationFn: (file: File): Promise<FileUploadResponse> =>
-      fileUpload(type, file),
+    mutationFn: (file: File) => fileUpload(type, file),
   });
 
   /* ---------------- Create Document ---------------- */

@@ -1,6 +1,5 @@
 import { MdEdit } from "react-icons/md";
-import { FaTrash, FaClock, FaRepeat } from "react-icons/fa6";
-import { FaMapMarkerAlt, FaCalendarAlt } from "react-icons/fa";
+import { FaTrash } from "react-icons/fa6";
 import { Button } from "../../../../../components/ui/Button";
 
 export const AnncCard = ({ data, onEdit, onDelete }: any) => {

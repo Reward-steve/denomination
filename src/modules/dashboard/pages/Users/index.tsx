@@ -1,4 +1,4 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/Layout";
 import { Button } from "../../../../components/ui/Button";
 import img from "../../../../assets/images/avater.jpg";
@@ -72,13 +72,13 @@ export default function Users() {
   }, [delayed]);
 
   // Handle pagination
-  const handleNextPage = () => {
-    setOptions((prev) => ({ ...prev, page: prev.page + 1 }));
-  };
+  // const handleNextPage = () => {
+  //   setOptions((prev) => ({ ...prev, page: prev.page + 1 }));
+  // };
 
-  const handlePrevPage = () => {
-    setOptions((prev) => ({ ...prev, page: Math.max(1, prev.page - 1) }));
-  };
+  // const handlePrevPage = () => {
+  //   setOptions((prev) => ({ ...prev, page: Math.max(1, prev.page - 1) }));
+  // };
 
   // Fetch users on mount & when options change
   useEffect(() => {
@@ -102,7 +102,6 @@ export default function Users() {
       }
     };
 
-
     loadUsers();
   }, [options]);
 
@@ -113,27 +112,46 @@ export default function Users() {
         <div className="flex items-center justify-between">
           {/* Tabs */}
           <div className="flex gap-6">
-            {is_admin && <div
-              className={`${tab.all ? "border-b-4" : ""
+            {is_admin && (
+              <div
+                className={`${
+                  tab.all ? "border-b-4" : ""
                 } border-primary hover:bg-[#3b82f830]`}
-            >
-              <Button variant="ghost" onClick={() => handleTabClicking("all")}>
-                All
-              </Button>
-            </div>}
+              >
+                <Button
+                  variant="ghost"
+                  onClick={() => handleTabClicking("all")}
+                >
+                  All
+                </Button>
+              </div>
+            )}
             <div
-              className={`${tab.exco ? "border-b-4" : ""
-                } border-primary hover:bg-[#3b82f830]`}
+              className={`${
+                tab.exco ? "border-b-4" : ""
+              } border-primary hover:bg-[#3b82f830]`}
             >
-              <Button variant="ghost" onClick={is_admin ? () => handleTabClicking("exco") : () => null}>
+              <Button
+                variant="ghost"
+                onClick={
+                  is_admin ? () => handleTabClicking("exco") : () => null
+                }
+              >
                 Executives
               </Button>
             </div>
           </div>
 
           {/* Search Bar */}
-          <FormInput type="search" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} placeholder={`Search ${is_admin ? 'user' : 'excos'}...`} icon={FaSearch} className="h-[40px] max-w-[300px]" parentClassName ="flex justify-end mb-1"/>
-
+          <FormInput
+            type="search"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder={`Search ${is_admin ? "user" : "excos"}...`}
+            icon={FaSearch}
+            className="h-[40px] max-w-[300px]"
+            parentClassName="flex justify-end mb-1"
+          />
         </div>
       </header>
 
@@ -153,8 +171,9 @@ export default function Users() {
                   <img
                     src={
                       user.photo
-                        ? `${import.meta.env.VITE_BASE_URL.split("/api/")[0]}/${user.photo
-                        }`
+                        ? `${import.meta.env.VITE_BASE_URL.split("/api/")[0]}/${
+                            user.photo
+                          }`
                         : img
                     }
                     alt={`${user.first_name} ${user.last_name}`}
@@ -165,8 +184,9 @@ export default function Users() {
                 {/* User Info */}
                 <div className="flex flex-col items-start gap-1">
                   <div>
-                    {`${user.first_name} ${user.middle_name || ""} ${user.last_name
-                      }`}
+                    {`${user.first_name} ${user.middle_name || ""} ${
+                      user.last_name
+                    }`}
                   </div>
                   <div className="text-text-placeholder text-sm">
                     {user.is_exco ? user.positions?.join(", ") : "Member"}
