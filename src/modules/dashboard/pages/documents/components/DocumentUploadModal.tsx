@@ -2,23 +2,20 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "../../../../../components/ui/Button";
 import { Loader } from "../../../../../components/ui/Loader";
-import { FileUploadSection } from "../components/FileUploadSection";
 import FormInput from "../../../../../components/ui/FormInput";
 import { Dropdown } from "../../../../../components/ui/Dropdown";
 import Modal from "../../../components/Modal";
-import type { DocumentFile } from "../../../types";
+import { useDocuments } from "../../../hook/useDocument";
 
 interface DocumentUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  handleAddFile: (file: DocumentFile) => void;
 }
 
 interface DocumentFormValues {
   name: string;
   descr?: string;
   visibility: "public" | "private" | "admins";
-  type: "document";
 }
 
 const VISIBILITY_OPTIONS = [
@@ -30,45 +27,46 @@ const VISIBILITY_OPTIONS = [
 export const DocumentUploadModal = ({
   isOpen,
   onClose,
-  handleAddFile,
 }: DocumentUploadModalProps) => {
+  const { uploadAndCreateDocument, creating, uploading } =
+    useDocuments("document");
+
   const {
     register,
     handleSubmit,
-    formState: { isSubmitting, errors },
+    formState: { errors, isSubmitting },
     setValue,
   } = useForm<DocumentFormValues>({
     defaultValues: {
       name: "",
       descr: "",
       visibility: "public",
-      type: "document",
     },
   });
 
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const onSubmit = async (data: DocumentFormValues) => {
-    if (!file) return setErrorMessage("Please select a file to upload.");
+    if (!files.length) {
+      setErrorMessage("Please select at least one file.");
+      return;
+    }
 
     try {
       setErrorMessage(null);
-      const storagePath = `storage/documents/${file.name.replace(/\s+/g, "_")}`;
-      await new Promise((res) => setTimeout(res, 1000));
 
-      const newDoc: DocumentFile = {
+      // ✅ Use the hook’s combined flow
+      await uploadAndCreateDocument({
+        files,
         name: data.name,
-        size: file.size,
-        type: "document",
-        uploadedAt: new Date().toISOString(),
-        document: [storagePath],
+        descr: data.descr,
         visibility: data.visibility,
-      };
+      });
 
-      handleAddFile(newDoc);
       onClose();
-    } catch {
+    } catch (err) {
+      console.error(err);
       setErrorMessage("Upload failed. Please try again.");
     }
   };
@@ -76,12 +74,35 @@ export const DocumentUploadModal = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Upload Document" size="md">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        <FileUploadSection type="document" onFileSelect={setFile} />
+        {/* Custom File Input */}
+        <div>
+          <label className="block text-sm font-medium mb-2">Select Files</label>
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-indigo-500 transition">
+            <input
+              type="file"
+              multiple
+              className="hidden"
+              id="file-upload"
+              onChange={(e) => setFiles(Array.from(e.target.files || []))}
+            />
+            <label
+              htmlFor="file-upload"
+              className="text-sm text-gray-600 cursor-pointer"
+            >
+              Click to choose or drag & drop files
+            </label>
+            {files.length > 0 && (
+              <p className="text-xs text-gray-500 mt-2">
+                {files.length} file(s) selected
+              </p>
+            )}
+          </div>
+        </div>
 
         <FormInput
           id="name"
           label="Name"
-          placeholder="Enter file name"
+          placeholder="Enter document name"
           register={register("name", { required: "Name is required" })}
           error={errors.name}
         />
@@ -120,8 +141,12 @@ export const DocumentUploadModal = ({
           >
             Cancel
           </Button>
-          <Button variant="primary" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? (
+          <Button
+            variant="primary"
+            type="submit"
+            disabled={isSubmitting || uploading || creating}
+          >
+            {isSubmitting || uploading || creating ? (
               <div className="flex items-center gap-2">
                 <Loader size={16} /> Uploading...
               </div>

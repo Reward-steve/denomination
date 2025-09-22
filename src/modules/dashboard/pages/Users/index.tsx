@@ -168,7 +168,7 @@ export default function Users() {
                       user.last_name
                     }`}
                   </div>
-                  <div className="text-gray-500">
+                  <div className="text-text-placeholder text-sm">
                     {user.is_exco ? user.positions?.join(", ") : "Member"}
                   </div>
                 </div>
