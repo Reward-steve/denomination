@@ -27,7 +27,6 @@ import { fetchStates, fetchLGA } from "../services/auth";
 
 // Icons
 import {
-  FaHeart,
   FaLock,
   FaMapPin,
   FaPhone,
@@ -92,24 +91,25 @@ function PersonalInfo() {
         first_name: "",
         middle_name: "",
         last_name: "",
-        dob: "",
-        gender: "",
-        marital_status: "",
-        phone: "",
-        secondary_phone: "",
-        residential_address: "",
-        email: "",
-        lga: "",
-        origin_state: "",
-        city: "",
-        residence_state: "",
-        area: "",
-        bethel: "",
-        zone: "",
-        priest_status: "",
-        hobbies: "",
         password: "",
         confirm_password: "",
+        dob: "",
+        gender: "",
+        phone: "",
+        secondary_phone: "",
+        marital_status: "",
+        lga: "",
+        city: "",
+        bethel: "",
+        zone: "",
+        area: "",
+        origin_state: "",
+        residence_state: "",
+        priest_status: "",
+        occupation: "",
+        residential_address: "",
+        email: "",
+        nationality: "Nigeria",
       },
     },
   });
@@ -174,8 +174,6 @@ function PersonalInfo() {
       toast.error("Profile photo is required.");
       return;
     }
-
-    console.log({ ...formData });
 
     const payload = { ...formData };
 
@@ -253,7 +251,7 @@ function PersonalInfo() {
         )}
       />
 
-      {/* Basic Details */}
+      {/* =================== Basic Details =================== */}
       <section className="space-y-6">
         <h2 className="font-semibold text-lg text-text-placeholder">
           Basic Details
@@ -294,7 +292,6 @@ function PersonalInfo() {
             })}
             error={errors.bio?.dob}
           />
-
           {renderDropdown("gender", "Gender", genderOptions, FaVenusMars)}
           {renderDropdown(
             "marital_status",
@@ -305,7 +302,7 @@ function PersonalInfo() {
         </div>
       </section>
 
-      {/* Contact Information */}
+      {/* =================== Contact Information =================== */}
       <section className="space-y-6">
         <h2 className="font-semibold text-lg text-text-placeholder">
           Contact Information
@@ -355,12 +352,21 @@ function PersonalInfo() {
         </div>
       </section>
 
-      {/* Geographic Information */}
+      {/* =================== Geographic Information =================== */}
       <section className="space-y-6">
         <h2 className="font-semibold text-lg text-text-placeholder">
           Geographic Information
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormInput
+            label="Bethel of Residence"
+            placeholder="Enter Bethel of Residence"
+            icon={FaMapPin}
+            register={register("bio.bethel", {
+              required: "Bethel of residence is required",
+            })}
+            error={errors.bio?.bethel}
+          />
           <FormInput
             label="City of Residence"
             placeholder="Enter City"
@@ -369,13 +375,25 @@ function PersonalInfo() {
             error={errors.bio?.city}
           />
           <FormInput
-            label="Nationality"
-            value="Nigeria"
-            disabled
+            label="Zone"
+            placeholder="Enter Zone"
             icon={FaMapPin}
-            register={register("bio.nationality")}
+            register={register("bio.zone")}
+            error={errors.bio?.zone}
           />
 
+          {renderDropdown(
+            "residence_state",
+            "State of Residence",
+            states as unknown as DropdownOption[],
+            FaMapPin,
+            {
+              error: stateError,
+              loading: isLoadingStates,
+              disabled: isLoadingStates,
+              onChange: (item) => setValue("bio.residence_state", item.name),
+            }
+          )}
           {renderDropdown(
             "origin_state",
             "State of Origin",
@@ -386,13 +404,12 @@ function PersonalInfo() {
               loading: isLoadingStates,
               disabled: isLoadingStates,
               onChange: (item) => {
-                setSelectedStateId(item?.id as unknown as string);
+                setSelectedStateId(item?.id as string);
                 setValue("bio.origin_state", item.name);
                 setValue("bio.lga", "");
               },
             }
           )}
-
           {renderDropdown(
             "lga",
             "LGA",
@@ -401,16 +418,21 @@ function PersonalInfo() {
             {
               error: lgaError,
               loading: isLoadingLgas,
-              disabled: selectedStateId === "" || isLoadingLgas,
-              onChange: (item) => {
-                setValue("bio.lga", item.name);
-              },
+              disabled: !selectedStateId || isLoadingLgas,
+              onChange: (item) => setValue("bio.lga", item.name),
             }
           )}
         </div>
+        <FormInput
+          label="Area"
+          placeholder="Enter Area"
+          icon={FaMapPin}
+          register={register("bio.area")}
+          error={errors.bio?.area}
+        />
       </section>
 
-      {/* Additional Info */}
+      {/* =================== Additional Info =================== */}
       <section className="space-y-6">
         <h2 className="font-semibold text-lg text-text-placeholder">
           Additional Information
@@ -422,18 +444,17 @@ function PersonalInfo() {
             priestStatusOptions,
             FaCross
           )}
-          <FormInput
-            optional
-            label="Hobbies"
-            placeholder="e.g., Reading, Singing"
-            icon={FaHeart}
-            register={register("bio.hobbies")}
-            error={errors.bio?.hobbies}
-          />
         </div>
+        <FormInput
+          label="Occupation"
+          placeholder="Enter Occupation"
+          icon={FaUser}
+          register={register("bio.occupation")}
+          error={errors.bio?.occupation}
+        />
       </section>
 
-      {/* Account Details */}
+      {/* =================== Account Details =================== */}
       <section className="space-y-6">
         <h2 className="font-semibold text-lg text-text-placeholder">
           Account Details
