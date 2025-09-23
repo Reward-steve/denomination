@@ -478,7 +478,11 @@ export const ResponsiveNav = ({
 
       {/* Mobile Actions */}
       {isMobile && (
-        <div className="flex fixed top-0 bg-background w-full h-14 z-50 justify-between">
+        <div
+          className={`flex fixed top-0 bg-background ${
+            isAuthPage ? " w-full" : "w-auto"
+          } h-14 z-50 justify-between`}
+        >
           <button
             title="Toggle sidebar"
             className="fixed z-50 p-2 rounded-md bg-surface text-text border border-border shadow-sm top-2.5 left-4"
