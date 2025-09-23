@@ -28,6 +28,11 @@ export const MediaCard = ({ item, baseUrl = "", onDelete }: MediaCardProps) => {
     ? new Date(item.created_at).toLocaleDateString()
     : "Unknown";
 
+  // 🔹 Check file type (audio vs video) by extension
+  const isAudioFile = (file: string) => /\.(mp3|wav|m4a|ogg)$/i.test(file);
+
+  const isVideoFile = (file: string) => /\.(mp4|mov|avi|mkv|webm)$/i.test(file);
+
   // Handle download
   const handleDownload = (path: string) => {
     const url = `${baseUrl}/${path}`;
@@ -100,12 +105,11 @@ export const MediaCard = ({ item, baseUrl = "", onDelete }: MediaCardProps) => {
       {ReactDOM.createPortal(
         <Modal
           isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-          }}
+          onClose={() => setIsModalOpen(false)}
           title={item.name}
           size="lg"
         >
+          {/* Document */}
           {item.type === "document" && (
             <div className="space-y-3">
               {item.paths.map((path, i) => (
@@ -118,29 +122,21 @@ export const MediaCard = ({ item, baseUrl = "", onDelete }: MediaCardProps) => {
                     title={path.split("/").pop()}
                   >
                     {getTypeIcon()}
-                    {`Doc ${i + 1 * 1}`}
+                    {`Doc ${i + 1}`}
                   </span>
-                  <div className="flex gap-2">
-                    {/* <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPreviewFile(`${baseUrl}/${path}`)}
-                    >
-                      <FaEye className="h-4 w-4" />
-                    </Button> */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDownload(path)}
-                    >
-                      <FaEye className="h-4 w-4 text-accent" />
-                    </Button>
-                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDownload(path)}
+                  >
+                    <FaEye className="h-4 w-4 text-accent" />
+                  </Button>
                 </div>
               ))}
             </div>
           )}
 
+          {/* Song */}
           {item.type === "song" && (
             <div className="flex flex-col items-center gap-4">
               <p className="text-sm font-medium text-text mt-2">{item.name}</p>
@@ -153,19 +149,30 @@ export const MediaCard = ({ item, baseUrl = "", onDelete }: MediaCardProps) => {
             </div>
           )}
 
+          {/* Sermon (audio OR video) */}
           {item.type === "sermon" && (
-            <div className="flex justify-center items-center w-full h-full">
-              <div className="space-y-3">
-                <p className="text-sm font-medium text-text mt-2">
-                  {item.descr || "No description provided."}
-                </p>
+            <div className="flex flex-col items-center gap-4 w-full">
+              <p className="text-sm font-medium text-text mt-2">
+                {item.descr || "No description provided."}
+              </p>
+
+              {isAudioFile(item.paths[0]) ? (
+                <audio
+                  ref={audioRef}
+                  src={`${baseUrl}/${item.paths[0]}`}
+                  controls
+                  className="w-full max-w-md rounded-lg"
+                />
+              ) : isVideoFile(item.paths[0]) ? (
                 <video
                   ref={videoRef}
                   src={`${baseUrl}/${item.paths[0]}`}
                   controls
                   className="w-full max-w-lg rounded-lg"
                 />
-              </div>
+              ) : (
+                <p className="text-sm text-error">Unsupported sermon format</p>
+              )}
             </div>
           )}
         </Modal>,

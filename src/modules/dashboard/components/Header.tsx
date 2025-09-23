@@ -18,7 +18,7 @@ export function DashboardHeader({
   return (
     <div className="space-y-6 animate-fade">
       {/* Header */}
-      <div className="sticky top-0 bg-background/80 backdrop-blur-md z-10 py-4">
+      <div className="backdrop-blur-md py-4">
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-text capitalize">{title}</h1>
