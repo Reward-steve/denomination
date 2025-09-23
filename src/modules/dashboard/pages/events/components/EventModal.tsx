@@ -57,16 +57,24 @@ export const EventModal = ({
           <p className="text-sm text-red-500 text-center">{errorMessage}</p>
         )}
 
-        <div className="flex justify-end gap-3 pt-4">
+        <div className="flex items-center justify-center flex-col sm:flex-row w-full gap-3">
           <Button
             variant="outline"
             type="button"
             onClick={onClose}
+            size="lg"
+            className="w-full"
             disabled={isSubmitting}
           >
             Cancel
           </Button>
-          <Button variant="primary" type="submit" disabled={isSubmitting}>
+          <Button
+            variant="primary"
+            size="lg"
+            className="w-full"
+            type="submit"
+            disabled={isSubmitting}
+          >
             {isSubmitting ? (
               <div className="flex items-center gap-2">
                 <Loader size={16} />
