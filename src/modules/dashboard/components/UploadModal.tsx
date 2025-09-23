@@ -139,6 +139,7 @@ export const UploadModal = ({ type, isOpen, onClose }: UploadModalProps) => {
             variant="outline"
             type="button"
             onClick={onClose}
+            size="lg"
             className="w-full"
             disabled={isSubmitting}
           >
@@ -146,6 +147,7 @@ export const UploadModal = ({ type, isOpen, onClose }: UploadModalProps) => {
           </Button>
           <Button
             variant="primary"
+            size="lg"
             type="submit"
             form="upload-form"
             className="w-full"
