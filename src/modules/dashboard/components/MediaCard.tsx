@@ -1,7 +1,6 @@
 import { useState, useRef } from "react";
 import ReactDOM from "react-dom";
 import {
-  FaDownload,
   FaEye,
   FaTrash,
   FaFileAlt,
@@ -119,22 +118,22 @@ export const MediaCard = ({ item, baseUrl = "", onDelete }: MediaCardProps) => {
                     title={path.split("/").pop()}
                   >
                     {getTypeIcon()}
-                    {path.split("/").pop() || "Document"}
+                    {`Doc ${i + 1 * 1}`}
                   </span>
                   <div className="flex gap-2">
-                    <Button
+                    {/* <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setPreviewFile(`${baseUrl}/${path}`)}
                     >
                       <FaEye className="h-4 w-4" />
-                    </Button>
+                    </Button> */}
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleDownload(path)}
                     >
-                      <FaDownload className="h-4 w-4" />
+                      <FaEye className="h-4 w-4 text-accent" />
                     </Button>
                   </div>
                 </div>

@@ -111,7 +111,7 @@ export const Modal = ({
           <button
             onClick={onClose}
             aria-label="Close modal"
-            className="p-2 rounded-full hover:bg-background/70 transition-colors"
+            className="p-2 rounded-full hover:bg-background transition-colors border border-border"
           >
             <FaX size={16} className="text-primary" />
           </button>
