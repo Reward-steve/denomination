@@ -1,11 +1,14 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import ReactDOM from "react-dom";
 import {
-  FaEye,
   FaTrash,
   FaFileAlt,
   FaMusic,
   FaMicrophone,
+  FaFileDownload,
+  FaVideo,
+  FaPlay,
+  FaPause,
 } from "react-icons/fa";
 import { Button } from "../../../components/ui/Button";
 import Modal from "./Modal";
@@ -20,20 +23,17 @@ interface MediaCardProps {
 
 export const MediaCard = ({ item, baseUrl = "", onDelete }: MediaCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [previewFile, setPreviewFile] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const [currentPlaying, setCurrentPlaying] = useState<string | null>(null); // track active file
 
   const createdDate = item?.created_at
     ? new Date(item.created_at).toLocaleDateString()
     : "Unknown";
 
-  // 🔹 Check file type (audio vs video) by extension
+  // 🔹 File checks
   const isAudioFile = (file: string) => /\.(mp3|wav|m4a|ogg)$/i.test(file);
-
   const isVideoFile = (file: string) => /\.(mp4|mov|avi|mkv|webm)$/i.test(file);
 
-  // Handle download
+  // 🔹 Download handler
   const handleDownload = (path: string) => {
     const url = `${baseUrl}/${path}`;
     const filename = path.split("/").pop() || "file";
@@ -45,38 +45,47 @@ export const MediaCard = ({ item, baseUrl = "", onDelete }: MediaCardProps) => {
     document.body.removeChild(link);
   };
 
-  // Type-specific icon
+  // 🔹 Icon for type
   const getTypeIcon = () => {
     switch (item.type) {
       case "document":
-        return <FaFileAlt className="h-7 w-7 text-accent" />;
+        return <FaFileAlt className="h-6 w-6 text-accent" />;
       case "song":
-        return <FaMusic className="h-7 w-7 text-accent" />;
+        return <FaMusic className="h-6 w-6 text-accent" />;
       case "sermon":
-        return <FaMicrophone className="h-7 w-7 text-accent" />;
+        return <FaMicrophone className="h-6 w-6 text-accent" />;
       default:
         return null;
     }
   };
 
+  // 🔹 Handle play/pause logic
+  const togglePlay = (id: string) => {
+    if (currentPlaying === id) {
+      setCurrentPlaying(null); // stop
+    } else {
+      setCurrentPlaying(id); // play new
+    }
+  };
+
   return (
     <>
-      {/* Card */}
+      {/* Compact Card */}
       <article
         className={clsx(
-          "p-4 sm:p-5 rounded-2xl bg-surface border border-border group",
+          "p-4 sm:p-5 rounded-xl bg-surface border border-border",
           "hover:border-accent hover:shadow-lg transition-all duration-200",
-          "cursor-pointer flex items-center gap-4"
+          "cursor-pointer flex items-start gap-4"
         )}
         onClick={() => setIsModalOpen(true)}
       >
-        <div className="flex-shrink-0 p-3 rounded-xl bg-db-surface/70 group-hover:bg-db-surface">
+        <div className="flex-shrink-0 p-3 rounded-lg bg-db-surface/60 group-hover:bg-db-surface">
           {getTypeIcon()}
         </div>
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 space-y-1">
           <h3
-            className="text-base sm:text-lg font-semibold text-text line-clamp-1"
+            className="text-base sm:text-lg font-semibold text-text truncate"
             title={item.name}
           >
             {item.name}
@@ -94,7 +103,6 @@ export const MediaCard = ({ item, baseUrl = "", onDelete }: MediaCardProps) => {
               e.stopPropagation();
               onDelete(item.id);
             }}
-            aria-label={`Delete ${item.name}`}
           >
             <FaTrash className="w-4 h-4 text-error" />
           </Button>
@@ -109,95 +117,146 @@ export const MediaCard = ({ item, baseUrl = "", onDelete }: MediaCardProps) => {
           title={item.name}
           size="lg"
         >
-          {/* Document */}
-          {item.type === "document" && (
-            <div className="space-y-3">
-              {item.paths.map((path, i) => (
+          <div className="space-y-4">
+            {/* DOCUMENTS */}
+            {item.type === "document" &&
+              item.paths.map((path, i) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between rounded-lg px-3 py-2 bg-db-surface/60 hover:bg-db-surface"
+                  className="flex items-center justify-between px-4 py-2 rounded-lg bg-db-surface/50 hover:bg-db-surface transition"
                 >
-                  <span
-                    className="flex items-center gap-2 text-sm text-text truncate"
-                    title={path.split("/").pop()}
-                  >
-                    {getTypeIcon()}
-                    {`Doc ${i + 1}`}
+                  <span className="flex items-center gap-2 text-sm font-medium text-text truncate">
+                    <FaFileAlt className="h-5 w-5 text-accent" />
+                    {`Document ${i + 1}`}
                   </span>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleDownload(path)}
                   >
-                    <FaEye className="h-4 w-4 text-accent" />
+                    <FaFileDownload className="h-4 w-4" />
                   </Button>
                 </div>
               ))}
-            </div>
-          )}
 
-          {/* Song */}
-          {item.type === "song" && (
-            <div className="flex flex-col items-center gap-4">
-              <p className="text-sm font-medium text-text mt-2">{item.name}</p>
-              <audio
-                ref={audioRef}
-                src={`${baseUrl}/${item.paths[0]}`}
-                controls
-                className="w-full max-w-md rounded-lg"
-              />
-            </div>
-          )}
+            {/* SONGS */}
+            {item.type === "song" &&
+              item.paths.map((path, i) => {
+                const id = `song-${i}`;
+                const isPlaying = currentPlaying === id;
 
-          {/* Sermon (audio OR video) */}
-          {item.type === "sermon" && (
-            <div className="flex flex-col items-center gap-4 w-full">
-              <p className="text-sm font-medium text-text mt-2">
-                {item.descr || "No description provided."}
-              </p>
+                return (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between px-4 py-2 rounded-lg bg-db-surface/50 hover:bg-db-surface transition"
+                  >
+                    <span className="flex items-center gap-2 text-sm font-medium text-text truncate">
+                      <FaMusic className="h-5 w-5 text-accent" />
+                      {`Song ${i + 1}`}
+                    </span>
 
-              {isAudioFile(item.paths[0]) ? (
-                <audio
-                  ref={audioRef}
-                  src={`${baseUrl}/${item.paths[0]}`}
-                  controls
-                  className="w-full max-w-md rounded-lg"
-                />
-              ) : isVideoFile(item.paths[0]) ? (
-                <video
-                  ref={videoRef}
-                  src={`${baseUrl}/${item.paths[0]}`}
-                  controls
-                  className="w-full max-w-lg rounded-lg"
-                />
-              ) : (
-                <p className="text-sm text-error">Unsupported sermon format</p>
-              )}
-            </div>
-          )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => togglePlay(id)}
+                    >
+                      {isPlaying ? (
+                        <FaPause className="h-4 w-4" />
+                      ) : (
+                        <FaPlay className="h-4 w-4" />
+                      )}
+                    </Button>
+
+                    {isPlaying && (
+                      <audio
+                        autoPlay
+                        controls
+                        src={`${baseUrl}/${path}`}
+                        onEnded={() => setCurrentPlaying(null)}
+                        className="hidden"
+                      />
+                    )}
+                  </div>
+                );
+              })}
+
+            {/* SERMONS */}
+            {item.type === "sermon" && (
+              <div className="flex flex-col gap-5 w-full">
+                {item.descr && (
+                  <p className="text-sm font-medium text-text text-center px-4">
+                    {item.descr}
+                  </p>
+                )}
+                <div className="space-y-3 w-full">
+                  {item.paths.map((path, i) => {
+                    const id = `sermon-${i}`;
+                    const isAudio = isAudioFile(path);
+                    const isVideo = isVideoFile(path);
+                    const isPlaying = currentPlaying === id;
+
+                    return (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between px-4 py-3 rounded-lg bg-db-surface/50 hover:bg-db-surface transition"
+                      >
+                        <span className="flex items-center gap-2 text-sm font-medium text-text truncate">
+                          {isAudio ? (
+                            <FaMicrophone className="h-5 w-5 text-accent" />
+                          ) : isVideo ? (
+                            <FaVideo className="h-5 w-5 text-accent" />
+                          ) : (
+                            <FaFileAlt className="h-5 w-5 text-error" />
+                          )}
+                          {isAudio
+                            ? `Audio Sermon ${i + 1}`
+                            : isVideo
+                            ? `Video Sermon ${i + 1}`
+                            : `Unsupported ${i + 1}`}
+                        </span>
+
+                        {isAudio && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => togglePlay(id)}
+                          >
+                            {isPlaying ? (
+                              <FaPause className="h-4 w-4" />
+                            ) : (
+                              <FaPlay className="h-4 w-4" />
+                            )}
+                          </Button>
+                        )}
+
+                        {/* Audio/Video Player */}
+                        {isAudio && isPlaying && (
+                          <audio
+                            autoPlay
+                            controls
+                            src={`${baseUrl}/${path}`}
+                            onEnded={() => setCurrentPlaying(null)}
+                            className="hidden"
+                          />
+                        )}
+
+                        {isVideo && (
+                          <video
+                            controls
+                            src={`${baseUrl}/${path}`}
+                            className="w-full sm:w-96 rounded"
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
         </Modal>,
         window.document.body
       )}
-
-      {/* Preview Modal for documents */}
-      {previewFile &&
-        ReactDOM.createPortal(
-          <Modal
-            isOpen={!!previewFile}
-            onClose={() => setPreviewFile(null)}
-            title="Document Preview"
-            size="xl"
-          >
-            <div className="relative w-full h-[70vh] sm:h-[80vh]">
-              <iframe
-                src={previewFile}
-                className="w-full h-full rounded-lg border border-border"
-                title="Document Preview"
-              />
-            </div>
-          </Modal>,
-          window.document.body
-        )}
     </>
   );
 };
