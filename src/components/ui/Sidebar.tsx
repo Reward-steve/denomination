@@ -1,11 +1,12 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, memo, useCallback, useEffect } from "react";
-import { FaCircleCheck } from "react-icons/fa6";
+import { FaCircleCheck, FaGlobe } from "react-icons/fa6";
 import { LuPanelRightClose, LuPanelRightOpen } from "react-icons/lu";
 import type { IconType } from "react-icons";
 import clsx from "clsx";
 import Logo from "./Logo";
 import {
+  AUTH_BASE_PATH,
   DASHBOARD_BASE_PATH,
   type AuthSidebarProps,
   type DashboardSidebarProps,
@@ -13,6 +14,7 @@ import {
 import { useRegistration } from "../../hooks/useReg";
 import { useResponsive } from "../../hooks/useResponsive";
 import { useAuth } from "../../hooks/useAuth";
+import { Link } from "react-router-dom";
 
 /* -------------------- Types -------------------- */
 export interface SidebarProps {
@@ -87,13 +89,11 @@ export const SidebarLink = memo(
     const isStepCompleted = num < step;
 
     const handleClick = useCallback(() => {
-      if (!to) {
-        console.warn(`Invalid path for ${label}`);
-        return;
-      }
-      navigate(`${DASHBOARD_BASE_PATH}/${to}`);
+      if (!to) return;
+      const basePath = isDashboard ? DASHBOARD_BASE_PATH : AUTH_BASE_PATH;
+      navigate(`${basePath}/${to}`);
       setIsOpen(false);
-    }, [navigate, to, label]);
+    }, [navigate, to, isDashboard, setIsOpen]);
 
     const buttonClasses = clsx(
       "w-full text-left my-2 flex items-center gap-3 p-2 rounded-md transition-colors duration-200 text-sm hover:bg-accent-light",
@@ -180,7 +180,11 @@ export const ResponsiveNav = ({
             : "w-[var(--sidebar-collapsed-width)]"
         )}
       >
-        <div className="h-full bg-surface p-3 border-r border-border flex flex-col">
+        <div
+          className={`h-full bg-surface border-r border-border flex flex-col ${
+            isAuthPage ? "px-3 pt-12" : "p-3"
+          }`}
+        >
           {/* Header */}
           <SidebarHeader
             isOpen={isOpen}
@@ -204,7 +208,7 @@ export const ResponsiveNav = ({
                               : label
                           }
                           setIsOpen={setIsOpen}
-                          num={step!}
+                          num={step ?? 0}
                           disabled={disabled}
                           Icon={Icon}
                           isOpen={isOpen}
@@ -224,13 +228,23 @@ export const ResponsiveNav = ({
       </aside>
 
       {/* Mobile Toggle */}
-      {!disabled && isMobile && (
+      {isMobile && (
         <button
           className="fixed top-2.5 left-4 z-50 p-2 rounded-md bg-surface text-text border border-border shadow-sm"
           onClick={() => setIsOpen((prev) => !prev)}
         >
           {isOpen ? <LuPanelRightClose /> : <LuPanelRightOpen />}
         </button>
+      )}
+
+      {isMobile && isAuthPage && (
+        <Link
+          to="/"
+          title="Return to Home"
+          className="p-2 fixed top-2.5 right-4 z-50 rounded-md bg-surface text-text border border-border shadow-sm"
+        >
+          <FaGlobe className="text-text" />
+        </Link>
       )}
     </>
   );

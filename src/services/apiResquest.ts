@@ -6,10 +6,14 @@ export const apiRequest = async (
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
   body?: object | FormData,
   xcache: "cf" | "nf" | "swr" | "co" | "no" = "no"
-): Promise<{ success: boolean; message: string; data: any }> => {
+): Promise<{
+  success: boolean;
+  message: string;
+  data: any;
+  errors?: string[];
+}> => {
   const url = XCache(`${endpoint}`, xcache);
 
-  // ✅ Use correct keys from AuthProvider
   const token = getFromStore<string>("tk", "local");
   const user = getFromStore<{ id: string }>("curr_user", "local");
   const userId = user?.id ?? null;
@@ -35,19 +39,23 @@ export const apiRequest = async (
   } catch (error: any) {
     let message = "An unknown error occurred";
     let data = null;
+    let errors: string[] = [];
 
     if (error.response?.data) {
       const responseData = error.response.data;
-      if (typeof responseData.message === "string") {
+
+      if (responseData.errors) {
+        // Collect all messages into a flat array
+        errors = Object.values(responseData.errors).flatMap((err: any) =>
+          Array.isArray(err) ? err : [err]
+        );
+        message = responseData.message || errors[0] || "Validation failed";
+      } else if (typeof responseData.message === "string") {
         message = responseData.message;
-      } else if (responseData.errors) {
-        const firstError = Object.values(responseData.errors)[0];
-        message = Array.isArray(firstError)
-          ? firstError[0]
-          : firstError || "Request failed";
       } else {
         message = "Request failed with server error.";
       }
+
       data = responseData;
     } else if (error.message) {
       message = error.message;
@@ -59,6 +67,7 @@ export const apiRequest = async (
       success: false,
       message,
       data: null,
+      errors,
     };
   }
 };

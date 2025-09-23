@@ -60,7 +60,6 @@ export default function UCCAInfo() {
   // Watchers for conditional fields
   const inducted = watch("bio.inducted");
   const promotionEvidence = watch("bio.promotion_method");
-  console.log(inducted);
 
   /** Mark this as Step 4 */
   useEffect(() => {
