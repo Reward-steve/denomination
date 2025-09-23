@@ -12,7 +12,7 @@ interface ModalProps {
   size?: "sm" | "md" | "lg" | "xl";
   closeOnOverlayClick?: boolean;
   closeOnEsc?: boolean;
-  footer?: React.ReactNode; // 🔹 new optional footer
+  footer?: React.ReactNode;
 }
 
 export const Modal = ({
@@ -48,7 +48,7 @@ export const Modal = ({
     return () => window.removeEventListener("keydown", handleKey);
   }, [isOpen, closeOnEsc, onClose]);
 
-  // --- Focus trap inside modal ---
+  // --- Focus trap ---
   const trapFocus = useCallback((e: KeyboardEvent) => {
     if (e.key !== "Tab" || !modalRef.current) return;
     const focusable = modalRef.current.querySelectorAll<HTMLElement>(
@@ -73,7 +73,7 @@ export const Modal = ({
     return () => document.removeEventListener("keydown", trapFocus);
   }, [isOpen, trapFocus]);
 
-  // --- Auto-focus first focusable element ---
+  // --- Auto-focus first element ---
   useEffect(() => {
     if (!isOpen) return;
     const el = modalRef.current?.querySelector<HTMLElement>(
@@ -90,17 +90,18 @@ export const Modal = ({
     xl: "max-w-3xl",
   }[size];
 
-  // --- Overlay classes ---
+  // --- Overlay ---
   const overlayClasses = clsx(
     "fixed inset-0 z-[9999] w-screen h-screen flex bg-black/50 backdrop-blur-sm",
     isMobile ? "items-end justify-center" : "items-center justify-center",
     "animate-fade-in"
   );
 
-  // --- Modal panel ---
+  // --- Panel ---
   const panelClasses = clsx(
     "relative w-full sm:max-h-[90vh] max-h-[100vh] overflow-y-auto shadow-xl bg-surface",
-    "px-4 sm:px-6 pb-6 h-full md:h-auto",
+    // ⬇️ Increased bottom padding (was pb-6, now pb-16 for safe scroll space)
+    "px-4 sm:px-6 pb-20 sm:pb-12 h-full md:h-auto",
     isMobile
       ? "rounded-t-3xl animate-slide-up"
       : `rounded-2xl ${sizeClass} animate-zoom-in`
@@ -143,7 +144,7 @@ export const Modal = ({
 
         {/* Footer (optional) */}
         {footer && (
-          <footer className="mt-6 border-t border-border pt-4 flex justify-end gap-3">
+          <footer className="mt-8 border-t border-border pt-4 flex justify-end gap-3">
             {footer}
           </footer>
         )}
