@@ -1,8 +1,8 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Button } from "../../../components/ui/Button";
 import { FaCheckCircle } from "react-icons/fa";
 import { useRegistration } from "../../../hooks/useReg";
+import { Modal } from "../../Landing/components/Modal";
 
 /**
  * RegistrationSuccess
@@ -12,8 +12,8 @@ import { useRegistration } from "../../../hooks/useReg";
  * to their dashboard.
  */
 export default function RegistrationSuccess() {
-  const navigate = useNavigate();
   const { setStep, setPrev } = useRegistration();
+  const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
     setStep(6);
@@ -41,13 +41,13 @@ export default function RegistrationSuccess() {
         {/* CTA */}
         <div className="mt-6 flex flex-col sm:flex-row justify-center gap-3 sm:gap-6">
           <Button
-            onClick={() => navigate("/dashboard")}
+            onClick={() => setShowLogin(true)}
             textSize="sm"
             type="button"
             variant="auth"
             className="w-full sm:w-auto"
           >
-            Go to Dashboard
+            Login
           </Button>
         </div>
       </section>
@@ -57,6 +57,13 @@ export default function RegistrationSuccess() {
         Thank you for joining <span className="font-semibold">UCCA</span>. We’re
         excited to have you on board!
       </p>
+      {/* Login Modal */}
+      {showLogin && (
+        <Modal
+          showLogin={showLogin}
+          handleCloseLogin={() => setShowLogin(false)}
+        />
+      )}
     </main>
   );
 }
