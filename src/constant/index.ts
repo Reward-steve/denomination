@@ -44,6 +44,7 @@ export const ROUTES = {
 };
 
 export const DASHBOARD_BASE_PATH = "/dashboard";
+export const AUTH_BASE_PATH = "/auth";
 
 // Path validation utility
 const validatePath = (path: string): string => {

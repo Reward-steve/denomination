@@ -32,10 +32,7 @@ function ThemedAppContent() {
         <Route path="/" element={<LandingPage />} />
 
         {/* Auth-flow */}
-        <Route
-          path="/auth/*"
-          element={<Layout Items={authMenu} disabled={true} />}
-        >
+        <Route path="/auth/*" element={<Layout Items={authMenu} />}>
           <Route index element={<Navigate to="personal-info" replace />} />
           {auth.map(({ path, element: Element }) => (
             <Route key={path} path={path} element={<Element />} />

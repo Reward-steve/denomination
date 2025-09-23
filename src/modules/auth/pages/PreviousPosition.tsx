@@ -97,7 +97,12 @@ export default function PrevPosition() {
         setStep(6);
         navigate("/auth/success");
       } else {
-        toast.error(res.message || "Registration failed");
+        // ✅ Handle multiple errors gracefully
+        if (res.errors?.length) {
+          res.errors.forEach((err: string) => toast.error(err));
+        } else {
+          toast.error(res.message || "Registration failed");
+        }
       }
     } catch (error) {
       toast.error(
@@ -162,20 +167,13 @@ export default function PrevPosition() {
             error={errors.prev_positions?.[index]?.position_name}
           />
 
-          {/* Years */}
+          {/* Years (fully optional now) */}
           <FormInput
             label="Start Year"
             placeholder="YYYY"
             type="number"
             icon={FaCalendar}
-            register={register(`prev_positions.${index}.start_year`, {
-              valueAsNumber: true,
-              min: { value: 1900, message: "Year must be >= 1900" },
-              max: {
-                value: new Date().getFullYear(),
-                message: "Year cannot be in the future",
-              },
-            })}
+            register={register(`prev_positions.${index}.start_year`)}
             optional
             error={errors.prev_positions?.[index]?.start_year}
           />
@@ -185,20 +183,7 @@ export default function PrevPosition() {
             placeholder="YYYY"
             type="number"
             icon={FaCalendar}
-            register={register(`prev_positions.${index}.end_year`, {
-              valueAsNumber: true,
-              validate: (value, formValues) => {
-                const start = formValues.prev_positions?.[index]?.start_year;
-                if (!value) return true; // allow empty
-                if (start && value < start) {
-                  return "End year cannot be earlier than start year";
-                }
-                if (Number(value) > new Date().getFullYear()) {
-                  return "Year cannot be in the future";
-                }
-                return true;
-              },
-            })}
+            register={register(`prev_positions.${index}.end_year`)}
             optional
             error={errors.prev_positions?.[index]?.end_year}
           />

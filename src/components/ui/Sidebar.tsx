@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, memo, useCallback, useEffect } from "react";
-import { FaCircleCheck } from "react-icons/fa6";
+import { FaCircleCheck, FaGlobe } from "react-icons/fa6";
 import { LuPanelRightClose, LuPanelRightOpen } from "react-icons/lu";
 import type { IconType } from "react-icons";
 import clsx from "clsx";
@@ -13,6 +13,7 @@ import {
 import { useRegistration } from "../../hooks/useReg";
 import { useResponsive } from "../../hooks/useResponsive";
 import { useAuth } from "../../hooks/useAuth";
+import { Link } from "react-router-dom";
 
 /* -------------------- Types -------------------- */
 export interface SidebarProps {
@@ -191,7 +192,7 @@ export const ResponsiveNav = ({
           {/* Links */}
           <nav className="flex-1 overflow-y-auto">
             {items.length > 0 ? (
-              <ul className="space-y-1">
+              <ul className={`space-y-1 ${isMobile ? "mt-6" : "mt-0"}`}>
                 {items.map(
                   ({ label, Icon, path, step, admin }) =>
                     ((!admin && !is_admin) || is_admin) && (
@@ -224,13 +225,23 @@ export const ResponsiveNav = ({
       </aside>
 
       {/* Mobile Toggle */}
-      {!disabled && isMobile && (
+      {isMobile && (
         <button
           className="fixed top-2.5 left-4 z-50 p-2 rounded-md bg-surface text-text border border-border shadow-sm"
           onClick={() => setIsOpen((prev) => !prev)}
         >
           {isOpen ? <LuPanelRightClose /> : <LuPanelRightOpen />}
         </button>
+      )}
+
+      {isAuthPage && (
+        <Link
+          to="/"
+          title="Return to Home"
+          className="p-2 fixed top-2.5 right-4 z-50 rounded-md bg-surface text-text border border-border shadow-sm"
+        >
+          <FaGlobe className="text-text" />
+        </Link>
       )}
     </>
   );
