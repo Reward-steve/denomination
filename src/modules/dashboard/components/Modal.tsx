@@ -99,8 +99,8 @@ export const Modal = ({
 
   // --- Modal panel ---
   const panelClasses = clsx(
-    "relative w-full max-h-[90vh] overflow-y-auto shadow-xl bg-surface",
-    "px-4 sm:px-6 pb-6 h-[95%] md:h-auto",
+    "relative w-full sm:max-h-[90vh] max-h-[100vh] overflow-y-auto shadow-xl bg-surface",
+    "px-4 sm:px-6 pb-6 h-full md:h-auto",
     isMobile
       ? "rounded-t-3xl animate-slide-up"
       : `rounded-2xl ${sizeClass} animate-zoom-in`
@@ -132,9 +132,9 @@ export const Modal = ({
           <button
             onClick={onClose}
             aria-label="Close modal"
-            className="p-2 rounded-full hover:bg-background transition-colors border border-border"
+            className="p-2 rounded-full hover:bg-background transition-colors bg-background"
           >
-            <FaX size={16} className="text-primary" />
+            <FaX size={14} className="text-accent" />
           </button>
         </header>
 
