@@ -6,6 +6,7 @@ import type { IconType } from "react-icons";
 import clsx from "clsx";
 import Logo from "./Logo";
 import {
+  AUTH_BASE_PATH,
   DASHBOARD_BASE_PATH,
   type AuthSidebarProps,
   type DashboardSidebarProps,
@@ -88,13 +89,11 @@ export const SidebarLink = memo(
     const isStepCompleted = num < step;
 
     const handleClick = useCallback(() => {
-      if (!to) {
-        console.warn(`Invalid path for ${label}`);
-        return;
-      }
-      navigate(`${DASHBOARD_BASE_PATH}/${to}`);
+      if (!to) return;
+      const basePath = isDashboard ? DASHBOARD_BASE_PATH : AUTH_BASE_PATH;
+      navigate(`${basePath}/${to}`);
       setIsOpen(false);
-    }, [navigate, to, label]);
+    }, [navigate, to, isDashboard, setIsOpen]);
 
     const buttonClasses = clsx(
       "w-full text-left my-2 flex items-center gap-3 p-2 rounded-md transition-colors duration-200 text-sm hover:bg-accent-light",
@@ -181,7 +180,11 @@ export const ResponsiveNav = ({
             : "w-[var(--sidebar-collapsed-width)]"
         )}
       >
-        <div className="h-full bg-surface p-3 border-r border-border flex flex-col">
+        <div
+          className={`h-full bg-surface border-r border-border flex flex-col ${
+            isAuthPage ? "px-3 pt-12" : "p-3"
+          }`}
+        >
           {/* Header */}
           <SidebarHeader
             isOpen={isOpen}
@@ -192,7 +195,7 @@ export const ResponsiveNav = ({
           {/* Links */}
           <nav className="flex-1 overflow-y-auto">
             {items.length > 0 ? (
-              <ul className={`space-y-1 ${isMobile ? "mt-6" : "mt-0"}`}>
+              <ul className="space-y-1">
                 {items.map(
                   ({ label, Icon, path, step, admin }) =>
                     ((!admin && !is_admin) || is_admin) && (
@@ -205,7 +208,7 @@ export const ResponsiveNav = ({
                               : label
                           }
                           setIsOpen={setIsOpen}
-                          num={step!}
+                          num={step ?? 0}
                           disabled={disabled}
                           Icon={Icon}
                           isOpen={isOpen}
@@ -234,7 +237,7 @@ export const ResponsiveNav = ({
         </button>
       )}
 
-      {isAuthPage && (
+      {isMobile && isAuthPage && (
         <Link
           to="/"
           title="Return to Home"

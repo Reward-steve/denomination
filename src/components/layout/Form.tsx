@@ -20,7 +20,7 @@ export default function Form({
 
   return (
     <div className="flex flex-col py-6 px-4 text-text animate-slide-up">
-      <div className="flex-grow flex items-center justify-center mb-4 sm:mt-28 mt-10">
+      <div className="flex-grow flex items-center justify-center mb-4 sm:mt-28 mt-20">
         <form
           onSubmit={onSubmit}
           className="w-full max-w-md rounded-lg space-y-5"
