@@ -225,7 +225,7 @@ export default function Home() {
                         LIVE
                       </small>
                     </div>
-                    <Button
+                    {user?.is_admin && <Button
                       variant="primary"
                       size="lg"
                       onClick={() => {
@@ -234,7 +234,7 @@ export default function Home() {
                       }}
                     >
                       Take Attendance
-                    </Button>
+                    </Button>}
                   </div>
                 </div>
               ))}

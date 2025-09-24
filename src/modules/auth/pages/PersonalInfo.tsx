@@ -444,14 +444,14 @@ function PersonalInfo() {
             priestStatusOptions,
             FaCross
           )}
+          <FormInput
+            label="Occupation"
+            placeholder="Enter Occupation"
+            icon={FaUser}
+            register={register("bio.occupation")}
+            error={errors.bio?.occupation}
+          />
         </div>
-        <FormInput
-          label="Occupation"
-          placeholder="Enter Occupation"
-          icon={FaUser}
-          register={register("bio.occupation")}
-          error={errors.bio?.occupation}
-        />
       </section>
 
       {/* =================== Account Details =================== */}
