@@ -12,6 +12,7 @@ import {
 } from "react-icons/fa";
 import { Button } from "../../../components/ui/Button";
 import Modal from "./Modal";
+import { ConfirmDialog } from "../../../components/ui/ConfirmDialog";
 import type { MediaResponse } from "../types";
 import clsx from "clsx";
 
@@ -23,17 +24,16 @@ interface MediaCardProps {
 
 export const MediaCard = ({ item, baseUrl = "", onDelete }: MediaCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentPlaying, setCurrentPlaying] = useState<string | null>(null); // track active file
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [currentPlaying, setCurrentPlaying] = useState<string | null>(null);
 
   const createdDate = item?.created_at
     ? new Date(item.created_at).toLocaleDateString()
     : "Unknown";
 
-  // 🔹 File checks
   const isAudioFile = (file: string) => /\.(mp3|wav|m4a|ogg)$/i.test(file);
   const isVideoFile = (file: string) => /\.(mp4|mov|avi|mkv|webm)$/i.test(file);
 
-  // 🔹 Download handler
   const handleDownload = (path: string) => {
     const url = `${baseUrl}/${path}`;
     const filename = path.split("/").pop() || "file";
@@ -45,7 +45,6 @@ export const MediaCard = ({ item, baseUrl = "", onDelete }: MediaCardProps) => {
     document.body.removeChild(link);
   };
 
-  // 🔹 Icon for type
   const getTypeIcon = () => {
     switch (item.type) {
       case "document":
@@ -59,13 +58,8 @@ export const MediaCard = ({ item, baseUrl = "", onDelete }: MediaCardProps) => {
     }
   };
 
-  // 🔹 Handle play/pause logic
   const togglePlay = (id: string) => {
-    if (currentPlaying === id) {
-      setCurrentPlaying(null); // stop
-    } else {
-      setCurrentPlaying(id); // play new
-    }
+    setCurrentPlaying((prev) => (prev === id ? null : id));
   };
 
   return (
@@ -101,13 +95,33 @@ export const MediaCard = ({ item, baseUrl = "", onDelete }: MediaCardProps) => {
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              onDelete(item.id);
+              setConfirmDelete(true);
             }}
           >
             <FaTrash className="w-4 h-4 text-error" />
           </Button>
         )}
       </article>
+
+      {/* ✅ Reusable Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDelete}
+        title="Confirm Delete"
+        message={
+          <>
+            Are you sure you want to delete{" "}
+            <span className="font-semibold">{item.name}</span>? <br />
+            This action cannot be undone.
+          </>
+        }
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={() => {
+          onDelete?.(item.id);
+          setConfirmDelete(false);
+        }}
+        onCancel={() => setConfirmDelete(false)}
+      />
 
       {/* Detail Modal */}
       {ReactDOM.createPortal(
@@ -229,7 +243,6 @@ export const MediaCard = ({ item, baseUrl = "", onDelete }: MediaCardProps) => {
                           </Button>
                         )}
 
-                        {/* Audio/Video Player */}
                         {isAudio && isPlaying && (
                           <audio
                             autoPlay
@@ -239,7 +252,6 @@ export const MediaCard = ({ item, baseUrl = "", onDelete }: MediaCardProps) => {
                             className="hidden"
                           />
                         )}
-
                         {isVideo && (
                           <video
                             controls
