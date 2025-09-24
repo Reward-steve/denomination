@@ -1,16 +1,17 @@
-import { useEffect, useState } from "react";
+// src/features/dashboard/pages/Users.tsx
+import { useEffect, useState, useMemo } from "react";
 import DashboardLayout from "../../components/Layout";
 import img from "../../../../assets/images/avater.jpg";
 import { fetchUsers } from "./services";
 import UserCardSkeleton from "./component/UserCardSkeleton";
 import { useAuth } from "../../../../hooks/useAuth";
-import { useDebounce } from "../../hook/useDebounce";
-import FormInput from "../../../../components/ui/FormInput";
-import { FaSearch, FaUsers } from "react-icons/fa";
+import { FaUsers } from "react-icons/fa";
 import { Dropdown } from "../../../../components/ui/Dropdown";
 import type { DropdownOption } from "../../../../types/auth.types";
 
-// Types
+/* ==============================
+   🔹 Types
+================================ */
 interface User {
   id: string | number;
   first_name: string;
@@ -19,6 +20,7 @@ interface User {
   photo?: string;
   is_exco?: boolean;
   positions?: string[];
+  priest_status: string; // e.g. "posted" or ""
 }
 
 interface FetchOptions {
@@ -27,36 +29,28 @@ interface FetchOptions {
   per_page: number;
 }
 
+/* ==============================
+   🔹 Component
+================================ */
 export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
-  const [loadingUser, setLoadingUser] = useState<boolean>(true);
+  const [loadingUser, setLoadingUser] = useState(true);
 
-  // Dropdown filter value
-  const [filter, setFilter] = useState<DropdownOption>({
-    id: "all",
-    name: "All Users",
-  });
+  // Dropdown filter
+  const [filter, setFilter] = useState<DropdownOption | null>(null);
 
-  const [options, setOptions] = useState<FetchOptions>({
+  const [options] = useState<FetchOptions>({
     search: "",
     page: 1,
     per_page: 100,
   });
-  const [searchValue, setSearchValue] = useState("");
-  const delayed = useDebounce(searchValue, 1000);
 
   const { user } = useAuth();
-  const is_admin = user?.is_admin || false;
+  const is_admin = Boolean(user?.is_admin);
 
-  useEffect(() => {
-    setOptions((prev) => ({
-      ...prev,
-      search: delayed,
-      page: 1,
-    }));
-  }, [delayed]);
-
-  // Fetch users
+  /* ==============================
+     🔹 Fetch Users
+  ================================= */
   useEffect(() => {
     const loadUsers = async () => {
       setLoadingUser(true);
@@ -64,7 +58,6 @@ export default function Users() {
         const {
           data: { data },
         } = await fetchUsers(options);
-
         setUsers(data);
       } catch (error) {
         console.error("Failed to fetch users:", error);
@@ -76,28 +69,70 @@ export default function Users() {
     loadUsers();
   }, [options]);
 
+  /* ==============================
+     🔹 Dropdown Items
+  ================================= */
   const dropdownItems: DropdownOption[] = [
     ...(is_admin ? [{ id: "all", name: "All Users" }] : []),
+    { id: "priest_status", name: "Posted Priests" },
     { id: "exco", name: "Executives" },
   ];
 
-  // Filter users
-  const filteredUsers =
-    filter.id === "all" ? users : users.filter((u) => u.is_exco);
-
+  // Set default filter based on role
   useEffect(() => {
-    setFilter(
-      is_admin ? dropdownItems[0] : dropdownItems.find((i) => i.id === "exco")!
-    );
+    if (is_admin) {
+      setFilter(dropdownItems[0]); // "All Users"
+    } else {
+      setFilter(dropdownItems.find((i) => i.id === "exco")!);
+    }
   }, [is_admin]);
 
+  /* ==============================
+     🔹 Filtering Logic
+  ================================= */
+  const filteredUsers = useMemo(() => {
+    if (!filter) return users;
+
+    switch (filter.id) {
+      case "all":
+        return users;
+      case "exco":
+        return users.filter((u) => u.is_exco);
+      case "priest_status":
+        return users.filter((u) => u.priest_status === "posted");
+      default:
+        return users;
+    }
+  }, [users, filter]);
+
+  /* ==============================
+     🔹 Empty State Message
+  ================================= */
+  const getEmptyMessage = () => {
+    if (!filter) return "No users found.";
+
+    switch (filter.id) {
+      case "all":
+        return "No users found in the directory.";
+      case "exco":
+        return "No executive members available.";
+      case "priest_status":
+        return "No posted priests available.";
+      default:
+        return "No users match your selection.";
+    }
+  };
+
+  /* ==============================
+     🔹 Render
+  ================================= */
   return (
     <DashboardLayout>
-      {/* Modern Header */}
+      {/* Header */}
       <header className="border-b border-border shadow-sm">
         <div className="flex flex-col gap-4 px-2 py-3">
-          {/* Title & Subtitle */}
-          <div className="flex flex-col">
+          {/* Title */}
+          <div>
             <h1 className="text-lg sm:text-xl font-semibold text-text">
               User Directory
             </h1>
@@ -106,38 +141,20 @@ export default function Users() {
             </p>
           </div>
 
-          {/* Filter & Search Row */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            {/* Dropdown */}
-            <div className="w-full sm:w-auto">
-              <Dropdown
-                label="Filter Users"
-                items={dropdownItems}
-                displayValueKey="name"
-                value={filter}
-                onSelect={(val) => setFilter(val!)}
-                icon={FaUsers}
-                size="big"
-                placeholder="Select filter..."
-                className="w-full sm:w-[220px] rounded-lg shadow-sm"
-                optional
-              />
-            </div>
-
-            {/* Search */}
-            <div className="w-full sm:w-auto">
-              <FormInput
-                type="search"
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                placeholder={`Search ${is_admin ? "users" : "excos"}...`}
-                icon={FaSearch}
-                label="Search Users"
-                className="rounded-lg shadow-sm w-full sm:w-[280px]"
-                parentClassName="w-full sm:w-auto"
-                optional
-              />
-            </div>
+          {/* Dropdown Filter */}
+          <div className="w-full sm:w-[220px]">
+            <Dropdown
+              label="Filter Users"
+              items={dropdownItems}
+              displayValueKey="name"
+              value={filter ?? undefined}
+              onSelect={(val) => val && setFilter(val)}
+              icon={FaUsers}
+              size="big"
+              placeholder="Select filter..."
+              className="w-full rounded-lg shadow-sm"
+              optional
+            />
           </div>
         </div>
       </header>
@@ -145,6 +162,10 @@ export default function Users() {
       {/* User List */}
       {loadingUser ? (
         <UserCardSkeleton />
+      ) : filteredUsers.length === 0 ? (
+        <div className="flex items-center justify-center h-60">
+          <p className="text-text-placeholder text-sm">{getEmptyMessage()}</p>
+        </div>
       ) : (
         <section className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 p-2">
           {filteredUsers.map((user) => (
@@ -152,7 +173,7 @@ export default function Users() {
               key={user.id}
               className="flex flex-col items-start gap-3 p-4 bg-surface text-text rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200"
             >
-              {/* User Image */}
+              {/* Image */}
               <div className="w-full h-[12rem] overflow-hidden rounded-lg">
                 <img
                   src={
@@ -167,7 +188,7 @@ export default function Users() {
                 />
               </div>
 
-              {/* User Info */}
+              {/* Info */}
               <div className="flex flex-col items-start gap-1">
                 <div className="font-medium">
                   {`${user.first_name} ${user.middle_name || ""} ${

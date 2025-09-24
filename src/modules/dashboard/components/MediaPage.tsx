@@ -92,7 +92,11 @@ export function MediaPage({ type }: MediaPageProps) {
     <DashboardLayout>
       <DashboardHeader
         title={`${type}s`}
-        description={`Securely store, manage, and access your ${type}s anytime.`}
+        description={`${
+          is_admin
+            ? `Securely store, manage, and access your ${type}s anytime.`
+            : `Easily access and explore your ${type}s whenever you need.`
+        }`}
         actionLabel={is_admin ? `+ New ${type}` : undefined}
         onAction={is_admin ? () => setIsModalOpen(true) : undefined}
       >
