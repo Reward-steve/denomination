@@ -6,12 +6,12 @@ import RegistrationSuccess from "../modules/auth/pages/RegistrationSuccess";
 import UCCAInfo from "../modules/auth/pages/UCCAInfo";
  
 import Announcements from "../modules/dashboard/pages/Announcements";
-import Document from "../modules/dashboard/pages/documents";
-import Events from "../modules/dashboard/pages/events";
-import Finance from "../modules/dashboard/pages/finance";
+import Document from "../modules/dashboard/pages/Documents";
+import Events from "../modules/dashboard/pages/Events";
+import Finance from "../modules/dashboard/pages/Finance";
 import Home from "../modules/dashboard/pages/Home";
-import Sermon from "../modules/dashboard/pages/sermon";
-import Songs from "../modules/dashboard/pages/songs";
+import Sermon from "../modules/dashboard/pages/Sermon";
+import Songs from "../modules/dashboard/pages/Songs";
 import Users from "../modules/dashboard/pages/Users";
  
 
