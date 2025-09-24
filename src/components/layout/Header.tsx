@@ -10,11 +10,9 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { useResponsive } from "../../hooks/useResponsive";
 import { useTheme } from "../../hooks/useTheme";
-import img from "../../../public/logo.png";
 import { lightTheme } from "../../utils/themes";
 import { useEffect, useState, useRef } from "react";
 import type { User } from "../../types/auth.types";
-import { getFromStore } from "../../utils/appHelpers";
 import type { Theme } from "@emotion/react";
 import clsx from "clsx";
 import { useAuth } from "../../hooks/useAuth";
@@ -26,13 +24,14 @@ export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const { logout } = useAuth();
 
-  const [user, setUser] = useState<User>();
+  const [currentUser, setCurrentUser] = useState<User>();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  const { user } = useAuth();
+
   useEffect(() => {
-    const curr_user = getFromStore("curr_user");
-    if (curr_user) setUser(curr_user as User);
+    if (user) setCurrentUser(user as User);
   }, []);
 
   useEffect(() => {
@@ -61,7 +60,7 @@ export default function Header() {
         <MobileHeader
           title={pageTitle}
           onBack={handleBack}
-          user={user}
+          user={currentUser}
           theme={theme}
           toggleTheme={toggleTheme}
           logout={logout}
@@ -73,7 +72,7 @@ export default function Header() {
         <DesktopHeader
           theme={theme}
           toggleTheme={toggleTheme}
-          user={user}
+          user={currentUser}
           logout={logout}
           menuOpen={menuOpen}
           setMenuOpen={setMenuOpen}
@@ -84,7 +83,10 @@ export default function Header() {
   );
 }
 
-/* ---------------- MOBILE HEADER ---------------- */
+// --- Import your default logo ---
+import defaultLogo from "../../../public/logo.png";
+
+// ---------------- MOBILE HEADER ----------------
 function MobileHeader({
   title,
   theme,
@@ -93,7 +95,10 @@ function MobileHeader({
   menuOpen,
   setMenuOpen,
   menuRef,
+  user,
 }: any) {
+  const profilePic = user?.profile_pic || defaultLogo;
+
   return (
     <div className="flex items-center justify-end p-3 relative shadow-sm">
       <div className="w-[60%] flex justify-between items-center">
@@ -104,8 +109,8 @@ function MobileHeader({
           <FaBell className="text-primary text-lg cursor-pointer" />
           <button onClick={() => setMenuOpen((p: boolean) => !p)}>
             <img
-              src={img}
-              alt="user_profile"
+              src={profilePic}
+              alt={user?.first_name || "user_profile"}
               className="w-8 h-8 rounded-full object-cover"
             />
           </button>
@@ -123,7 +128,7 @@ function MobileHeader({
   );
 }
 
-/* ---------------- DESKTOP HEADER ---------------- */
+// ---------------- DESKTOP HEADER ----------------
 function DesktopHeader({
   search,
   setSearch,
@@ -135,6 +140,8 @@ function DesktopHeader({
   setMenuOpen,
   menuRef,
 }: any) {
+  const profilePic = user?.profile_pic || defaultLogo;
+
   return (
     <div className="h-16 flex justify-center items-end w-full border-b border-border">
       <div className="h-full w-full flex items-center justify-between bg-surface px-4 relative">
@@ -161,12 +168,12 @@ function DesktopHeader({
             className="flex items-center gap-2"
           >
             <img
-              src={img}
-              alt="user_profile"
+              src={profilePic}
+              alt={user?.first_name || "user_profile"}
               className="w-8 h-8 rounded-full object-cover"
             />
             <span className="text-sm font-medium text-text">
-              {user?.first_name}
+              {user?.first_name || "Guest"}
             </span>
           </button>
 

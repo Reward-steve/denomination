@@ -8,6 +8,7 @@ import { useAuth } from "../../../../hooks/useAuth";
 import { FaUsers } from "react-icons/fa";
 import { Dropdown } from "../../../../components/ui/Dropdown";
 import type { DropdownOption } from "../../../../types/auth.types";
+import { DashboardHeader } from "../../components/Header";
 
 /* ==============================
    🔹 Types
@@ -129,80 +130,73 @@ export default function Users() {
   return (
     <DashboardLayout>
       {/* Header */}
-      <header className="border-b border-border shadow-sm">
-        <div className="flex flex-col gap-4 px-2 py-3">
-          {/* Title */}
-          <div>
-            <h1 className="text-lg sm:text-xl font-semibold text-text">
-              User Directory
-            </h1>
-            <p className="text-sm text-text-placeholder">
-              Manage and explore {is_admin ? "all users" : "executive members"}
-            </p>
-          </div>
-
-          {/* Dropdown Filter */}
-          <div className="w-full sm:w-[220px]">
-            <Dropdown
-              label="Filter Users"
-              items={dropdownItems}
-              displayValueKey="name"
-              value={filter ?? undefined}
-              onSelect={(val) => val && setFilter(val)}
-              icon={FaUsers}
-              size="big"
-              placeholder="Select filter..."
-              className="w-full rounded-lg shadow-sm"
-              optional
-            />
-          </div>
+      <DashboardHeader
+        title="Users"
+        description={`Manage and explore ${
+          is_admin ? "all users" : "executive members"
+        }`}
+      >
+        {/* Dropdown Filter */}
+        <div className="w-full sm:w-[220px]">
+          <Dropdown
+            label="Filter Users"
+            items={dropdownItems}
+            displayValueKey="name"
+            value={filter ?? undefined}
+            onSelect={(val) => val && setFilter(val)}
+            icon={FaUsers}
+            size="big"
+            placeholder="Select filter..."
+            className="w-full rounded-lg shadow-sm"
+            optional
+          />
         </div>
-      </header>
 
-      {/* User List */}
-      {loadingUser ? (
-        <UserCardSkeleton />
-      ) : filteredUsers.length === 0 ? (
-        <div className="flex items-center justify-center h-60">
-          <p className="text-text-placeholder text-sm">{getEmptyMessage()}</p>
-        </div>
-      ) : (
-        <section className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 p-2">
-          {filteredUsers.map((user) => (
-            <article
-              key={user.id}
-              className="flex flex-col items-start gap-3 p-4 bg-surface text-text rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200"
-            >
-              {/* Image */}
-              <div className="w-full h-[12rem] overflow-hidden rounded-lg">
-                <img
-                  src={
-                    user.photo
-                      ? `${import.meta.env.VITE_BASE_URL.split("/api/")[0]}/${
-                          user.photo
-                        }`
-                      : img
-                  }
-                  alt={`${user.first_name} ${user.last_name}`}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                />
-              </div>
+        {/* User List */}
+        {loadingUser ? (
+          <UserCardSkeleton />
+        ) : filteredUsers.length === 0 ? (
+          <div className="flex items-center justify-center h-60">
+            <p className="text-text-placeholder text-sm">{getEmptyMessage()}</p>
+          </div>
+        ) : (
+          <section className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 p-2">
+            {filteredUsers.map((user) => (
+              <article
+                key={user.id}
+                className="flex flex-col items-start gap-3 p-4 bg-surface text-text rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200"
+              >
+                {/* Image */}
+                <div className="w-full h-[12rem] overflow-hidden rounded-lg">
+                  <img
+                    src={
+                      user.photo
+                        ? `${import.meta.env.VITE_BASE_URL.split("/api/")[0]}/${
+                            user.photo
+                          }`
+                        : img
+                    }
+                    alt={`${user.first_name} ${user.last_name}`}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
 
-              {/* Info */}
-              <div className="flex flex-col items-start gap-1">
-                <div className="font-medium">
-                  {`${user.first_name} ${user.middle_name || ""} ${
-                    user.last_name
-                  }`}
+                {/* Info */}
+                <div className="flex flex-col items-start gap-1">
+                  <div className="font-medium">
+                    {`${user.first_name} ${user.middle_name || ""} ${
+                      user.last_name
+                    }`}
+                  </div>
+                  <div className="text-text-placeholder text-sm">
+                    {user.is_exco ? user.positions?.join(", ") : "Member"}
+                  </div>
                 </div>
-                <div className="text-text-placeholder text-sm">
-                  {user.is_exco ? user.positions?.join(", ") : "Member"}
-                </div>
-              </div>
-            </article>
-          ))}
-        </section>
-      )}
+              </article>
+            ))}
+          </section>
+        )}
+      </DashboardHeader>
     </DashboardLayout>
   );
 }
