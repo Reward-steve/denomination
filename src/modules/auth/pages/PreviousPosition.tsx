@@ -123,7 +123,7 @@ export default function PrevPosition() {
       {/* Current Position (optional) */}
       <FormInput
         label="Current Position (optional)"
-        placeholder="e.g., Senior Apostle"
+        placeholder="e.g. Coordinator"
         icon={FaBriefcase}
         register={register("bio.bcs_position")}
         optional
