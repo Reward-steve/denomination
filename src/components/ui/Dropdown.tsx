@@ -23,6 +23,7 @@ interface BaseDropdownProps<T extends DropdownOption> {
   optional?: boolean;
   defaultValue?: T | T[];
   acceptChange?: boolean; // Auto-cast IDs to string
+  className?: string;
 }
 
 /* ==============================
@@ -72,6 +73,7 @@ export function Dropdown<T extends DropdownOption>({
   icon: Icon,
   multiple = false,
   placeholder = "Select...",
+  className,
 }: DropdownProps<T>) {
   /* --- Local State --- */
   const [isOpen, setIsOpen] = useState(false);
@@ -153,7 +155,7 @@ export function Dropdown<T extends DropdownOption>({
 
   /* --- Render --- */
   return (
-    <div className="w-full max-w-xl relative">
+    <div className={`w-full max-w-xl relative ${className || ""}`}>
       {/* Label */}
       {label && (
         <p className="mb-1 text-sm font-medium text-text">
@@ -173,16 +175,16 @@ export function Dropdown<T extends DropdownOption>({
         <input
           type="text"
           className={`bg-surface w-full text-text-secondary rounded-xl border transition-colors outline-none pr-9
-            ${Icon ? "pl-9" : "pl-3"}
-            ${inputSize}
-            ${
-              isError
-                ? "border-error focus:ring-1 focus:ring-error"
-                : isOpen
-                ? "border-accent focus:ring-1 focus:ring-accent"
-                : "border-border"
-            }
-            ${disabled || loading ? "cursor-not-allowed opacity-70" : ""}`}
+          ${Icon ? "pl-9" : "pl-3"}
+          ${inputSize}
+          ${
+            isError
+              ? "border-error focus:ring-1 focus:ring-error"
+              : isOpen
+              ? "border-accent focus:ring-1 focus:ring-accent"
+              : "border-border"
+          }
+          ${disabled || loading ? "cursor-not-allowed opacity-70" : ""}`}
           placeholder={loading ? "Loading..." : placeholder}
           value={displayValue}
           readOnly
@@ -200,7 +202,7 @@ export function Dropdown<T extends DropdownOption>({
             size={20}
             onClick={toggleDropdown}
             className={`absolute right-3 top-1/2 -translate-y-1/2 transition-transform text-primary cursor-pointer
-              ${isOpen ? "rotate-180" : ""}`}
+            ${isOpen ? "rotate-180" : ""}`}
           />
         )}
       </div>
@@ -222,15 +224,14 @@ export function Dropdown<T extends DropdownOption>({
                 <div
                   key={i}
                   className={`px-3 py-2 flex items-center gap-2 
-                    cursor-pointer
-                    ${
-                      active
-                        ? "bg-primary/10 text-primary font-medium"
-                        : "hover:bg-border text-text-secondary"
-                    }`}
-                  // Only toggle when clicking outside the checkbox
+                  cursor-pointer
+                  ${
+                    active
+                      ? "bg-primary/10 text-primary font-medium"
+                      : "hover:bg-border text-text-secondary"
+                  }`}
                   onClick={(e) => {
-                    if ((e.target as HTMLElement).closest("label")) return; // ✅ ignore clicks inside CheckboxField
+                    if ((e.target as HTMLElement).closest("label")) return;
                     handleChange(item);
                   }}
                 >
