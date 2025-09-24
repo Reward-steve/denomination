@@ -76,7 +76,6 @@ export default function Users() {
     loadUsers();
   }, [options]);
 
-  // Dropdown options
   const dropdownItems: DropdownOption[] = [
     ...(is_admin ? [{ id: "all", name: "All Users" }] : []),
     { id: "exco", name: "Executives" },
@@ -85,6 +84,12 @@ export default function Users() {
   // Filter users
   const filteredUsers =
     filter.id === "all" ? users : users.filter((u) => u.is_exco);
+
+  useEffect(() => {
+    setFilter(
+      is_admin ? dropdownItems[0] : dropdownItems.find((i) => i.id === "exco")!
+    );
+  }, [is_admin]);
 
   return (
     <DashboardLayout>
