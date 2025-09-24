@@ -140,7 +140,7 @@ export default function UCCAInfo() {
       <Controller
         name="ucca_position"
         control={control}
-        rules={{ required: "UCCA position is required" }}
+        // rules={{ required: "UCCA position is required" }}
         render={({ field, fieldState: { error } }) => (
           <Dropdown
             label="Current UCCA Position"
@@ -165,6 +165,7 @@ export default function UCCAInfo() {
             loading={loadingPositions}
             disabled={loadingPositions}
             multiple
+            optional
           />
         )}
       />
@@ -184,7 +185,7 @@ export default function UCCAInfo() {
       <Controller
         name="bio.promotion_method"
         control={control}
-        rules={{ required: "Promotion evidence is required" }}
+        // rules={{ required: "Promotion evidence is required" }}
         render={({ field, fieldState: { error } }) => (
           <Dropdown
             label="Evidence of Promotion"
@@ -201,6 +202,7 @@ export default function UCCAInfo() {
             isError={!!error}
             errorMsg={error?.message || ""}
             displayValueKey="name"
+            optional
           />
         )}
       />
