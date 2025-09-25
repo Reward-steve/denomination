@@ -5,14 +5,15 @@ import PrevPosition from "../modules/auth/pages/PreviousPosition";
 import RegistrationSuccess from "../modules/auth/pages/RegistrationSuccess";
 import UCCAInfo from "../modules/auth/pages/UCCAInfo";
 
-import Announcements from "../modules/dashboard/pages/_Announcements";
-import Document from "../modules/dashboard/pages/_Documents";
-import Events from "../modules/dashboard/pages/_Events";
-import Finance from "../modules/dashboard/pages/_Finance";
-import Home from "../modules/dashboard/pages/_Home";
-import Sermon from "../modules/dashboard/pages/_Sermon";
-import Songs from "../modules/dashboard/pages/_Songs";
-import Users from "../modules/dashboard/pages/_Users";
+import Announcements from "../modules/dashboard/pages/Announcements";
+import Document from "../modules/dashboard/pages/Documents";
+import Events from "../modules/dashboard/pages/Events";
+import { EventView } from "../modules/dashboard/pages/Events/EventView";
+import Finance from "../modules/dashboard/pages/Finance";
+import Home from "../modules/dashboard/pages/Home";
+import Sermon from "../modules/dashboard/pages/Sermon";
+import Songs from "../modules/dashboard/pages/Songs";
+import Users from "../modules/dashboard/pages/Users";
 
 export const auth = [
   { path: "personal-info", element: PersonalInfo },
@@ -26,6 +27,7 @@ export const auth = [
 export const dashboard = [
   { path: "home", element: Home },
   { path: "events", element: Events },
+  { path: "events/:eventId/view", element: EventView },
   { path: "finance", element: Finance },
   { path: "users", element: Users },
 
