@@ -66,6 +66,7 @@ export interface EventCardProps {
   event: Event;
   onEdit: (event: Event) => void;
   onDelete: (id: number) => void;
+  onClick?: () => void;
 }
 
 export interface Event {

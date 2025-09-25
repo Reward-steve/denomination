@@ -1,12 +1,3 @@
-import {
-  FaMoon,
-  FaSun,
-  FaSignOutAlt,
-  FaCog,
-} from "react-icons/fa";
-
-import type { Theme } from "@emotion/react";
-import clsx from "clsx";
 import React, { useEffect, useRef, useState, type ReactElement } from "react";
 
 

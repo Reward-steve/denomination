@@ -5,7 +5,7 @@ import { Button } from "../../../../../components/ui/Button";
 import type { EventCardProps } from "../../../types";
 import { formatTimeToAMPM, getRecurrenceText } from "../../../utils/Helper";
 
-export const EventCard = ({ event, onEdit, onDelete }: EventCardProps) => {
+export const EventCard = ({ event, onEdit, onDelete, onClick }: EventCardProps) => {
   /** ---------- Date & Time ---------- */
   const parsedDate = event.date ? new Date(event.date) : null;
   const dateString =
@@ -22,9 +22,9 @@ export const EventCard = ({ event, onEdit, onDelete }: EventCardProps) => {
   const recurrenceText = getRecurrenceText(event);
 
   return (
-    <article
+    <article onClick={onClick}
       className="p-4 rounded-2xl bg-surface border border-border 
-                 hover:border-accent transition duration-200 
+                 hover:border-accent transition cursor-pointer duration-200 
                  space-y-2"
       role="region"
       aria-labelledby={`event-title-${event.id}`}

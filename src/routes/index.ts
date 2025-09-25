@@ -8,6 +8,7 @@ import UCCAInfo from "../modules/auth/pages/UCCAInfo";
 import Announcements from "../modules/dashboard/pages/Announcements";
 import Document from "../modules/dashboard/pages/Documents";
 import Events from "../modules/dashboard/pages/Events";
+import { EventView } from "../modules/dashboard/pages/Events/EventView";
 import Finance from "../modules/dashboard/pages/Finance";
 import Home from "../modules/dashboard/pages/Home";
 import Sermon from "../modules/dashboard/pages/Sermon";
@@ -27,6 +28,7 @@ export const auth = [
 export const dashboard = [
   { path: "home", element: Home },
   { path: "events", element: Events },
+  { path: "events/:eventId/view", element: EventView },
   { path: "finance", element: Finance },
   { path: "users", element: Users },
  

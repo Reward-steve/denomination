@@ -19,6 +19,7 @@ import {
 import { toast } from "react-toastify";
 import { EmptyState } from "../../../../components/ui/EmptyState";
 import { DashboardHeader } from "../../components/Header";
+import { useNavigate } from "react-router-dom";
 
 /** ---------- Skeleton Loader ---------- */
 const EventCardSkeleton = () => (
@@ -32,6 +33,7 @@ const EventCardSkeleton = () => (
 export default function Events() {
   const [events, setEvents] = useState<AppEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   /** ---------- Modal Hook ---------- */
   const { showModal, newEvent, openModal, closeModal, submitEvent } =
@@ -140,6 +142,7 @@ export default function Events() {
           event={ev}
           onEdit={handleEditEvent}
           onDelete={handleDeleteEvent}
+          onClick={()=>  navigate(`/dashboard/events/${ev.id}/view`,{state: {event: ev}})}
         />
       )),
     [events, handleEditEvent, handleDeleteEvent]
@@ -167,7 +170,7 @@ export default function Events() {
           {!loading && events.length === 0 && (
             <EmptyState
               title="No Events Yet"
-              description="You haven’t created any events yet. Start by adding your first event to keep track of your schedule."
+              description="You haven't created any events yet. Start by adding your first event to keep track of your schedule."
               icon={<FaCalendarAlt className="w-16 h-16 text-primary/80" />}
               actionLabel="Create Event"
               onAction={() => openModal()}
