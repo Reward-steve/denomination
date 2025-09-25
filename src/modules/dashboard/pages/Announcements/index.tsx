@@ -160,13 +160,18 @@ export default function Announcements() {
                 setFormData({ ...formData, body: e.target.value })
               }
             />
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="gray" onClick={handleModalClosing}>
+            <div className="flex justify-center items-center flex-col gap-4">
+              <Button
+                variant="gray"
+                onClick={handleModalClosing}
+                className="w-full sm:w-auto"
+              >
                 Cancel
               </Button>
               <Button
                 variant="primary"
                 onClick={() => buttonState.action(formData)}
+                className="w-full sm:w-auto"
               >
                 {postingAnnc ? (
                   <>

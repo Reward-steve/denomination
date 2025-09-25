@@ -19,8 +19,8 @@ export const BaseModal = ({
   if (!isOpen) return null;
 
   const className = isMobile
-    ? "bg-surface rounded-t-3xl w-full h-full shadow-2xl relative"
-    : "bg-surface rounded-2xl w-[90%] max-w-3xl shadow-2xl relative";
+    ? "bg-surface rounded-t-3xl w-full h-full shadow-2xl relative animate-slide-up"
+    : "bg-surface rounded-2xl w-[90%] max-w-3xl shadow-2xl relative animate-slide-up";
 
   return (
     <div

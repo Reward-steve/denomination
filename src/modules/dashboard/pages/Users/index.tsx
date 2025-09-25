@@ -5,7 +5,7 @@ import img from "../../../../assets/images/avater.jpg";
 import { fetchUsers, MakeAdmin } from "./services";
 import UserCardSkeleton from "./component/UserCardSkeleton";
 import { useAuth } from "../../../../hooks/useAuth";
-import { FaEllipsisV, FaUsers } from "react-icons/fa";
+import { FaEllipsisV, FaUsers, FaSearch } from "react-icons/fa";
 import { Dropdown } from "../../../../components/ui/Dropdown";
 import type { DropdownOption, User } from "../../../../types/auth.types";
 import { css } from "@emotion/css";
@@ -14,6 +14,8 @@ import { Dropper, Item } from "../../../../components/layout/Dropper";
 import { toast } from "react-toastify";
 import { DashboardHeader } from "../../components/Header";
 import { MdGroupOff } from "react-icons/md";
+import FormInput from "../../../../components/ui/FormInput";
+import { useDebounce } from "../../hook/useDebounce";
 
 /* ==============================
    🔹 Types
@@ -37,7 +39,11 @@ export default function Users() {
   // Dropdown filter
   const [filter, setFilter] = useState<DropdownOption | null>(null);
 
-  const [options] = useState<FetchOptions>({
+  // Search state
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 400); // ⏳ debounce delay 400ms
+
+  const [options, setOptions] = useState<FetchOptions>({
     search: "",
     page: 1,
     per_page: 100,
@@ -71,6 +77,11 @@ export default function Users() {
 
     loadUsers();
   }, [options]);
+
+  /* 🔹 Update search in options when debounce changes */
+  useEffect(() => {
+    setOptions((prev) => ({ ...prev, search: debouncedSearch, page: 1 }));
+  }, [debouncedSearch]);
 
   /* ==============================
      🔹 Dropdown Items
@@ -147,20 +158,35 @@ export default function Users() {
           is_admin ? "all users" : "executive members"
         }`}
       >
-        {/* Dropdown Filter */}
-        <div className="w-full sm:w-[220px]">
-          <Dropdown
-            label="Filter Users"
-            items={dropdownItems}
-            displayValueKey="name"
-            value={filter ?? undefined}
-            onSelect={(val) => val && setFilter(val)}
-            icon={FaUsers}
-            size="big"
-            placeholder="Select filter..."
-            className="w-full rounded-lg shadow-md"
+        {/* Top Controls: Search + Dropdown */}
+        <div className="flex flex-col sm:flex-row gap-3 w-full">
+          {/* Search */}
+          <FormInput
+            type="search"
+            placeholder="Search users by name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            icon={FaSearch}
+            label="Search Users"
             optional
+            className="w-full sm:w-[300px]"
           />
+
+          {/* Dropdown Filter */}
+          <div className="w-full sm:w-[220px]">
+            <Dropdown
+              label="Filter Users"
+              items={dropdownItems}
+              displayValueKey="name"
+              value={filter ?? undefined}
+              onSelect={(val) => val && setFilter(val)}
+              icon={FaUsers}
+              size="big"
+              placeholder="Select filter..."
+              className="w-full rounded-lg shadow-md"
+              optional
+            />
+          </div>
         </div>
 
         {/* User List */}
