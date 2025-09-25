@@ -24,7 +24,6 @@ import { MarkAttendance } from "./components/MarkAttendance";
 import DocumentSkeleton from "./components/DocumentSkeleton";
 import { FaCalendar } from "react-icons/fa6";
 import { FaFileAlt } from "react-icons/fa";
-import { DashboardHeader } from "../../components/Header";
 
 // ---------------- Reusable EmptyState ----------------
 function EmptyState({
@@ -117,249 +116,234 @@ export default function Home() {
 
   return (
     <DashboardLayout>
-      <DashboardHeader
-        title="Dashboard"
-        description={
-          user?.is_admin
-            ? "Manage events, documents, announcements, and track payments all in one place."
-            : "Stay updated with events, documents, and your outstanding payments."
-        }
-      >
-        {openModal && (
-          <MarkAttendance setOpenModal={setOpenModal} data={selectedEvent} />
-        )}
+      {openModal && (
+        <MarkAttendance setOpenModal={setOpenModal} data={selectedEvent} />
+      )}
 
-        <div className="space-y-12">
-          {/* ---------------- Intro Section ---------------- */}
-          <section className="space-y-2">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-text-secondary animate-fade">
-              Welcome back, <span className="text-accent">{fullName}</span>
-            </h1>
+      <div className="space-y-12">
+        {/* ---------------- Intro Section ---------------- */}
+        <section className="space-y-2">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-text-secondary animate-fade">
+            Welcome back, <span className="text-accent">{fullName}</span>
+          </h1>
+        </section>
+
+        <div className="rounded-2xl mx-auto space-y-8">
+          {/* ---------------- Announcements ---------------- */}
+          {announcements.length > 0 && (
+            <section className="space-y-3 overflow-hidden">
+              <h2 className="text-xl font-semibold text-text">Announcements</h2>
+              <div
+                className={`animated ${anim} border border-border bg-surface rounded-2xl p-3 sm:p-3 lg:p-3 space-y-8`}
+              >
+                <div className="flex items-end justify-between">
+                  <div className="md:max-w-[80%] max-w-full">
+                    <div className="text-xl font-semibold text-text mb-1">
+                      {announcements[index]?.title}
+                    </div>
+                    <p className="text-text-placeholder text-sm">
+                      {announcements[index]?.body}
+                    </p>
+                  </div>
+                  {!isMobile && (
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => readAnn(announcements[index]?.id)}
+                    >
+                      Got it
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* ---------------- Due Payments ---------------- */}
+          <section className="space-y-3">
+            <div className="flex justify-between items-left flex-col sm:flex-row gap-3">
+              <h2 className="text-xl font-semibold text-text">Due payments</h2>
+              <div className="w-full sm:max-w-[150px]">
+                <Button
+                  variant="primary"
+                  size="md"
+                  className="w-full sm:w-auto"
+                >
+                  Pay All (N14,750)
+                </Button>
+              </div>
+            </div>
+            <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+              <OutStanding
+                amount="N1,200"
+                fee="Monthly dues"
+                times="3x"
+                onPayNow={() => console.log("paying...")}
+              />
+              <OutStanding
+                amount="N1,200"
+                fee="Year Registration fees"
+                times="3x"
+                onPayNow={() => console.log("paying...")}
+              />
+              <OutStanding
+                amount="N1,200"
+                fee="Monthly welfare payment"
+                times="3x"
+                onPayNow={() => console.log("paying...")}
+              />
+              <OutStanding
+                amount="N1,200"
+                fee="Group saving funds"
+                times="3x"
+                onPayNow={() => console.log("paying...")}
+              />
+            </div>
           </section>
 
-          <div className="rounded-2xl mx-auto space-y-8">
-            {/* ---------------- Announcements ---------------- */}
-            {announcements.length > 0 && (
-              <section className="space-y-3 overflow-hidden">
-                <h2 className="text-xl font-semibold text-text">
-                  Announcements
-                </h2>
+          {/* ---------------- Ongoing Events ---------------- */}
+          {ongoingEvents.length > 0 ? (
+            <section className="space-y-3">
+              <h2 className="text-xl font-semibold text-text">
+                Ongoing Events
+              </h2>
+              {ongoingEvents.map((ev: any, idx) => (
                 <div
-                  className={`animated ${anim} border border-border bg-surface rounded-2xl p-3 sm:p-3 lg:p-3 space-y-8`}
+                  key={idx}
+                  className="border border-border bg-surface rounded-2xl p-3 space-y-8"
                 >
-                  <div className="flex items-end justify-between">
-                    <div className="md:max-w-[80%] max-w-full">
-                      <div className="text-xl font-semibold text-text mb-1">
-                        {announcements[index]?.title}
-                      </div>
-                      <p className="text-text-placeholder text-sm">
-                        {announcements[index]?.body}
-                      </p>
+                  <div className="flex items-center justify-between flex-col sm:flex-row gap-4">
+                    <div className="text-xl flex items-center font-semibold text-text">
+                      {ev?.name}
+                      <small className="text-red-600 text-xs bg-red-100 px-2 rounded ml-2">
+                        LIVE
+                      </small>
                     </div>
-                    {!isMobile && (
+                    {user?.is_admin && (
                       <Button
-                        variant="outline"
+                        variant="primary"
                         size="lg"
-                        onClick={() => readAnn(announcements[index]?.id)}
+                        onClick={() => {
+                          setSelectedEvent(ev);
+                          setOpenModal(true);
+                        }}
                       >
-                        Got it
+                        Take Attendance
                       </Button>
                     )}
                   </div>
                 </div>
-              </section>
-            )}
-
-            {/* ---------------- Due Payments ---------------- */}
-            <section className="space-y-3">
-              <div className="flex justify-between items-left flex-col sm:flex-row gap-3">
-                <h2 className="text-xl font-semibold text-text">
-                  Due payments
-                </h2>
-                <div className="w-full sm:max-w-[150px]">
-                  <Button
-                    variant="primary"
-                    size="md"
-                    className="w-full sm:w-auto"
-                  >
-                    Pay All (N14,750)
-                  </Button>
-                </div>
-              </div>
-              <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-                <OutStanding
-                  amount="N1,200"
-                  fee="Monthly dues"
-                  times="3x"
-                  onPayNow={() => console.log("paying...")}
-                />
-                <OutStanding
-                  amount="N1,200"
-                  fee="Year Registration fees"
-                  times="3x"
-                  onPayNow={() => console.log("paying...")}
-                />
-                <OutStanding
-                  amount="N1,200"
-                  fee="Monthly welfare payment"
-                  times="3x"
-                  onPayNow={() => console.log("paying...")}
-                />
-                <OutStanding
-                  amount="N1,200"
-                  fee="Group saving funds"
-                  times="3x"
-                  onPayNow={() => console.log("paying...")}
-                />
-              </div>
+              ))}
             </section>
+          ) : (
+            <EmptyState
+              title="No Ongoing Events"
+              description="There are no live events happening right now. Check back later!"
+              icon={<FaCalendar size={28} />}
+            />
+          )}
 
-            {/* ---------------- Ongoing Events ---------------- */}
-            {ongoingEvents.length > 0 ? (
-              <section className="space-y-3">
-                <h2 className="text-xl font-semibold text-text">
-                  Ongoing Events
-                </h2>
-                {ongoingEvents.map((ev: any, idx) => (
-                  <div
-                    key={idx}
-                    className="border border-border bg-surface rounded-2xl p-3 space-y-8"
-                  >
-                    <div className="flex items-center justify-between flex-col sm:flex-row gap-4">
-                      <div className="text-xl flex items-center font-semibold text-text">
-                        {ev?.name}
-                        <small className="text-red-600 text-xs bg-red-100 px-2 rounded ml-2">
-                          LIVE
-                        </small>
+          {/* ---------------- Upcoming Events & Documents ---------------- */}
+          <section className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+            {/* Next Events */}
+            {loadingUpcoming ? (
+              <DocumentSkeleton />
+            ) : upcomingEvents.length ? (
+              <div className="border border-border bg-surface rounded-2xl p-3 space-y-3">
+                <div className="flex justify-between items-center w-full">
+                  <h2 className="text-text-placeholder">Next Events</h2>
+                  <Link to="/dashboard/events" className="text-primary">
+                    See all
+                  </Link>
+                </div>
+                {upcomingEvents
+                  .slice(0, 3)
+                  .map(({ name, day, date, time, venue, month }: any, idx) => (
+                    <div
+                      key={idx}
+                      className="flex justify-between items-center border-b border-border p-2"
+                    >
+                      <div>
+                        <div className="text-lg text-text">{name}</div>
+                        <p className="text-text-placeholder">{venue}</p>
                       </div>
-                      {user?.is_admin && (
-                        <Button
-                          variant="primary"
-                          size="lg"
-                          onClick={() => {
-                            setSelectedEvent(ev);
-                            setOpenModal(true);
-                          }}
-                        >
-                          Take Attendance
-                        </Button>
-                      )}
+                      <div className="text-sm text-text-placeholder">
+                        {date
+                          ? formatDateTime(date, time)
+                          : day?.includes("5th")
+                          ? "Last Sunday"
+                          : isNaN(day)
+                          ? day
+                          : formatDateTime(
+                              `2025-${formatNum(month)}-${formatNum(day)}`,
+                              time
+                            )}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </section>
+                  ))}
+              </div>
             ) : (
               <EmptyState
-                title="No Ongoing Events"
-                description="There are no live events happening right now. Check back later!"
+                title="No Upcoming Events"
+                description="Stay tuned! Upcoming events will appear here."
                 icon={<FaCalendar size={28} />}
+                action={
+                  <Button variant="primary" size="sm">
+                    <Link to="/dashboard/events/">Create Event</Link>
+                  </Button>
+                }
               />
             )}
 
-            {/* ---------------- Upcoming Events & Documents ---------------- */}
-            <section className="grid gap-4 grid-cols-1 sm:grid-cols-2">
-              {/* Next Events */}
-              {loadingUpcoming ? (
-                <DocumentSkeleton />
-              ) : upcomingEvents.length ? (
-                <div className="border border-border bg-surface rounded-2xl p-3 space-y-3">
-                  <div className="flex justify-between items-center w-full">
-                    <h2 className="text-text-placeholder">Next Events</h2>
-                    <Link to="/dashboard/events" className="text-primary">
-                      See all
-                    </Link>
-                  </div>
-                  {upcomingEvents
-                    .slice(0, 3)
-                    .map(
-                      ({ name, day, date, time, venue, month }: any, idx) => (
-                        <div
-                          key={idx}
-                          className="flex justify-between items-center border-b border-border p-2"
-                        >
-                          <div>
-                            <div className="text-lg text-text">{name}</div>
-                            <p className="text-text-placeholder">{venue}</p>
-                          </div>
-                          <div className="text-sm text-text-placeholder">
-                            {date
-                              ? formatDateTime(date, time)
-                              : day?.includes("5th")
-                              ? "Last Sunday"
-                              : isNaN(day)
-                              ? day
-                              : formatDateTime(
-                                  `2025-${formatNum(month)}-${formatNum(day)}`,
-                                  time
-                                )}
-                          </div>
-                        </div>
-                      )
-                    )}
+            {/* Documents */}
+            {loadingDocs ? (
+              <DocumentSkeleton />
+            ) : docs.length > 0 ? (
+              <div className="border border-border bg-surface rounded-2xl p-3 space-y-2">
+                <div className="flex justify-between items-center w-full">
+                  <h2 className="text-text-placeholder">Documents</h2>
+                  <Link to="/dashboard/documents" className="text-primary">
+                    See all
+                  </Link>
                 </div>
-              ) : (
-                <EmptyState
-                  title="No Upcoming Events"
-                  description="Stay tuned! Upcoming events will appear here."
-                  icon={<FaCalendar size={28} />}
-                  action={
-                    <Button variant="primary" size="sm">
-                      <Link to="/dashboard/events/">Create Event</Link>
-                    </Button>
-                  }
-                />
-              )}
-
-              {/* Documents */}
-              {loadingDocs ? (
-                <DocumentSkeleton />
-              ) : docs.length > 0 ? (
-                <div className="border border-border bg-surface rounded-2xl p-3 space-y-2">
-                  <div className="flex justify-between items-center w-full">
-                    <h2 className="text-text-placeholder">Documents</h2>
-                    <Link to="/dashboard/documents" className="text-primary">
-                      See all
-                    </Link>
-                  </div>
-                  {docs
-                    .slice(0, 3)
-                    .map(({ paths, name, descr, type }: any, id) => (
-                      <div
-                        key={id}
-                        className="flex justify-between items-center rounded-xl border border-border py-3 px-4"
-                      >
-                        <div>
-                          <div className="text-lg text-text">{name}</div>
-                          <p className="text-text-placeholder">
-                            {!descr || descr?.length === 0 ? type : descr}
-                          </p>
-                        </div>
-                        <Button
-                          variant="gray"
-                          size="sm"
-                          onClick={() => handleDownload(paths, name)}
-                        >
-                          Download
-                        </Button>
+                {docs
+                  .slice(0, 3)
+                  .map(({ paths, name, descr, type }: any, id) => (
+                    <div
+                      key={id}
+                      className="flex justify-between items-center rounded-xl border border-border py-3 px-4"
+                    >
+                      <div>
+                        <div className="text-lg text-text">{name}</div>
+                        <p className="text-text-placeholder">
+                          {!descr || descr?.length === 0 ? type : descr}
+                        </p>
                       </div>
-                    ))}
-                </div>
-              ) : (
-                <EmptyState
-                  title="No Documents Yet"
-                  description="You haven’t uploaded or received any documents."
-                  icon={<FaFileAlt size={28} />}
-                  action={
-                    <Button variant="primary" size="sm">
-                      <Link to="/dashboard/documents/">Upload Document</Link>
-                    </Button>
-                  }
-                />
-              )}
-            </section>
-          </div>
+                      <Button
+                        variant="gray"
+                        size="sm"
+                        onClick={() => handleDownload(paths, name)}
+                      >
+                        Download
+                      </Button>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <EmptyState
+                title="No Documents Yet"
+                description="You haven’t uploaded or received any documents."
+                icon={<FaFileAlt size={28} />}
+                action={
+                  <Button variant="primary" size="sm">
+                    <Link to="/dashboard/documents/">Upload Document</Link>
+                  </Button>
+                }
+              />
+            )}
+          </section>
         </div>
-      </DashboardHeader>
+      </div>
     </DashboardLayout>
   );
 }
