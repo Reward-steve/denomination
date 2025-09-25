@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ✅ Login: only updates state & storage (no redirect here)
   const login = useCallback((newToken: string, newUser: User) => {
     setToken(newToken);
-    setUser(newUser);
+    setUser(newUser); 
     saveInStore(TOKEN_KEY, newToken, "local");
     saveInStore(USER_KEY, newUser, "local");
   }, []);

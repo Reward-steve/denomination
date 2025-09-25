@@ -10,7 +10,6 @@ export interface EventModalProps {
   firstInputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
- 
 export type MediaType = "document" | "song" | "sermon";
 
 export interface BaseMedia {
@@ -59,7 +58,6 @@ export interface DocumentResponse {
   created_at: string;
   updated_at: string;
   paths: string[];
- 
 }
 
 export interface EventCardProps {
@@ -118,3 +116,18 @@ export const monthOptions = [
   { id: 11, name: "November" },
   { id: 12, name: "December" },
 ];
+
+export type PaymentItem = {
+  id: number; // Item identifier
+  unit_price: number; // Price per unit
+  units: number; // Quantity
+  from: string; // ISO date string
+  to: string; // ISO date string
+};
+
+export type InitPaymentRequest = {
+  user_id: number; // User making the payment
+  payment_method: "cash" | "card" | "transfer"; // Supported methods
+  event_id: number; // Event related to the payment
+  items: PaymentItem[]; // Array of payment items
+};
