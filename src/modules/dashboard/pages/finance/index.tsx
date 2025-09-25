@@ -1,7 +1,10 @@
-import { useState } from "react";
+// src/features/finance/pages/Finance.tsx
 import DashboardLayout from "../../components/Layout";
 import { FaArrowUp, FaArrowDown, FaWallet } from "react-icons/fa";
 import { Button } from "../../../../components/ui/Button";
+import { useFetchAllTransactions } from "../../hook/useFinance";
+import { EmptyState } from "../../../../components/ui/EmptyState";
+import { TbTransactionDollar } from "react-icons/tb";
 
 /* -------------------- Types -------------------- */
 interface Transaction {
@@ -12,39 +15,34 @@ interface Transaction {
   date: string;
 }
 
+/* -------------------- Helpers -------------------- */
+function mapApiToTransactions(apiData: any[]): Transaction[] {
+  return apiData.map((txn) => ({
+    id: txn.id,
+    type: Number(txn.amount) > 0 ? "income" : "expense",
+    description: `${txn.first_name} ${txn.last_name} - ${txn.payment_method}`,
+    amount: Number(txn.amount),
+    date: txn.created_at.split(" ")[0], // only date part
+  }));
+}
+
 /* -------------------- Component -------------------- */
 export default function Finance() {
-  const [transactions] = useState<Transaction[]>([
-    {
-      id: 1,
-      type: "income",
-      description: "Salary",
-      amount: 2000,
-      date: "2025-09-01",
-    },
-    {
-      id: 2,
-      type: "expense",
-      description: "Groceries",
-      amount: 150,
-      date: "2025-09-03",
-    },
-    {
-      id: 3,
-      type: "expense",
-      description: "Transport",
-      amount: 50,
-      date: "2025-09-05",
-    },
-  ]);
+  const { data, isLoading, isError } = useFetchAllTransactions();
+
+  const transactions: Transaction[] = data?.data
+    ? mapApiToTransactions(data.data)
+    : [];
 
   // Calculate totals
   const income = transactions
     .filter((t) => t.type === "income")
     .reduce((sum, t) => sum + t.amount, 0);
+
   const expenses = transactions
     .filter((t) => t.type === "expense")
     .reduce((sum, t) => sum + t.amount, 0);
+
   const balance = income - expenses;
 
   return (
@@ -54,48 +52,27 @@ export default function Finance() {
         <header>
           <h2 className="text-2xl font-bold text-text">Finance</h2>
           <p className="text-text-placeholder mt-1">
-            Easily track your income and expenses. Your balance updates
-            automatically so you always know where you stand.
+            Track your payments, balances, and history in one place.
           </p>
         </header>
 
         {/* Overview Stats */}
         <section className="grid gap-4 sm:grid-cols-3">
-          <div
-            className="p-4 rounded-xl bg-surface shadow hover:shadow-lg transition-all flex items-center gap-3"
-            role="status"
-            aria-label={`Total income: $${income}`}
-          >
-            <FaArrowUp className="text-green-500 text-2xl shrink-0" />
-            <div>
-              <p className="text-sm text-text-placeholder">Total Income</p>
-              <p className="text-lg font-bold text-text">${income}</p>
-            </div>
-          </div>
-
-          <div
-            className="p-4 rounded-xl bg-surface shadow hover:shadow-lg transition-all flex items-center gap-3"
-            role="status"
-            aria-label={`Total expenses: $${expenses}`}
-          >
-            <FaArrowDown className="text-red-500 text-2xl shrink-0" />
-            <div>
-              <p className="text-sm text-text-placeholder">Total Expenses</p>
-              <p className="text-lg font-bold text-text">${expenses}</p>
-            </div>
-          </div>
-
-          <div
-            className="p-4 rounded-xl bg-surface shadow hover:shadow-lg transition-all flex items-center gap-3"
-            role="status"
-            aria-label={`Balance: $${balance}`}
-          >
-            <FaWallet className="text-accent text-2xl shrink-0" />
-            <div>
-              <p className="text-sm text-text-placeholder">Balance</p>
-              <p className="text-lg font-bold text-text">${balance}</p>
-            </div>
-          </div>
+          <StatCard
+            icon={<FaArrowUp className="text-green-500 text-2xl shrink-0" />}
+            label="Total Income"
+            value={`₦${income.toLocaleString()}`}
+          />
+          <StatCard
+            icon={<FaArrowDown className="text-red-500 text-2xl shrink-0" />}
+            label="Total Expenses"
+            value={`₦${expenses.toLocaleString()}`}
+          />
+          <StatCard
+            icon={<FaWallet className="text-accent text-2xl shrink-0" />}
+            label="Balance"
+            value={`₦${balance.toLocaleString()}`}
+          />
         </section>
 
         {/* Recent Transactions */}
@@ -104,16 +81,20 @@ export default function Finance() {
             <h3 className="text-lg font-semibold text-text">
               Recent Transactions
             </h3>
-            <Button
-              variant="primary"
-              size="sm"
-              aria-label="Add a new transaction"
-            >
-              + Add Transaction
+            <Button variant="primary" size="sm">
+              + Make Payment
             </Button>
           </div>
 
-          {transactions.length > 0 ? (
+          {isLoading ? (
+            <p className="text-center text-text-placeholder py-8">
+              Loading transactions...
+            </p>
+          ) : isError ? (
+            <p className="text-center text-error py-8">
+              Failed to load transactions.
+            </p>
+          ) : transactions.length > 0 ? (
             <ul
               className="divide-y divide-border rounded-xl bg-surface shadow"
               role="list"
@@ -135,19 +116,43 @@ export default function Finance() {
                       t.type === "income" ? "text-green-500" : "text-red-500"
                     }`}
                   >
-                    {t.type === "income" ? "+" : "-"}${t.amount}
+                    {t.type === "income" ? "+" : "-"}₦
+                    {t.amount.toLocaleString()}
                   </p>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-center text-text-placeholder py-8">
-              No transactions yet. Click <b>“Add Transaction”</b> above to get
-              started.
-            </p>
+            <EmptyState
+              title="No Transactions"
+              description="No transactions yet. Click “Make Payment” above to get
+              started."
+              icon={<TbTransactionDollar className="w-8 h-8 text-accent" />}
+            />
           )}
         </section>
       </section>
     </DashboardLayout>
+  );
+}
+
+/* -------------------- Subcomponents -------------------- */
+function StatCard({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="p-4 rounded-xl bg-surface shadow hover:shadow-lg transition-all flex items-center gap-3">
+      {icon}
+      <div>
+        <p className="text-sm text-text-placeholder">{label}</p>
+        <p className="text-lg font-bold text-text">{value}</p>
+      </div>
+    </div>
   );
 }

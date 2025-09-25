@@ -140,7 +140,7 @@ function DesktopHeader({
   setMenuOpen,
   menuRef,
 }: any) {
-  const profilePic = user?.profile_pic || defaultLogo;
+  const profilePic = user?.photo || defaultLogo;
 
   return (
     <div className="h-16 flex justify-center items-end w-full border-b border-border">
