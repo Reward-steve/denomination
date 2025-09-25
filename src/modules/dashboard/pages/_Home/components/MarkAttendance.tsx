@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaCheck, FaUser } from "react-icons/fa6";
-
+import ReactDOM from "react-dom";
 import FormInput from "../../../../../components/ui/FormInput";
 import { Button } from "../../../../../components/ui/Button";
 import ListingSkeleton from "./ListingSkeleton";
@@ -25,7 +25,7 @@ interface User {
 }
 
 interface MarkAttendanceProps {
-  setOpenModal: (b:boolean) => void;
+  setOpenModal: (b: boolean) => void;
   data: { id: string; name: string };
 }
 
@@ -94,7 +94,7 @@ export function MarkAttendance({
     fetchUsers(debouncedQuery);
   }, [debouncedQuery]);
 
-  return (
+  return ReactDOM.createPortal(
     <BaseModal title="Mark Attendance" setClose={setOpenModal}>
       <div className="p-4 md:w-[700px] w-full flex flex-col items-center">
         <div className="text-text-secondary font-semibold text-lg mb-3">
@@ -157,6 +157,7 @@ export function MarkAttendance({
             })}
         </div>
       </div>
-    </BaseModal>
+    </BaseModal>,
+    window.document.body
   );
 }

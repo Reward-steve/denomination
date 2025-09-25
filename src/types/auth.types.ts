@@ -281,4 +281,6 @@ export interface User {
   nok: NextOfKin[];
   skills: Skill[];
   is_admin:boolean;
+  is_exco?:boolean;
+  positions?:string[];
 }
