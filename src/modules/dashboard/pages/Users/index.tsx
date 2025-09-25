@@ -262,7 +262,7 @@ export default function Users() {
                   </div>
 
                   {/* Grid Info */}
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
+                  <div className="text-sm flex justify-start items-start gap-2 flex-col">
                     {user.bethel && (
                       <div>
                         <span className="text-text-placeholder">Bethel: </span>

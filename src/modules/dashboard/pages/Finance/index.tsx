@@ -8,12 +8,12 @@ import { EmptyState } from "../../../../components/ui/EmptyState";
 import ReactDOM from "react-dom";
 import {
   useFetchAllTransactions,
-  // useInitPayment,
+  useInitPayment,
   useFetchDebts,
   useFetchTransaction,
 } from "../../hook/useFinance";
 import { BaseModal } from "../../../../components/ui/BaseModal";
-// import type { InitPaymentRequest } from "../../types";
+import type { InitPaymentRequest, PaymentItem } from "../../types";
 
 /* -------------------- Types -------------------- */
 interface Transaction {
@@ -43,6 +43,8 @@ export default function Finance() {
   const { data, isLoading, isError } = useFetchAllTransactions();
   const { data: debts } = useFetchDebts(1, false);
   const { data: txnDetail } = useFetchTransaction(10, false);
+
+  console.log(data);
 
   const transactions: Transaction[] = data?.data
     ? mapApiToTransactions(data.data)
@@ -199,27 +201,151 @@ function PreviewBlock({ title, data }: { title: string; data: unknown }) {
 
 /* -------------------- Payment Modal -------------------- */
 function PaymentModal({ onClose }: { onClose: () => void }) {
-  // const { mutate, isPending } = useInitPayment();
+  const { mutate, isPending } = useInitPayment();
+
+  // Form state
+  const [paymentMethod, setPaymentMethod] =
+    useState<InitPaymentRequest["payment_method"]>("card");
+
+  const [items, setItems] = useState<PaymentItem[]>([
+    {
+      id: 1,
+      unit_price: 5000,
+      units: 1,
+      from: new Date().toISOString(),
+      to: new Date().toISOString(),
+    },
+  ]);
 
   const handlePay = () => {
-    // mutate({ amount: 5000, method: "card" }, { onSuccess: onClose });
+    const payload: InitPaymentRequest = {
+      user_id: 1, // TODO: replace with actual logged-in user_id
+      event_id: 123, // TODO: replace with real event_id
+      payment_method: paymentMethod,
+      items,
+    };
+
+    mutate(payload, { onSuccess: onClose });
   };
 
-  // Render modal into document.body using portal
+  // Add new item row
+  const addItem = () => {
+    setItems((prev) => [
+      ...prev,
+      {
+        id: prev.length + 1,
+        unit_price: 0,
+        units: 1,
+        from: new Date().toISOString(),
+        to: new Date().toISOString(),
+      },
+    ]);
+  };
+
   return ReactDOM.createPortal(
     <BaseModal title="Make Payment" isOpen setClose={onClose}>
       <div className="space-y-4">
-        <p className="text-sm text-text-placeholder">
-          Confirm payment of ₦5,000 using your card.
-        </p>
-        <div className="flex gap-2">
+        {/* Payment Method */}
+        <div>
+          <label className="text-sm font-medium text-text">
+            Payment Method
+          </label>
+          <select
+            value={paymentMethod}
+            onChange={(e) =>
+              setPaymentMethod(
+                e.target.value as InitPaymentRequest["payment_method"]
+              )
+            }
+            className="mt-1 block w-full rounded-lg border border-border bg-surface p-2 text-sm text-text"
+          >
+            <option value="cash">Cash</option>
+            <option value="card">Card</option>
+            <option value="transfer">Transfer</option>
+          </select>
+        </div>
+
+        {/* Payment Items */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-text">Items</label>
+          {items.map((item, index) => (
+            <div
+              key={item.id}
+              className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-surface p-2 rounded-lg border border-border"
+            >
+              <input
+                type="number"
+                placeholder="Unit Price"
+                value={item.unit_price}
+                onChange={(e) =>
+                  setItems((prev) =>
+                    prev.map((it, i) =>
+                      i === index ? { ...it, unit_price: +e.target.value } : it
+                    )
+                  )
+                }
+                className="rounded border border-border p-1 text-sm"
+              />
+              <input
+                type="number"
+                placeholder="Units"
+                value={item.units}
+                onChange={(e) =>
+                  setItems((prev) =>
+                    prev.map((it, i) =>
+                      i === index ? { ...it, units: +e.target.value } : it
+                    )
+                  )
+                }
+                className="rounded border border-border p-1 text-sm"
+              />
+              <input
+                type="date"
+                value={item.from.split("T")[0]}
+                onChange={(e) =>
+                  setItems((prev) =>
+                    prev.map((it, i) =>
+                      i === index
+                        ? {
+                            ...it,
+                            from: new Date(e.target.value).toISOString(),
+                          }
+                        : it
+                    )
+                  )
+                }
+                className="rounded border border-border p-1 text-sm"
+              />
+              <input
+                type="date"
+                value={item.to.split("T")[0]}
+                onChange={(e) =>
+                  setItems((prev) =>
+                    prev.map((it, i) =>
+                      i === index
+                        ? { ...it, to: new Date(e.target.value).toISOString() }
+                        : it
+                    )
+                  )
+                }
+                className="rounded border border-border p-1 text-sm"
+              />
+            </div>
+          ))}
+          <Button variant="outline" size="sm" onClick={addItem}>
+            + Add Item
+          </Button>
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-2 justify-end">
           <Button
             variant="primary"
             size="sm"
             onClick={handlePay}
-            // disabled={isPending}
+            disabled={isPending}
           >
-            {/* {isPending ? "Processing..." : "Pay ₦5,000"} */}Pay ₦5,000
+            {isPending ? "Processing..." : "Confirm Payment"}
           </Button>
           <Button variant="outline" size="sm" onClick={onClose}>
             Cancel
@@ -230,161 +356,3 @@ function PaymentModal({ onClose }: { onClose: () => void }) {
     document.body
   );
 }
-
-// /* -------------------- Payment Modal -------------------- */
-// function PaymentModal({ onClose }: { onClose: () => void }) {
-//   const { mutate, isPending } = useInitPayment();
-
-//   // Form state
-//   const [paymentMethod, setPaymentMethod] =
-//     useState<InitPaymentRequest["payment_method"]>("card");
-
-//   const [items, setItems] = useState<PaymentItem[]>([
-//     {
-//       id: 1,
-//       unit_price: 5000,
-//       units: 1,
-//       from: new Date().toISOString(),
-//       to: new Date().toISOString(),
-//     },
-//   ]);
-
-//   const handlePay = () => {
-//     const payload: InitPaymentRequest = {
-//       user_id: 1, // TODO: replace with actual logged-in user_id
-//       event_id: 123, // TODO: replace with real event_id
-//       payment_method: paymentMethod,
-//       items,
-//     };
-
-//     mutate(payload, { onSuccess: onClose });
-//   };
-
-//   // Add new item row
-//   const addItem = () => {
-//     setItems((prev) => [
-//       ...prev,
-//       {
-//         id: prev.length + 1,
-//         unit_price: 0,
-//         units: 1,
-//         from: new Date().toISOString(),
-//         to: new Date().toISOString(),
-//       },
-//     ]);
-//   };
-
-//   return ReactDOM.createPortal(
-//     <BaseModal title="Make Payment" isOpen setClose={onClose}>
-//       <div className="space-y-4">
-//         {/* Payment Method */}
-//         <div>
-//           <label className="text-sm font-medium text-text">
-//             Payment Method
-//           </label>
-//           <select
-//             value={paymentMethod}
-//             onChange={(e) =>
-//               setPaymentMethod(
-//                 e.target.value as InitPaymentRequest["payment_method"]
-//               )
-//             }
-//             className="mt-1 block w-full rounded-lg border border-border bg-surface p-2 text-sm text-text"
-//           >
-//             <option value="cash">Cash</option>
-//             <option value="card">Card</option>
-//             <option value="transfer">Transfer</option>
-//           </select>
-//         </div>
-
-//         {/* Payment Items */}
-//         <div className="space-y-2">
-//           <label className="text-sm font-medium text-text">Items</label>
-//           {items.map((item, index) => (
-//             <div
-//               key={item.id}
-//               className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-surface p-2 rounded-lg border border-border"
-//             >
-//               <input
-//                 type="number"
-//                 placeholder="Unit Price"
-//                 value={item.unit_price}
-//                 onChange={(e) =>
-//                   setItems((prev) =>
-//                     prev.map((it, i) =>
-//                       i === index ? { ...it, unit_price: +e.target.value } : it
-//                     )
-//                   )
-//                 }
-//                 className="rounded border border-border p-1 text-sm"
-//               />
-//               <input
-//                 type="number"
-//                 placeholder="Units"
-//                 value={item.units}
-//                 onChange={(e) =>
-//                   setItems((prev) =>
-//                     prev.map((it, i) =>
-//                       i === index ? { ...it, units: +e.target.value } : it
-//                     )
-//                   )
-//                 }
-//                 className="rounded border border-border p-1 text-sm"
-//               />
-//               <input
-//                 type="date"
-//                 value={item.from.split("T")[0]}
-//                 onChange={(e) =>
-//                   setItems((prev) =>
-//                     prev.map((it, i) =>
-//                       i === index
-//                         ? {
-//                             ...it,
-//                             from: new Date(e.target.value).toISOString(),
-//                           }
-//                         : it
-//                     )
-//                   )
-//                 }
-//                 className="rounded border border-border p-1 text-sm"
-//               />
-//               <input
-//                 type="date"
-//                 value={item.to.split("T")[0]}
-//                 onChange={(e) =>
-//                   setItems((prev) =>
-//                     prev.map((it, i) =>
-//                       i === index
-//                         ? { ...it, to: new Date(e.target.value).toISOString() }
-//                         : it
-//                     )
-//                   )
-//                 }
-//                 className="rounded border border-border p-1 text-sm"
-//               />
-//             </div>
-//           ))}
-//           <Button variant="outline" size="sm" onClick={addItem}>
-//             + Add Item
-//           </Button>
-//         </div>
-
-//         {/* Actions */}
-//         <div className="flex gap-2 justify-end">
-//           <Button
-//             variant="primary"
-//             size="sm"
-//             onClick={handlePay}
-//             disabled={isPending}
-//           >
-//             {isPending ? "Processing..." : "Confirm Payment"}
-//           </Button>
-//           <Button variant="outline" size="sm" onClick={onClose}>
-//             Cancel
-//           </Button>
-//         </div>
-//       </div>
-//     </BaseModal>,
-//     document.body
-//   );
-// }
