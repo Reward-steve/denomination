@@ -107,9 +107,10 @@ export function MarkAttendance({
           type="search"
           icon={FaUser}
           onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full sticky top-0 z-10 bg-surface border-b border-border"
         />
 
-        <div className="users-list w-full py-3 mt-4 flex flex-col gap-3 overflow-y-scroll max-h-[750px]">
+        <div className="users-list w-full py-3 mt-4 flex flex-col gap-3 overflow-y-auto max-h-[650px]">
           {loadingUser && <ListingSkeleton items={4} />}
 
           {!loadingUser &&

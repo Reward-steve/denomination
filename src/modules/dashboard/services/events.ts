@@ -11,6 +11,10 @@ export const createEvent = async (event: Event) => {
 export const fetchEvent = async (eventId: number) => {
   return apiRequest(`events/${eventId}/fetch`, "GET", { id: eventId });
 };
+// Fetch a single event by ID
+export const fetchEventAttendance = async (eventId: number) => {
+  return apiRequest(`events/${eventId}/attendance/fetch`, "GET", { id: eventId });
+};
 
 // Update an existing event by ID
 export const updateEvent = async (eventId: number, event: Event) => {
