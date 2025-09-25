@@ -7,7 +7,12 @@ import { formatTimeToAMPM, getRecurrenceText } from "../../../utils/Helper";
 import { ConfirmDialog } from "../../../../../components/ui/ConfirmDialog";
 import { useState } from "react";
 
-export const EventCard = ({ event, onEdit, onDelete }: EventCardProps) => {
+export const EventCard = ({
+  event,
+  onEdit,
+  onDelete,
+  onClick,
+}: EventCardProps) => {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   /** ---------- Date & Time ---------- */
@@ -32,6 +37,7 @@ export const EventCard = ({ event, onEdit, onDelete }: EventCardProps) => {
                  space-y-3 relative"
       role="region"
       aria-labelledby={`event-title-${event.id}`}
+      onClick={onClick}
     >
       {/* Title */}
       <h3
