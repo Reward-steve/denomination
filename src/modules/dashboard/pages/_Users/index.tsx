@@ -13,30 +13,17 @@ import { Button } from "../../../../components/ui/Button";
 import { Dropper, Item } from "../../../../components/layout/Dropper";
 import { toast } from "react-toastify";
 import { DashboardHeader } from "../../components/Header";
+import { MdGroupOff } from "react-icons/md";
 
 /* ==============================
    🔹 Types
 ================================ */
-// interface User {
-//   id: string | number;
-//   first_name: string;
-//   middle_name?: string;
-//   last_name: string;
-//   photo?: string;
-//   is_exco?: boolean;
-//   positions?: string[];
-//   priest_status: string; // e.g. "posted" or ""
-// }
-
 interface FetchOptions {
   search: string;
   page: number;
   per_page: number;
 }
 
-/* ==============================
-   🔹 Component
-================================ */
 export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUser, setLoadingUser] = useState(true);
@@ -94,10 +81,9 @@ export default function Users() {
     { id: "exco", name: "Executives" },
   ];
 
-  // Set default filter based on role
   useEffect(() => {
     if (is_admin) {
-      setFilter(dropdownItems[0]); // "All Users"
+      setFilter(dropdownItems[0]);
     } else {
       setFilter(dropdownItems.find((i) => i.id === "exco")!);
     }
@@ -122,7 +108,7 @@ export default function Users() {
   }, [users, filter]);
 
   /* ==============================
-     🔹 Empty State Message
+     🔹 Empty State
   ================================= */
   const getEmptyMessage = () => {
     if (!filter) return "No users found.";
@@ -155,7 +141,6 @@ export default function Users() {
   ================================= */
   return (
     <DashboardLayout>
-      {/* Header */}
       <DashboardHeader
         title="Users"
         description={`Manage and explore ${
@@ -173,7 +158,7 @@ export default function Users() {
             icon={FaUsers}
             size="big"
             placeholder="Select filter..."
-            className="w-full rounded-lg shadow-sm"
+            className="w-full rounded-lg shadow-md"
             optional
           />
         </div>
@@ -182,21 +167,25 @@ export default function Users() {
         {loadingUser ? (
           <UserCardSkeleton />
         ) : filteredUsers.length === 0 ? (
-          <div className="flex items-center justify-center h-60">
-            <p className="text-text-placeholder text-sm">{getEmptyMessage()}</p>
+          <div className="flex flex-col items-center justify-center h-72 text-center space-y-2">
+            <MdGroupOff className="text-5xl text-text-placeholder" />
+            <p className="text-text-placeholder text-base font-medium">
+              {getEmptyMessage()}
+            </p>
           </div>
         ) : (
-          <section className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 p-2">
+          <section className="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 p-2">
             {filteredUsers.map((user, idx) => (
               <article
                 key={idx}
-                className={`flex items-start gap-3 relative p-4 bg-surface text-text rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 ${_styles}`}
+                className={`relative flex flex-col bg-surface rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-border ${_styles}`}
               >
+                {/* Actions */}
                 <Dropper
-                  className="absolute top-1 right-1 z-10"
+                  className="absolute top-3 right-3 z-10"
                   trigger={
-                    <Button className="py-3 px-[12px] bg-surface text-text">
-                      <FaEllipsisV className="text-text" />
+                    <Button className="p-2 rounded-full bg-surface shadow hover:bg-border">
+                      <FaEllipsisV className="text-text-secondary" />
                     </Button>
                   }
                 >
@@ -209,10 +198,10 @@ export default function Users() {
                           id: user.id,
                         })
                       }
-                      className={`${
+                      className={`px-4 py-2 text-sm transition-colors rounded ${
                         key === "del"
-                          ? "flex items-center gap-2 w-full px-4 py-2 text-sm text-red-500 hover:bg-red-500 hover:text-white transition-colors"
-                          : ""
+                          ? "text-red-500 hover:bg-red-500"
+                          : "hover:bg-background"
                       }`}
                     >
                       {label}
@@ -221,7 +210,7 @@ export default function Users() {
                 </Dropper>
 
                 {/* Image */}
-                <div className="w-full h-[12rem] overflow-hidden rounded-lg">
+                <div className="w-full h-44 sm:h-52 overflow-hidden">
                   <img
                     src={
                       user.photo
@@ -231,104 +220,55 @@ export default function Users() {
                         : img
                     }
                     alt={`${user.first_name} ${user.last_name}`}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                   />
                 </div>
-                {/* User List */}
-                {loadingUser ? (
-                  <UserCardSkeleton />
-                ) : filteredUsers.length === 0 ? (
-                  <div className="flex items-center justify-center h-60">
-                    <p className="text-text-placeholder text-sm">
-                      {getEmptyMessage()}
-                    </p>
-                  </div>
-                ) : (
-                  <section className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 p-2">
-                    {filteredUsers.map((user) => (
-                      <article
-                        key={user.id}
-                        className="flex flex-col items-start gap-3 p-4 bg-surface text-text rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200"
-                      >
-                        {/* Image */}
-                        <div className="w-full h-[12rem] overflow-hidden rounded-lg">
-                          <img
-                            src={
-                              user.photo
-                                ? `${
-                                    import.meta.env.VITE_BASE_URL.split(
-                                      "/api/"
-                                    )[0]
-                                  }/${user.photo}`
-                                : img
-                            }
-                            alt={`${user.first_name} ${user.last_name}`}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
 
-                        {/* Info */}
-                        <div className="flex flex-col sm:w-[500px] w-full items-start gap-1">
-                          <div className="font-medium text-[1.2rem]">
-                            {`${user.first_name} ${user.middle_name || ""} ${
-                              user.last_name
-                            }`}
-                          </div>
-
-                          <div className="">
-                            <span className="text-text-placeholder text-sm">
-                              Bethel:{" "}
-                            </span>
-                            <span className="text-text">{user.bethel}</span>
-                          </div>
-                          <div className="">
-                            <span className="text-text-placeholder text-sm">
-                              Zone:{" "}
-                            </span>
-                            <span className="text-text">{user.zone}</span>
-                          </div>
-                          <div className="">
-                            <span className="text-text-placeholder text-sm">
-                              Area:{" "}
-                            </span>
-                            <span className="text-text">{user.area}</span>
-                          </div>
-                          <div className="">
-                            <span className="text-text-placeholder text-sm">
-                              Phone:{" "}
-                            </span>
-                            <span className="text-text">
-                              {user.primary_phone}
-                            </span>
-                          </div>
-
-                          <div className="">
-                            <span className="text-text-placeholder text-sm">
-                              Gender:{" "}
-                            </span>
-                            <span className="text-text">
-                              {user.gender[0].toUpperCase() +
-                                user.gender.slice(1)}
-                            </span>
-                          </div>
-
-                          <div className="text-text-placeholder text-sm">
-                            {user.is_exco && user.positions?.join(", ")}
-                          </div>
-                        </div>
-                      </article>
-                    ))}
-                  </section>
-                )}
                 {/* Info */}
-                <div className="flex flex-col items-start gap-1">
-                  <div className="font-medium">
+                <div className="p-4 space-y-2">
+                  <div className="font-semibold text-lg text-text">
                     {`${user.first_name} ${user.middle_name || ""} ${
                       user.last_name
                     }`}
                   </div>
-                  <div className="text-text-placeholder text-sm">
+                  <div className="text-sm text-text-secondary">
                     {user.is_exco ? user.positions?.join(", ") : "Member"}
+                  </div>
+
+                  {/* Grid Info */}
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
+                    {user.bethel && (
+                      <div>
+                        <span className="text-text-placeholder">Bethel: </span>
+                        <span className="text-text">{user.bethel}</span>
+                      </div>
+                    )}
+                    {user.zone && (
+                      <div>
+                        <span className="text-text-placeholder">Zone: </span>
+                        <span className="text-text">{user.zone}</span>
+                      </div>
+                    )}
+                    {user.area && (
+                      <div>
+                        <span className="text-text-placeholder">Area: </span>
+                        <span className="text-text">{user.area}</span>
+                      </div>
+                    )}
+                    {user.primary_phone && (
+                      <div>
+                        <span className="text-text-placeholder">Phone: </span>
+                        <span className="text-text">{user.primary_phone}</span>
+                      </div>
+                    )}
+                    {user.gender && (
+                      <div>
+                        <span className="text-text-placeholder">Gender: </span>
+                        <span className="text-text capitalize">
+                          {user.gender}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </article>
