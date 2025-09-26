@@ -24,7 +24,7 @@ import { PaymentModal } from "../Finance/components/PaymentModal";
 import DocumentSkeleton from "./components/DocumentSkeleton";
 import { FaCalendar } from "react-icons/fa6";
 import { FaFileAlt } from "react-icons/fa";
-import { useFetchDebts, useInitPayment } from "../../hook/useFinance";
+import { useFetchDebts } from "../../hook/useFinance";
 
 /* ---------------- Empty State ---------------- */
 function EmptyState({
@@ -62,15 +62,6 @@ export default function Home() {
   /* ---------------- Modals ---------------- */
   const [openAttendanceModal, setOpenAttendanceModal] = useState(false);
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
-
-  /* ---------------- Payment Hook ---------------- */
-  const initPayment = useInitPayment();
-
-  const handlePay = (payload: any) => {
-    initPayment.mutate(payload, {
-      onSuccess: () => setOpenPaymentModal(false),
-    });
-  };
 
   /* ---------------- Debts ---------------- */
   const {
@@ -156,13 +147,7 @@ export default function Home() {
 
       {/* Payment Modal */}
       {openPaymentModal && (
-        <PaymentModal
-          onClose={() => setOpenPaymentModal(false)}
-          selectedUser={user}
-          onBack={() => setOpenPaymentModal(false)}
-          onPay={handlePay}
-          isPending={initPayment.isPending}
-        />
+        <PaymentModal onClose={() => setOpenPaymentModal(false)} />
       )}
 
       <div className="space-y-12">
