@@ -1,7 +1,11 @@
 import type { IconType } from "react-icons";
 import { FaCoins, FaMusic, FaUser } from "react-icons/fa6";
 import { FaFileAlt, FaPray } from "react-icons/fa";
-import { TbCalendarEventFilled, TbHome2 } from "react-icons/tb";
+import {
+  TbCalendarEventFilled,
+  TbHome2,
+  TbTransactionDollar,
+} from "react-icons/tb";
 import { MdAnnouncement } from "react-icons/md";
 
 // Interfaces
@@ -27,6 +31,7 @@ export const ROUTES = {
     HOME: "home",
     EVENTS: "events",
     FINANCE: "finance",
+    TRANSACTION: "transaction-history",
     USERS: "users",
     DOCUMENTS: "documents",
     SONGS: "songs",
@@ -110,6 +115,12 @@ export const dashboardMenu: DashboardSidebarProps[] = [
     path: validatePath(ROUTES.DASHBOARD.FINANCE),
     Icon: FaCoins,
     admin: true,
+  },
+  {
+    label: "Transactions",
+    path: validatePath(ROUTES.DASHBOARD.TRANSACTION),
+    Icon: TbTransactionDollar,
+    admin: false,
   },
   {
     label: "Users",

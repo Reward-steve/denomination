@@ -17,17 +17,11 @@ export const BasicInfoSection = ({
 }: BasicInfoSectionProps) => {
   return (
     <section
-      className="border rounded-lg p-3 sm:p-4 md:p-5 border-border space-y-4 bg-background"
+      className="border rounded-lg p-3 sm:p-4 md:p-5 border-border space-y-1 bg-background"
       aria-labelledby="basic-info-title"
     >
-      <h3
-        id="basic-info-title"
-        className="text-base sm:text-lg font-medium text-text-placeholder mb-2"
-      >
-        Basic Info
-      </h3>
 
-      <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-2 md:gap-4">
+      <div className="space-y-1 md:space-y-0 md:grid md:grid-cols-2 md:gap-4">
         <FormInput
           id="name"
           label="Event Name"

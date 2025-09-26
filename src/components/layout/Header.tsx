@@ -101,10 +101,14 @@ function MobileHeader({
 
   return (
     <div className="flex items-center justify-end p-3 relative shadow-sm">
-      <div className="w-[60%] flex justify-between items-center">
+      <div className="w-[100%] flex justify-between items-center">
+
+        <div className="w-[35px]"> </div>
+
         <h1 className="text-base font-semibold truncate text-text-placeholder">
           {title}
         </h1>
+
         <div className="flex items-center gap-3 relative" ref={menuRef}>
           <FaBell className="text-primary text-lg cursor-pointer" />
           <button onClick={() => setMenuOpen((p: boolean) => !p)}>
@@ -123,6 +127,7 @@ function MobileHeader({
             />
           )}
         </div>
+
       </div>
     </div>
   );
