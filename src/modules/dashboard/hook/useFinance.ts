@@ -7,7 +7,8 @@ import {
   fetchAllTransactions,
   fetchStats,
 } from "../services/finance";
-import type { InitPaymentRequest /*PaymentItem*/ } from "../types";
+import type { InitPaymentRequest } from "../types";
+import { toast } from "react-toastify";
 
 /* ---------------- MUTATIONS ---------------- */
 
@@ -28,6 +29,9 @@ export function useInitPayment() {
   return useMutation({
     mutationFn: (payload: InitPaymentRequest) => initPayment(payload),
     onSuccess: () => {
+      // ✅ Notify user only once — clear, simple, non-intrusive
+      toast.success("Payment initialized successfully ✅");
+
       // Refetch relevant queries to keep UI in sync
       queryClient.invalidateQueries({ queryKey: ["allTransactions"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
@@ -35,6 +39,9 @@ export function useInitPayment() {
     },
     onError: (err: unknown) => {
       console.error("❌ Payment initialization failed:", err);
+
+      // ⚠️ Only toast when it's a user-facing failure
+      toast.error("Failed to initialize payment. Please try again.");
     },
   });
 }
@@ -43,6 +50,7 @@ export function useInitPayment() {
 
 /**
  * Fetch debts for a specific user.
+ * ✅ No toast here — errors should be handled in UI, not spam users.
  */
 export function useFetchDebts(userId: number, enabled = true) {
   return useQuery({

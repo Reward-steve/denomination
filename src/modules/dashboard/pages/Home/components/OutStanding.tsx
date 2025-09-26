@@ -5,9 +5,16 @@ interface StatCardProps {
   fee: string;
   times: string;
   onPayNow?: () => void;
+  showPayNow?: boolean;
 }
 
-const OutStanding = ({ amount, fee, times, onPayNow }: StatCardProps) => (
+const OutStanding = ({
+  amount,
+  fee,
+  times,
+  onPayNow,
+  showPayNow,
+}: StatCardProps) => (
   <div
     className={clsx(
       "p-6 rounded-2xl bg-surface shadow-sm",
@@ -23,14 +30,16 @@ const OutStanding = ({ amount, fee, times, onPayNow }: StatCardProps) => (
       {/* <p className="mt-1 text-2xl font-bold text-primary">{fee}</p> */}
     </div>
     <div className="max-w-[100px] mt-2">
-      <Button
-        onClick={onPayNow}
-        variant="gray"
-        size="sm"
-        className="w-full sm:w-auto animate-fade transition-all"
-      >
-        Pay now
-      </Button>
+      {showPayNow && (
+        <Button
+          onClick={onPayNow}
+          variant="gray"
+          size="sm"
+          className="w-full sm:w-auto animate-fade transition-all"
+        >
+          Pay now
+        </Button>
+      )}
     </div>
   </div>
 );

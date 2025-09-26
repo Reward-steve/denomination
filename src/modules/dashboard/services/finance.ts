@@ -20,3 +20,6 @@ export const fetchAllTransactions = async () => {
 export const fetchStats = async () => {
   return apiRequest("txn/stats/fetch", "GET");
 };
+export const fetchPaymentItems = async () => {
+  return apiRequest("lookups/payment-items/fetch", "GET");
+};
