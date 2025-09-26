@@ -93,7 +93,7 @@ export const useEventModal = ({ initialEvent }: UseEventModalProps = {}) => {
       // ✅ Build payload for API
       const payload: AppEvent = {
         ...event,
-        id: event.id && event.id !== 0 ? event.id : undefined, // omit id if creating new
+        ...(event.id && event.id !== 0 ? { id: event.id } : {}), // only include if valid
         time: normalizedTime,
         venue: event.venue || "TBA",
         descr: event.descr || "No description",
