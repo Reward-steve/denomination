@@ -1,7 +1,11 @@
 import type { IconType } from "react-icons";
 import { FaCoins, FaMusic, FaUser } from "react-icons/fa6";
 import { FaFileAlt, FaPray } from "react-icons/fa";
-import { TbCalendarEventFilled, TbHome2 } from "react-icons/tb";
+import {
+  TbCalendarEventFilled,
+  TbHome2,
+  TbTransactionDollar,
+} from "react-icons/tb";
 import { MdAnnouncement } from "react-icons/md";
 
 // Interfaces
@@ -115,7 +119,7 @@ export const dashboardMenu: DashboardSidebarProps[] = [
   {
     label: "Transactions",
     path: validatePath(ROUTES.DASHBOARD.TRANSACTION),
-    Icon: FaCoins,
+    Icon: TbTransactionDollar,
     admin: false,
   },
   {
