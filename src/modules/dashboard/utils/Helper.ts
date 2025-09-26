@@ -21,6 +21,21 @@ function getOrdinalSuffix(num: number): string {
   }
 }
 
+// Function to format the date string
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  // Get the date and time components
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+
+  // Return in 'YYYY-MM-DD HH:mm:ss' format
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+};
+
 // Get the weekday name from a Date or string
 function getWeekdayName(date: string | Date): string {
   const parsedDate = typeof date === "string" ? new Date(date) : date;
@@ -144,6 +159,7 @@ const sortEvents = (list: AppEvent[]) =>
   [...list].sort((a, b) => toTimestamp(a) - toTimestamp(b));
 
 export {
+  formatDate,
   getRecurrenceText,
   normalizeTime,
   formatTimeToAMPM,

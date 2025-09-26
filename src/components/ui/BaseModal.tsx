@@ -32,7 +32,7 @@ export const BaseModal = ({
     >
       <div className={className} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <div className="flex items-center justify-between p-4 border-b border-border">
           <h2
             id="event-modal-title"
             className="text-lg font-semibold text-text"
@@ -49,7 +49,7 @@ export const BaseModal = ({
         </div>
 
         {/* Content */}
-        <div className="p-4 overflow-y-auto max-h-[70vh]">{children}</div>
+        <div className="px-4 overflow-y-auto max-h-[70vh]">{children}</div>
       </div>
     </div>
   );
