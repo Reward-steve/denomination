@@ -68,7 +68,7 @@ export interface EventCardProps {
 }
 
 export interface Event {
-  id?: number;
+  id: number;
   name: string;
   venue: string;
   descr?: string;
@@ -131,4 +131,15 @@ export type InitPaymentRequest = {
   payment_method: "cash" | "card" | "transfer"; // Supported methods
   event_id: number; // Event related to the payment
   items: PaymentItem[]; // Array of payment items
+};
+
+export type FinanceStatsResponse = {
+  status: boolean;
+  message: string;
+  data: {
+    total_debts: number;
+    dues_collected: number;
+    welfare_collected: number;
+    total_balance: number;
+  };
 };

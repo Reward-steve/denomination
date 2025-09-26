@@ -1,19 +1,11 @@
-// src/features/finance/pages/Finance.tsx
 import { useState, type ReactNode } from "react";
 import DashboardLayout from "../../components/Layout";
-import { FaArrowUp, FaArrowDown, FaWallet } from "react-icons/fa";
+import { FaArrowUp, FaArrowDown, FaWallet, FaMoneyBill } from "react-icons/fa";
 import { TbTransactionDollar } from "react-icons/tb";
 import { Button } from "../../../../components/ui/Button";
 import { EmptyState } from "../../../../components/ui/EmptyState";
-import ReactDOM from "react-dom";
-import {
-  useFetchAllTransactions,
-  useInitPayment,
-  useFetchDebts,
-  useFetchTransaction,
-} from "../../hook/useFinance";
-import { BaseModal } from "../../../../components/ui/BaseModal";
-import type { InitPaymentRequest, PaymentItem } from "../../types";
+import { useFetchAllTransactions, useFetchStats } from "../../hook/useFinance";
+import { PaymentModal } from "./components/PaymentModal";
 
 /* -------------------- Types -------------------- */
 interface Transaction {
@@ -22,6 +14,48 @@ interface Transaction {
   description: string;
   amount: number;
   date: string;
+}
+
+interface Stat {
+  label: string;
+  value: number;
+  icon: ReactNode;
+  color: string;
+}
+
+/* -------------------- Skeleton Loaders -------------------- */
+function StatCardSkeleton() {
+  return (
+    <div className="p-4 rounded-xl bg-surface shadow flex items-center gap-3 animate-pulse">
+      <div className="w-8 h-8 rounded-full bg-border" />
+      <div className="flex-1 space-y-2">
+        <div className="h-3 bg-border rounded w-3/4" />
+        <div className="h-4 bg-border rounded w-1/2" />
+      </div>
+    </div>
+  );
+}
+
+function TransactionListSkeleton() {
+  return (
+    <ul
+      className="divide-y divide-border rounded-xl bg-surface shadow"
+      role="list"
+    >
+      {Array.from({ length: 5 }).map((_, index) => (
+        <li
+          key={index}
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-4 animate-pulse"
+        >
+          <div className="flex-1 min-w-0 space-y-2">
+            <div className="h-4 bg-border rounded w-3/4" />
+            <div className="h-3 bg-border rounded w-1/2" />
+          </div>
+          <div className="h-4 bg-border rounded w-16 shrink-0" />
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 /* -------------------- Helpers -------------------- */
@@ -40,26 +74,49 @@ export default function Finance() {
   const [showPayment, setShowPayment] = useState(false);
 
   // Queries
-  const { data, isLoading, isError } = useFetchAllTransactions();
-  const { data: debts } = useFetchDebts(1, false);
-  const { data: txnDetail } = useFetchTransaction(10, false);
+  const {
+    data: transactionData,
+    isLoading: transactionsLoading,
+    isError: transactionsError,
+  } = useFetchAllTransactions();
+  const {
+    data: statsData,
+    isLoading: statsLoading,
+    isError: statsError,
+  } = useFetchStats();
 
-  console.log(data);
-
-  const transactions: Transaction[] = data?.data
-    ? mapApiToTransactions(data.data)
+  const transactions: Transaction[] = transactionData?.data
+    ? mapApiToTransactions(transactionData.data)
     : [];
 
-  // Totals
-  const income = transactions
-    .filter((t) => t.type === "income")
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const expenses = transactions
-    .filter((t) => t.type === "expense")
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const balance = income - expenses;
+  const stats: Stat[] = statsData?.data
+    ? [
+        {
+          label: "Total Debts",
+          value: statsData.data.total_debts,
+          icon: <FaArrowDown />,
+          color: "text-red-500",
+        },
+        {
+          label: "Dues Collected",
+          value: statsData.data.dues_collected,
+          icon: <FaArrowUp />,
+          color: "text-green-500",
+        },
+        {
+          label: "Welfare Collected",
+          value: statsData.data.welfare_collected,
+          icon: <FaMoneyBill />,
+          color: "text-accent",
+        },
+        {
+          label: "Total Balance",
+          value: statsData.data.total_balance,
+          icon: <FaWallet />,
+          color: "text-accent",
+        },
+      ]
+    : [];
 
   return (
     <DashboardLayout>
@@ -72,23 +129,33 @@ export default function Finance() {
           </p>
         </header>
 
-        {/* Overview */}
-        <section className="grid gap-4 sm:grid-cols-3">
-          <StatCard
-            icon={<FaArrowUp className="text-green-500 text-2xl shrink-0" />}
-            label="Total Income"
-            value={`₦${income.toLocaleString()}`}
-          />
-          <StatCard
-            icon={<FaArrowDown className="text-red-500 text-2xl shrink-0" />}
-            label="Total Expenses"
-            value={`₦${expenses.toLocaleString()}`}
-          />
-          <StatCard
-            icon={<FaWallet className="text-accent text-2xl shrink-0" />}
-            label="Balance"
-            value={`₦${balance.toLocaleString()}`}
-          />
+        {/* Stats Overview */}
+        <section className="grid gap-4 sm:grid-cols-4">
+          {statsLoading ? (
+            <>
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+            </>
+          ) : statsError ? (
+            <p className="text-center text-error col-span-4">
+              Failed to load stats.
+            </p>
+          ) : stats.length > 0 ? (
+            stats.map((stat) => (
+              <StatCard
+                key={stat.label}
+                icon={
+                  <span className={`${stat.color} text-2xl shrink-0`}>
+                    {stat.icon}
+                  </span>
+                }
+                label={stat.label}
+                value={`₦${stat.value.toLocaleString()}`}
+              />
+            ))
+          ) : null}
         </section>
 
         {/* Transactions */}
@@ -106,11 +173,9 @@ export default function Finance() {
             </Button>
           </div>
 
-          {isLoading ? (
-            <p className="text-center text-text-placeholder py-8">
-              Loading transactions...
-            </p>
-          ) : isError ? (
+          {transactionsLoading ? (
+            <TransactionListSkeleton />
+          ) : transactionsError ? (
             <p className="text-center text-error py-8">
               Failed to load transactions.
             </p>
@@ -124,12 +189,6 @@ export default function Finance() {
             />
           )}
         </section>
-
-        {/* Debugging/Preview sections */}
-        {debts && <PreviewBlock title="Debts Preview" data={debts} />}
-        {txnDetail && (
-          <PreviewBlock title="Transaction Detail" data={txnDetail} />
-        )}
 
         {/* Payment Modal */}
         {showPayment && <PaymentModal onClose={() => setShowPayment(false)} />}
@@ -185,174 +244,5 @@ function TransactionList({ transactions }: { transactions: Transaction[] }) {
         </li>
       ))}
     </ul>
-  );
-}
-
-function PreviewBlock({ title, data }: { title: string; data: unknown }) {
-  return (
-    <section>
-      <h3 className="font-semibold">{title}</h3>
-      <pre className="text-xs bg-surface p-2 rounded-lg overflow-x-auto">
-        {JSON.stringify(data, null, 2)}
-      </pre>
-    </section>
-  );
-}
-
-/* -------------------- Payment Modal -------------------- */
-function PaymentModal({ onClose }: { onClose: () => void }) {
-  const { mutate, isPending } = useInitPayment();
-
-  // Form state
-  const [paymentMethod, setPaymentMethod] =
-    useState<InitPaymentRequest["payment_method"]>("card");
-
-  const [items, setItems] = useState<PaymentItem[]>([
-    {
-      id: 1,
-      unit_price: 5000,
-      units: 1,
-      from: new Date().toISOString(),
-      to: new Date().toISOString(),
-    },
-  ]);
-
-  const handlePay = () => {
-    const payload: InitPaymentRequest = {
-      user_id: 1, // TODO: replace with actual logged-in user_id
-      event_id: 123, // TODO: replace with real event_id
-      payment_method: paymentMethod,
-      items,
-    };
-
-    mutate(payload, { onSuccess: onClose });
-  };
-
-  // Add new item row
-  const addItem = () => {
-    setItems((prev) => [
-      ...prev,
-      {
-        id: prev.length + 1,
-        unit_price: 0,
-        units: 1,
-        from: new Date().toISOString(),
-        to: new Date().toISOString(),
-      },
-    ]);
-  };
-
-  return ReactDOM.createPortal(
-    <BaseModal title="Make Payment" isOpen setClose={onClose}>
-      <div className="space-y-4">
-        {/* Payment Method */}
-        <div>
-          <label className="text-sm font-medium text-text">
-            Payment Method
-          </label>
-          <select
-            value={paymentMethod}
-            onChange={(e) =>
-              setPaymentMethod(
-                e.target.value as InitPaymentRequest["payment_method"]
-              )
-            }
-            className="mt-1 block w-full rounded-lg border border-border bg-surface p-2 text-sm text-text"
-          >
-            <option value="cash">Cash</option>
-            <option value="card">Card</option>
-            <option value="transfer">Transfer</option>
-          </select>
-        </div>
-
-        {/* Payment Items */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-text">Items</label>
-          {items.map((item, index) => (
-            <div
-              key={item.id}
-              className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-surface p-2 rounded-lg border border-border"
-            >
-              <input
-                type="number"
-                placeholder="Unit Price"
-                value={item.unit_price}
-                onChange={(e) =>
-                  setItems((prev) =>
-                    prev.map((it, i) =>
-                      i === index ? { ...it, unit_price: +e.target.value } : it
-                    )
-                  )
-                }
-                className="rounded border border-border p-1 text-sm"
-              />
-              <input
-                type="number"
-                placeholder="Units"
-                value={item.units}
-                onChange={(e) =>
-                  setItems((prev) =>
-                    prev.map((it, i) =>
-                      i === index ? { ...it, units: +e.target.value } : it
-                    )
-                  )
-                }
-                className="rounded border border-border p-1 text-sm"
-              />
-              <input
-                type="date"
-                value={item.from.split("T")[0]}
-                onChange={(e) =>
-                  setItems((prev) =>
-                    prev.map((it, i) =>
-                      i === index
-                        ? {
-                            ...it,
-                            from: new Date(e.target.value).toISOString(),
-                          }
-                        : it
-                    )
-                  )
-                }
-                className="rounded border border-border p-1 text-sm"
-              />
-              <input
-                type="date"
-                value={item.to.split("T")[0]}
-                onChange={(e) =>
-                  setItems((prev) =>
-                    prev.map((it, i) =>
-                      i === index
-                        ? { ...it, to: new Date(e.target.value).toISOString() }
-                        : it
-                    )
-                  )
-                }
-                className="rounded border border-border p-1 text-sm"
-              />
-            </div>
-          ))}
-          <Button variant="outline" size="sm" onClick={addItem}>
-            + Add Item
-          </Button>
-        </div>
-
-        {/* Actions */}
-        <div className="flex gap-2 justify-end">
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={handlePay}
-            disabled={isPending}
-          >
-            {isPending ? "Processing..." : "Confirm Payment"}
-          </Button>
-          <Button variant="outline" size="sm" onClick={onClose}>
-            Cancel
-          </Button>
-        </div>
-      </div>
-    </BaseModal>,
-    document.body
   );
 }
