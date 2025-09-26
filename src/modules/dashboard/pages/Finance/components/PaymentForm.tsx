@@ -43,7 +43,7 @@ export function PaymentForm({
   // build items list
   const initialItems = useMemo<(PaymentItem & { name?: string })[]>(() => {
     const debts =
-      debtRes?.data?.map((d) => ({
+      debtRes?.data?.map((d: any) => ({
         id: d.item_id,
         name: d.name,
         unit_price: d.item_amount ?? 0,
