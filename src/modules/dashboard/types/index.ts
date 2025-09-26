@@ -128,7 +128,7 @@ export type PaymentItem = {
 
 export type InitPaymentRequest = {
   user_id: number; // User making the payment
-  payment_method: "cash" | "card" | "transfer"; // Supported methods
+  payment_method: "cash" | "online"; // Supported methods
   event_id: number; // Event related to the payment
   items: PaymentItem[]; // Array of payment items
 };

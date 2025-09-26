@@ -208,7 +208,9 @@ export function Dropdown<T extends DropdownOption>({
       </div>
 
       {/* Error Message */}
-      {isError && <p className="mt-1 text-xs text-error">{errorMsg}</p>}
+      {isError && (
+        <p className="mt-1 text-xs text-error animate-shake">{errorMsg}</p>
+      )}
 
       {/* Dropdown List */}
       {isOpen && !loading && (
