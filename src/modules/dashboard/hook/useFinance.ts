@@ -6,6 +6,7 @@ import {
   fetchTransactions,
   fetchAllTransactions,
   fetchStats,
+  fetchUserTransactions,
 } from "../services/finance";
 import type { InitPaymentRequest /*PaymentItem*/ } from "../types";
 
@@ -70,6 +71,16 @@ export function useFetchAllTransactions() {
   return useQuery({
     queryKey: ["allTransactions"],
     queryFn: fetchAllTransactions,
+  });
+}
+
+/**
+ * Fetch all user transactions for the system.
+ */
+export function useFetchUserTransactions() {
+  return useQuery({
+    queryKey: ["userTransactions"],
+    queryFn: fetchUserTransactions,
   });
 }
 

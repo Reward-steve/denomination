@@ -17,6 +17,9 @@ export const fetchTransactions = async (txn_id: number) => {
 export const fetchAllTransactions = async () => {
   return apiRequest("txn/fetch", "GET");
 };
+export const fetchUserTransactions = async () => {
+  return apiRequest("txn/user/fetch", "GET");
+};
 export const fetchStats = async () => {
   return apiRequest("txn/stats/fetch", "GET");
 };

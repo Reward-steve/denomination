@@ -57,7 +57,7 @@ export const EventModal = ({
           <p className="text-sm text-red-500 text-center">{errorMessage}</p>
         )}
 
-        <div className="flex items-center justify-center flex-col sm:flex-row w-full gap-3">
+        <div className="flex items-center justify-center flex-col-reverse sm:flex-row w-full gap-3">
           <Button
             variant="outline"
             type="button"
