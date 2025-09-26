@@ -20,17 +20,11 @@ export const DateTimeSection = ({
 }: DateTimeSectionProps) => {
   return (
     <section
-      className={`border rounded-lg p-3 sm:p-4 md:p-5 border-border space-y-4 bg-background ${className}`}
+      className={`border rounded-lg p-3 sm:p-4 md:p-5 border-border space-y-1 bg-background ${className}`}
       aria-labelledby="date-time-title"
     >
-      <h3
-        id="date-time-title"
-        className="text-base sm:text-lg font-medium text-text-placeholder mb-2"
-      >
-        Date &amp; Time
-      </h3>
 
-      <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-2 md:gap-4">
+      <div className="space-y-1 md:space-y-0 md:grid md:grid-cols-2 md:gap-4">
         <FormInput
           id="date"
           type="date"

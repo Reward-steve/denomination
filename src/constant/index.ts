@@ -27,6 +27,7 @@ export const ROUTES = {
     HOME: "home",
     EVENTS: "events",
     FINANCE: "finance",
+    TRANSACTION: "transaction-history",
     USERS: "users",
     DOCUMENTS: "documents",
     SONGS: "songs",
@@ -110,6 +111,12 @@ export const dashboardMenu: DashboardSidebarProps[] = [
     path: validatePath(ROUTES.DASHBOARD.FINANCE),
     Icon: FaCoins,
     admin: true,
+  },
+  {
+    label: "Transactions",
+    path: validatePath(ROUTES.DASHBOARD.TRANSACTION),
+    Icon: FaCoins,
+    admin: false,
   },
   {
     label: "Users",

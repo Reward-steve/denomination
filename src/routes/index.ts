@@ -10,6 +10,7 @@ import Document from "../modules/dashboard/pages/Documents";
 import Events from "../modules/dashboard/pages/Events";
 import { EventView } from "../modules/dashboard/pages/Events/EventView";
 import Finance from "../modules/dashboard/pages/Finance";
+import TransactionHistory from "../modules/dashboard/pages/Finance/txnHistory";
 import Home from "../modules/dashboard/pages/Home";
 import Sermon from "../modules/dashboard/pages/Sermon";
 import Songs from "../modules/dashboard/pages/Songs";
@@ -29,6 +30,7 @@ export const dashboard = [
   { path: "events", element: Events },
   { path: "events/:eventId/view", element: EventView },
   { path: "finance", element: Finance },
+  { path: "transaction-history", element:TransactionHistory},
   { path: "users", element: Users },
 
   { path: "documents", element: Document },
