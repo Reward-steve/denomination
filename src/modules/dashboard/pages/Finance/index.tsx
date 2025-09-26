@@ -9,6 +9,7 @@ import { PaymentModal } from "./components/PaymentModal";
 import { DashboardHeader } from "../../components/Header";
 import { FaArrowRight } from "react-icons/fa6";
 import { BaseModal } from "../../../../components/ui/BaseModal";
+import moment from "moment";
 
 /* -------------------- Types -------------------- */
 interface Transaction {
@@ -17,7 +18,18 @@ interface Transaction {
   username: string;
   amount: number;
   date: string;
-  payment_method: string;
+  reference?: string;
+  from_date?: string;
+  to_date?: string;
+  payment_method?: string,
+  payment_gateway?: string | null,
+  event_name?: string;
+  event_id?: number | null;
+  created_at?: string;
+  updated_at?: string;
+  descr: string | null
+  recurring: number;
+  item_name?: string
 }
 
 interface Stat {
@@ -25,6 +37,19 @@ interface Stat {
   value: number;
   icon: ReactNode;
   color: string;
+}
+
+const determineStatusColor = (status: string, withBG = true) => {
+  switch (status) {
+    case "successful":
+      return withBG ? "bg-green-100" : "text-green-800";
+    case "pending":
+      return withBG ? "bg-yellow-100" : "text-yellow-800";
+    case "failed":
+      return withBG ? "bg-red-100" : "text-red-800";
+    default:
+      return withBG ? "bg-gray-100" : "text-gray-800";
+  }
 }
 
 /* -------------------- Skeleton Loaders -------------------- */
@@ -71,6 +96,17 @@ function mapApiToTransactions(apiData: any[]): Transaction[] {
     amount: Number(txn.amount),
     date: txn.created_at.split(" ")[0],
     payment_method: txn.payment_method,
+    payment_gateway: txn.payment_gateway,
+    event_id: txn.event_id,
+    event_name: txn.event_name,
+    reference: txn.reference,
+    descr: txn.descr,
+    recurring: txn.recurring,
+    created_at: txn.created_at,
+    updated_at: txn.updated_at,
+    from_date: txn.from_date,
+    to_date: txn.to_date,
+    item_name: txn.item_name
   })));
 }
 
@@ -215,32 +251,59 @@ export default function Finance() {
 
       {/* reciept modal */}
       {showReceipt && <BaseModal
+
         title="Payment receipt"
         setClose={() => setShowReceipt(false)}>
-        <ul className="divide-y divide-border bg-background rounded-xl my-4 shadow" role="list" aria-label="Receipt details" >
+        <div className="flex justify-center items-center w-full mb-4">
+          <ul className="divide-y divide-border bg-background rounded-xl max-w-[600px] w-full my-4 shadow" role="list" aria-label="Receipt details" >
 
-          {/* const statusStyles = t.status === "successful" ? "bg-green-100 text-green-800" : t.status === "pending" ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"; */}
 
-
-          <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
+            <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
               <p className="text-text-placeholder text-sm">Name</p>
               <p className="font-medium text-text truncate">{txDetails?.username}</p>
-          </li>
-          <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
-              <p className="text-text-placeholder text-sm">Name</p>
-              <p className="font-medium text-text truncate">{txDetails?.username}</p>
-          </li>
-          <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
-              <p className="text-text-placeholder text-sm">Name</p>
-              <p className="font-medium text-text truncate">{txDetails?.username}</p>
-          </li>
-          <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
-              <p className="text-text-placeholder text-sm">Name</p>
-              <p className="font-medium text-text truncate">{txDetails?.username}</p>
-          </li>
-         
+            </li>
+            <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
+              <p className="text-text-placeholder text-sm">Associated event</p>
+              <p className="font-medium text-text truncate">{txDetails?.event_name}</p>
+            </li>
+            <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
+              <p className="text-text-placeholder text-sm">Amount</p>
+              <p className="font-medium text-text truncate">₦{Number(txDetails?.amount).toLocaleString()}</p>
+            </li>
+            <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
+              <p className="text-text-placeholder text-sm">Payment item</p>
+              <p className="font-medium text-text truncate">{txDetails?.item_name}</p>
+            </li>
+            {(txDetails?.descr && txDetails.descr.trim().length > 0) && <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
+              <p className="text-text-placeholder text-sm">Description</p>
+              <p className="font-medium text-text truncate">{txDetails?.descr}</p>
+            </li>}
+            <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
+              <p className="text-text-placeholder text-sm">Payment method</p>
+              <p className="font-medium text-text truncate">{txDetails?.payment_method}</p>
+            </li>
+            <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
+              <p className="text-text-placeholder text-sm">Status</p>
+              <p className={`font-medium text-text truncate px-1 rounded ${determineStatusColor(txDetails?.status || "", false)}`}>{txDetails?.status}</p>
+            </li>
 
-        </ul>
+            {txDetails?.recurring && <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
+              <p className="text-text-placeholder text-sm">Period paid for</p>
+              <p className="font-medium text-text truncate">{new Date(txDetails?.from_date || '').getFullYear() === new Date().getFullYear() ? moment(txDetails?.from_date || '').format("MMM") : moment(txDetails?.from_date).format("MMM YYYY")} - {moment(txDetails?.to_date).format("MMM YYYY")} </p>
+            </li>}
+
+            <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
+              <p className="text-text-placeholder text-sm">Date</p>
+              <p className="font-medium text-text truncate">{moment(txDetails?.created_at).format("MMM D, YYYY")}</p>
+            </li>
+            <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
+              <p className="text-text-placeholder text-sm">Reference</p>
+              <p className="font-medium text-text truncate">{txDetails?.reference}</p>
+            </li>
+
+
+          </ul>
+        </div>
       </BaseModal>}
 
     </DashboardLayout>
