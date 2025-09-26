@@ -6,14 +6,18 @@ import { Button } from "../../../../components/ui/Button";
 import { EmptyState } from "../../../../components/ui/EmptyState";
 import { useFetchAllTransactions, useFetchStats } from "../../hook/useFinance";
 import { PaymentModal } from "./components/PaymentModal";
+import { DashboardHeader } from "../../components/Header";
+import { FaArrowRight } from "react-icons/fa6";
+import { BaseModal } from "../../../../components/ui/BaseModal";
 
 /* -------------------- Types -------------------- */
 interface Transaction {
   id: number;
-  type: "income" | "expense";
-  description: string;
+  status: "failed" | "successful" | "pending";
+  username: string;
   amount: number;
   date: string;
+  payment_method: string;
 }
 
 interface Stat {
@@ -60,18 +64,21 @@ function TransactionListSkeleton() {
 
 /* -------------------- Helpers -------------------- */
 function mapApiToTransactions(apiData: any[]): Transaction[] {
-  return apiData.map((txn) => ({
+  return (apiData.length = 5, apiData.map((txn) => ({
     id: txn.id,
-    type: Number(txn.amount) > 0 ? "income" : "expense",
-    description: `${txn.first_name} ${txn.last_name} - ${txn.payment_method}`,
+    status: txn.status,
+    username: `${txn.first_name} ${txn.last_name}`,
     amount: Number(txn.amount),
     date: txn.created_at.split(" ")[0],
-  }));
+    payment_method: txn.payment_method,
+  })));
 }
 
 /* -------------------- Main Component -------------------- */
 export default function Finance() {
   const [showPayment, setShowPayment] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [txDetails, setTxDetails] = useState<Transaction>();
 
   // Queries
   const {
@@ -91,43 +98,53 @@ export default function Finance() {
 
   const stats: Stat[] = statsData?.data
     ? [
-        {
-          label: "Total Debts",
-          value: statsData.data.total_debts,
-          icon: <FaArrowDown />,
-          color: "text-red-500",
-        },
-        {
-          label: "Dues Collected",
-          value: statsData.data.dues_collected,
-          icon: <FaArrowUp />,
-          color: "text-green-500",
-        },
-        {
-          label: "Welfare Collected",
-          value: statsData.data.welfare_collected,
-          icon: <FaMoneyBill />,
-          color: "text-accent",
-        },
-        {
-          label: "Total Balance",
-          value: statsData.data.total_balance,
-          icon: <FaWallet />,
-          color: "text-accent",
-        },
-      ]
+      {
+        label: "Total Debts",
+        value: statsData.data.total_debts,
+        icon: <FaArrowDown />,
+        color: "text-red-500",
+      },
+      {
+        label: "Dues Collected",
+        value: statsData.data.dues_collected,
+        icon: <FaArrowUp />,
+        color: "text-green-500",
+      },
+      {
+        label: "Welfare Collected",
+        value: statsData.data.welfare_collected,
+        icon: <FaMoneyBill />,
+        color: "text-accent",
+      },
+      {
+        label: "Total Balance",
+        value: statsData.data.total_balance,
+        icon: <FaWallet />,
+        color: "text-accent",
+      },
+    ]
     : [];
 
   return (
     <DashboardLayout>
       <section className="space-y-8 animate-fade">
         {/* Header */}
-        <header>
+        {/* <header>
           <h2 className="text-2xl font-bold text-text">Finance</h2>
           <p className="text-text-placeholder mt-1">
-            Track your payments, balances, and history in one place.
+            
           </p>
-        </header>
+        </header> */}
+
+        <DashboardHeader
+          title={`Finance`}
+          description={"Track your payments, balances, and history in one place."}
+          actionLabel={"Make Payment"}
+          onAction={() => setShowPayment(true)}
+        >
+          <></>
+        </DashboardHeader>
+
 
         {/* Stats Overview */}
         <section className="grid gap-4 sm:grid-cols-4">
@@ -164,13 +181,6 @@ export default function Finance() {
             <h3 className="text-lg font-semibold text-text">
               Recent Transactions
             </h3>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setShowPayment(true)}
-            >
-              + Make Payment
-            </Button>
           </div>
 
           {transactionsLoading ? (
@@ -180,7 +190,7 @@ export default function Finance() {
               Failed to load transactions.
             </p>
           ) : transactions.length > 0 ? (
-            <TransactionList transactions={transactions} />
+            <TransactionList transactions={transactions} showDetails={setShowReceipt} _setTxDetails={setTxDetails} />
           ) : (
             <EmptyState
               title="No Transactions"
@@ -189,10 +199,50 @@ export default function Finance() {
             />
           )}
         </section>
+        <div className="flex w-full justify-end mt-[10px!important] max-[360px]:justify-center">
+          <Button
+            variant="primary"
+            size="md" className="max-[360px]:w-full"
+            onClick={() => setShowPayment(true)}
+          >
+            <div className="flex gap-3 justify-center items-center"><span>See all Transactions</span>  <FaArrowRight /></div>
+          </Button>
+        </div>
 
         {/* Payment Modal */}
         {showPayment && <PaymentModal onClose={() => setShowPayment(false)} />}
       </section>
+
+      {/* reciept modal */}
+      {showReceipt && <BaseModal
+        title="Payment receipt"
+        setClose={() => setShowReceipt(false)}>
+        <ul className="divide-y divide-border bg-background rounded-xl my-4 shadow" role="list" aria-label="Receipt details" >
+
+          {/* const statusStyles = t.status === "successful" ? "bg-green-100 text-green-800" : t.status === "pending" ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"; */}
+
+
+          <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
+              <p className="text-text-placeholder text-sm">Name</p>
+              <p className="font-medium text-text truncate">{txDetails?.username}</p>
+          </li>
+          <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
+              <p className="text-text-placeholder text-sm">Name</p>
+              <p className="font-medium text-text truncate">{txDetails?.username}</p>
+          </li>
+          <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
+              <p className="text-text-placeholder text-sm">Name</p>
+              <p className="font-medium text-text truncate">{txDetails?.username}</p>
+          </li>
+          <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
+              <p className="text-text-placeholder text-sm">Name</p>
+              <p className="font-medium text-text truncate">{txDetails?.username}</p>
+          </li>
+         
+
+        </ul>
+      </BaseModal>}
+
     </DashboardLayout>
   );
 }
@@ -218,31 +268,40 @@ function StatCard({
   );
 }
 
-function TransactionList({ transactions }: { transactions: Transaction[] }) {
+function TransactionList({ transactions, showDetails, _setTxDetails }: { transactions: Transaction[], showDetails: any, _setTxDetails: (x: Transaction) => void }) {
+
   return (
     <ul
       className="divide-y divide-border rounded-xl bg-surface shadow"
       role="list"
       aria-label="Recent transactions"
     >
-      {transactions.map((t) => (
-        <li
-          key={t.id}
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-4 hover:bg-surface/70 transition"
-        >
-          <div className="flex-1 min-w-0">
-            <p className="font-medium text-text truncate">{t.description}</p>
-            <p className="text-sm text-text-placeholder">{t.date}</p>
-          </div>
-          <p
-            className={`font-semibold shrink-0 ${
-              t.type === "income" ? "text-green-500" : "text-red-500"
-            }`}
-          >
-            {t.type === "income" ? "+" : "-"}₦{t.amount.toLocaleString()}
-          </p>
-        </li>
-      ))}
+      {transactions.map((t) => {
+        const statusStyles = t.status === "successful" ? "bg-green-100 text-green-800" : t.status === "pending" ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800";
+        return (
+          <li key={t.id} role="button" tabIndex={-1} onClick={() => { showDetails(true); _setTxDetails(t) }} className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4 hover:bg-background/60 transition">
+
+            <div className="min-w-0">
+              <p className="font-medium text-text truncate">{t.username}</p>
+              <p className="text-sm text-text-placeholder">{t.date}</p>
+
+              <small className={`text-xs ${statusStyles} px-1 rounded`}>{t.status}</small>
+            </div>
+
+            <div className=" min-w-0 text-end">
+              <p className="text-text text-sm">{t.payment_method}</p>
+
+              <p className={`font-semibold shrink-0 
+            ${t.status === "successful" ? "text-green-500" : t.status === "pending" ? "text-text-placeholder" : "text-red-500"}`}>
+                {t.status === "successful" ? "+" : ''}₦{t.amount.toLocaleString()}
+              </p>
+            </div>
+
+
+          </li>
+        )
+      }
+      )}
     </ul>
   );
 }
