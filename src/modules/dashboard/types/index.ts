@@ -124,6 +124,7 @@ export type PaymentItem = {
   units: number; // Quantity
   from: string; // ISO date string
   to: string; // ISO date string
+  schedule?: 'yearly' | 'monthly' | 'once' | 'weekly'; // Item schedule description
 };
 
 export type InitPaymentRequest = {

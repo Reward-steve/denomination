@@ -8,6 +8,7 @@ import { useDebounce } from "../../../hook/useDebounce";
 import { fetchUsersForAttendance } from "../../../services/home";
 import { PaymentForm } from "./PaymentForm";
 import { UserList } from "./UserList";
+import { fetchUsers } from "../../Users/services";
 
 /* -------------------- Types -------------------- */
 export interface User {
@@ -41,12 +42,12 @@ export function PaymentModal({ onClose, user }: PaymentModalProps) {
   useEffect(() => {
     if (user) return; // skip fetching if user pre-selected
 
-    const fetchUsers = async () => {
+    const _fetchUsers = async () => {
       setLoadingUser(true);
       try {
         const {
           data: { data },
-        } = await fetchUsersForAttendance("all", debouncedSearch);
+        } = await fetchUsers({ search: debouncedSearch });
         setUsers(data);
       } catch (err) {
         console.error("Failed to fetch users:", err);
@@ -55,7 +56,7 @@ export function PaymentModal({ onClose, user }: PaymentModalProps) {
       }
     };
 
-    fetchUsers();
+    _fetchUsers();
   }, [debouncedSearch, user]);
 
   const handleSelectUser = (user: User) => {
@@ -90,8 +91,8 @@ export function PaymentModal({ onClose, user }: PaymentModalProps) {
         step === "select-user"
           ? "Choose a Member"
           : selectedUser
-          ? `Payment for ${selectedUser.first_name} ${selectedUser.last_name}`
-          : "Payment"
+            ? `Payment for ${selectedUser.first_name} ${selectedUser.last_name}`
+            : "Payment"
       }
       isOpen
       setClose={onClose}

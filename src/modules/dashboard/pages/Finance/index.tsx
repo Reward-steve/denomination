@@ -245,7 +245,7 @@ export default function Finance() {
           )}
         </section>
         <div className="flex w-full justify-end mt-[10px!important] max-[360px]:justify-center">
-          <Link to={"/dashboard/transaction-history"}>
+          <Link to={{pathname:"/dashboard/transaction-history",search:"?fromfinance=true"}}>
             <Button variant="primary" size="md" className="max-[360px]:w-full">
               <div className="flex gap-3 justify-center items-center">
                 <span>See all Transactions</span> <FaArrowRight />

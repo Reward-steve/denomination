@@ -15,7 +15,7 @@ import ListingSkeleton from "../../Home/components/ListingSkeleton";
 function recalcToDate(from: string, units: number) {
   const start = new Date(from);
   const end = new Date(start);
-  end.setMonth(start.getMonth() + (units > 0 ? units - 1 : 0));
+  end.setMonth(start.getMonth() + units);
   return end.toISOString();
 }
 
@@ -53,11 +53,12 @@ export function PaymentForm({
         units: Number(d.periods_owed) || 0,
         from: d.from,
         to: recalcToDate(d.from, Number(d.periods_owed) || 0),
+        schedule: d.schedule
       })) || [];
 
     // Appreciation always added (optional)
     debts.push({
-      id: 999,
+      id: 4,
       name: "Appreciation",
       unit_price: 0,
       units: 1,
@@ -117,13 +118,13 @@ export function PaymentForm({
         it.name === "Appreciation"
           ? it
           : {
-              ...it,
-              units: checked ? Math.max(1, Number(it.units) || 1) : 0,
-              to: recalcToDate(
-                it.from,
-                checked ? Math.max(1, Number(it.units) || 1) : 0
-              ),
-            }
+            ...it,
+            units: checked ? Math.max(1, Number(it.units) || 1) : 0,
+            to: recalcToDate(
+              it.from,
+              checked ? Math.max(1, Number(it.units) || 1) : 0
+            ),
+          }
       )
     );
   };
@@ -204,8 +205,8 @@ export function PaymentForm({
               name: "selectAllMobile",
               value: allChecked,
               onChange: toggleAll,
-              onBlur: () => {},
-              ref: () => {},
+              onBlur: () => { },
+              ref: () => { },
             }}
             label="Select All"
           />
@@ -245,8 +246,8 @@ export function PaymentForm({
                           value: Number(item.units) > 0,
                           onChange: (checked: boolean) =>
                             updateItemUnits(idx, checked ? 1 : 0),
-                          onBlur: () => {},
-                          ref: () => {},
+                          onBlur: () => { },
+                          ref: () => { },
                         }}
                         label={item.name ?? "Unnamed"}
                       />
@@ -277,6 +278,7 @@ export function PaymentForm({
                         {item.units}
                       </span>
                       <Button
+                        disabled={item.schedule === "once"}
                         variant="primary"
                         size="sm"
                         onClick={() =>
@@ -332,8 +334,8 @@ export function PaymentForm({
                         name: "selectAllDesktop",
                         value: allChecked,
                         onChange: toggleAll,
-                        onBlur: () => {},
-                        ref: () => {},
+                        onBlur: () => { },
+                        ref: () => { },
                       }}
                       label=""
                     />
@@ -364,8 +366,8 @@ export function PaymentForm({
                             value: Number(item.units) > 0,
                             onChange: (checked: boolean) =>
                               updateItemUnits(idx, checked ? 1 : 0),
-                            onBlur: () => {},
-                            ref: () => {},
+                            onBlur: () => { },
+                            ref: () => { },
                           }}
                           label={item.name ?? "Unnamed"}
                         />
