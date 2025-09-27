@@ -10,7 +10,7 @@ import { PaymentForm } from "./PaymentForm";
 import { UserList } from "./UserList";
 
 /* -------------------- Types -------------------- */
-interface User {
+export interface User {
   id: number;
   first_name: string;
   middle_name?: string;
@@ -19,11 +19,19 @@ interface User {
   photo?: string;
 }
 
-/* -------------------- Main Component -------------------- */
-export function PaymentModal({ onClose }: { onClose: () => void }) {
+interface PaymentModalProps {
+  onClose: () => void;
+  user?: User; // optional pre-selected user
+}
+
+export function PaymentModal({ onClose, user }: PaymentModalProps) {
   const { mutate, isPending } = useInitPayment();
-  const [step, setStep] = useState<"select-user" | "payment">("select-user");
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+  // If user is passed, start on payment step
+  const [step, setStep] = useState<"select-user" | "payment">(
+    user ? "payment" : "select-user"
+  );
+  const [selectedUser, setSelectedUser] = useState<User | null>(user ?? null);
 
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
@@ -31,6 +39,8 @@ export function PaymentModal({ onClose }: { onClose: () => void }) {
   const [loadingUser, setLoadingUser] = useState(true);
 
   useEffect(() => {
+    if (user) return; // skip fetching if user pre-selected
+
     const fetchUsers = async () => {
       setLoadingUser(true);
       try {
@@ -44,8 +54,9 @@ export function PaymentModal({ onClose }: { onClose: () => void }) {
         setLoadingUser(false);
       }
     };
+
     fetchUsers();
-  }, [debouncedSearch]);
+  }, [debouncedSearch, user]);
 
   const handleSelectUser = (user: User) => {
     setSelectedUser(user);
@@ -53,8 +64,13 @@ export function PaymentModal({ onClose }: { onClose: () => void }) {
   };
 
   const handleBack = () => {
-    setStep("select-user");
-    setSelectedUser(null);
+    if (user) {
+      // if user was pre-selected, prevent going back
+      onClose();
+    } else {
+      setStep("select-user");
+      setSelectedUser(null);
+    }
   };
 
   const handlePay = (payload: InitPaymentRequest) => {
