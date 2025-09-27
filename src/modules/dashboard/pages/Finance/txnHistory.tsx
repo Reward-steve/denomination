@@ -1,13 +1,12 @@
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import DashboardLayout from "../../components/Layout";
 import { TbTransactionDollar } from "react-icons/tb";
 import { EmptyState } from "../../../../components/ui/EmptyState";
-import { useFetchUserTransactions } from "../../hook/useFinance";
 import { PaymentModal } from "./components/PaymentModal";
 import { BaseModal } from "../../../../components/ui/BaseModal";
 import moment from "moment";
 import { useAuth } from "../../../../hooks/useAuth";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { fetchUserTransactions } from "../../services/finance";
 
 /* -------------------- Types -------------------- */
@@ -99,7 +98,7 @@ export default function TransactionHistory() {
   const loc = useLocation();
   // const param = useParams();
   const searchParams = new URLSearchParams(loc.search);
-  const fromFinance = !!searchParams.get('fromfinance');
+  const fromFinance = !!searchParams.get("fromfinance");
   const forAdmins = (user?.is_admin && fromFinance) || false;
   const df = useRef(false);
   // const { data: transactionData, isLoading: transactionsLoading, isError: transactionsError } = useFetchUserTransactions(forAdmins);
@@ -109,14 +108,17 @@ export default function TransactionHistory() {
   useEffect(() => {
     df.current = forAdmins;
 
-    fetchUserTransactions(df.current).then((res) => {
-      setTransactionData({ ...res });
-    }).catch(() => {
-      setTransactionsError(true);
-    }).finally(() => {
-      setTransactionsLoading(false);
-    });
-  }, [])
+    fetchUserTransactions(df.current)
+      .then((res) => {
+        setTransactionData({ ...res });
+      })
+      .catch(() => {
+        setTransactionsError(true);
+      })
+      .finally(() => {
+        setTransactionsLoading(false);
+      });
+  }, []);
 
   const transactions: Transaction[] = transactionData?.data
     ? mapApiToTransactions(transactionData.data)
@@ -230,7 +232,7 @@ export default function TransactionHistory() {
                   </p>
                   <p className="font-medium text-text truncate">
                     {new Date(txDetails?.from_date || "").getFullYear() ===
-                      new Date().getFullYear()
+                    new Date().getFullYear()
                       ? moment(txDetails?.from_date || "").format("MMM")
                       : moment(txDetails?.from_date).format("MMM YYYY")}{" "}
                     - {moment(txDetails?.to_date).format("MMM YYYY")}{" "}
@@ -267,12 +269,11 @@ function TransactionList({
   showDetails: any;
   _setTxDetails: (x: Transaction) => void;
 }) {
-
   const { user } = useAuth();
   const loc = useLocation();
   // const param = useParams();
   const searchParams = new URLSearchParams(loc.search);
-  const fromFinance = searchParams.get('fromfinance');
+  const fromFinance = searchParams.get("fromfinance");
 
   return (
     <ul
@@ -285,8 +286,8 @@ function TransactionList({
           t.status === "successful"
             ? "bg-green-100 text-green-800"
             : t.status === "pending"
-              ? "bg-yellow-100 text-yellow-800"
-              : "bg-red-100 text-red-800";
+            ? "bg-yellow-100 text-yellow-800"
+            : "bg-red-100 text-red-800";
         return (
           <li
             key={t.id}
@@ -299,7 +300,9 @@ function TransactionList({
             className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4 hover:bg-background/60 transition"
           >
             <div className="min-w-0">
-              <p className="font-medium text-text truncate">{(user?.is_admin && fromFinance) ? t.username : t.item_name}</p>
+              <p className="font-medium text-text truncate">
+                {user?.is_admin && fromFinance ? t.username : t.item_name}
+              </p>
               <p className="text-sm text-text-placeholder">{t.date}</p>
 
               <small className={`text-xs ${statusStyles} px-1 rounded`}>
@@ -312,12 +315,13 @@ function TransactionList({
 
               <p
                 className={`font-semibold shrink-0 
-            ${t.status === "successful"
-                    ? "text-green-500"
-                    : t.status === "pending"
-                      ? "text-text-placeholder"
-                      : "text-red-500"
-                  }`}
+            ${
+              t.status === "successful"
+                ? "text-green-500"
+                : t.status === "pending"
+                ? "text-text-placeholder"
+                : "text-red-500"
+            }`}
               >
                 {t.status === "successful" ? "+" : ""}₦
                 {t.amount.toLocaleString()}
