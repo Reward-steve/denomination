@@ -50,7 +50,7 @@ export const BaseModal = ({
         </div>
 
         {/* Content */}
-        <div className="px-4 overflow-y-auto max-h-[85vh] pb-8">{children}</div>
+        <div className="px-4 overflow-y-auto max-h-[85vh]">{children}</div>
       </div>
     </div>
   );

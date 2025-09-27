@@ -244,7 +244,7 @@ export interface Position {
 export interface User {
   id: number;
   first_name: string;
-  middle_name: string | null;
+  middle_name?: string;
   last_name: string;
   email_verified_at: string | null;
   reg_status: number;
@@ -280,7 +280,7 @@ export interface User {
   prev_positions: PreviousPosition[];
   nok: NextOfKin[];
   skills: Skill[];
-  is_admin:boolean;
-  is_exco?:boolean;
-  positions?:string[];
+  is_admin: boolean;
+  is_exco?: boolean;
+  positions?: string[];
 }
