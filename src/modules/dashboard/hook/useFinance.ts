@@ -85,10 +85,10 @@ export function useFetchAllTransactions() {
 /**
  * Fetch all user transactions for the system.
  */
-export function useFetchUserTransactions() {
+export function useFetchUserTransactions(forAdmins:boolean) {
   return useQuery({
     queryKey: ["userTransactions"],
-    queryFn: fetchUserTransactions,
+    queryFn: ()=>fetchUserTransactions(forAdmins),
   });
 }
 
