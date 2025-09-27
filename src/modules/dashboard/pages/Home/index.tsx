@@ -20,7 +20,7 @@ import {
 } from "../../../../utils/appHelpers";
 
 import { MarkAttendance } from "./components/MarkAttendance";
-import { PaymentModal } from "../Finance/components/PaymentModal";
+import { PaymentModal, type User } from "../Finance/components/PaymentModal";
 import DocumentSkeleton from "./components/DocumentSkeleton";
 import { FaCalendar } from "react-icons/fa6";
 import { FaFileAlt } from "react-icons/fa";
@@ -64,11 +64,7 @@ export default function Home() {
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
 
   /* ---------------- Debts ---------------- */
-  const {
-    data: debtsRes,
-    isLoading: debtsLoading,
-    error: debtsError,
-  } = useFetchDebts(user?.id || 0, !!user?.id);
+  const { data: debtsRes } = useFetchDebts(user?.id || 0, !!user?.id);
 
   const debts = debtsRes?.data || [];
   const totalOutstanding = debts.reduce(
@@ -147,7 +143,10 @@ export default function Home() {
 
       {/* Payment Modal */}
       {openPaymentModal && (
-        <PaymentModal onClose={() => setOpenPaymentModal(false)} />
+        <PaymentModal
+          onClose={() => setOpenPaymentModal(false)}
+          user={user as User}
+        />
       )}
 
       <div className="space-y-12">
@@ -190,31 +189,21 @@ export default function Home() {
           )}
 
           {/* ---------------- Debts ---------------- */}
-          <section className="space-y-3">
-            <div className="flex justify-between flex-col sm:flex-row gap-3">
-              <h2 className="text-xl font-semibold text-text">Your Debts</h2>
-              {user?.is_admin && debts.length > 0 && (
-                <Button
-                  variant="primary"
-                  size="md"
-                  onClick={() => setOpenPaymentModal(true)}
-                >
-                  Pay All (₦{formatNum(totalOutstanding)})
-                </Button>
-              )}
-            </div>
+          {debts.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex justify-between flex-col sm:flex-row gap-3">
+                <h2 className="text-xl font-semibold text-text">Your Debts</h2>
+                {user?.is_admin && (
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={() => setOpenPaymentModal(true)}
+                  >
+                    Pay All (₦{formatNum(totalOutstanding)})
+                  </Button>
+                )}
+              </div>
 
-            {debtsLoading ? (
-              <p className="text-sm text-text-placeholder">Loading debts…</p>
-            ) : debtsError ? (
-              <p className="text-sm text-error">Failed to load debts.</p>
-            ) : debts.length === 0 ? (
-              <EmptyState
-                title="No Debts"
-                description="You are all settled up 🎉"
-                icon={<FaFileAlt size={28} />}
-              />
-            ) : (
               <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 {debts.map((d: any) => (
                   <OutStanding
@@ -227,8 +216,8 @@ export default function Home() {
                   />
                 ))}
               </div>
-            )}
-          </section>
+            </section>
+          )}
 
           {/* ---------------- Ongoing Events ---------------- */}
           {ongoingEvents.length > 0 ? (

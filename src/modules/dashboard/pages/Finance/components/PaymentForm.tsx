@@ -9,6 +9,7 @@ import { fetchAllEvents } from "../../../services/events";
 import { useFetchDebts } from "../../../hook/useFinance";
 import type { InitPaymentRequest, PaymentItem } from "../../../types";
 import { toast } from "react-toastify";
+import ListingSkeleton from "../../Home/components/ListingSkeleton";
 
 /* -------------------- Helpers -------------------- */
 function recalcToDate(from: string, units: number) {
@@ -178,7 +179,12 @@ export function PaymentForm({
   };
 
   /* -------------------- Render -------------------- */
-  if (loadingDebts) return <div className="p-4">Loading debts...</div>;
+  if (loadingDebts)
+    return (
+      <div className="p-4">
+        <ListingSkeleton />
+      </div>
+    );
 
   return (
     <div className="flex flex-col h-full">
@@ -192,9 +198,7 @@ export function PaymentForm({
           >
             <FaChevronLeft size={14} />
           </Button>
-          <span className="font-semibold text-accent ml-1">
-            Select Payments
-          </span>
+
           <CheckboxField
             field={{
               name: "selectAllMobile",
@@ -203,7 +207,7 @@ export function PaymentForm({
               onBlur: () => {},
               ref: () => {},
             }}
-            label="All"
+            label="Select All"
           />
         </div>
       </div>
@@ -219,7 +223,7 @@ export function PaymentForm({
           <FaChevronLeft size={12} /> Back to members
         </Button>
 
-        {/* Mobile: card layout */}
+        {/* Mobile: two-row layout with checkbox */}
         <div className="sm:hidden space-y-3">
           {items.map((item, idx) => {
             const itemTotal =
@@ -231,48 +235,31 @@ export function PaymentForm({
                 key={item.id}
                 className="border border-border bg-background rounded-md p-3 text-sm"
               >
-                <div className="flex items-center justify-between mb-2">
-                  {!isAppreciation ? (
-                    <CheckboxField
-                      field={{
-                        name: item.name || `item-${item.id}`,
-                        value: Number(item.units) > 0,
-                        onChange: (checked: boolean) =>
-                          updateItemUnits(idx, checked ? 1 : 0),
-                        onBlur: () => {},
-                        ref: () => {},
-                      }}
-                      label={item.name ?? "Unnamed"}
-                    />
-                  ) : (
-                    <span className="font-semibold text-text">{item.name}</span>
-                  )}
-                </div>
+                {/* Row 1: checkbox + name + unit controls */}
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    {!isAppreciation && (
+                      <CheckboxField
+                        field={{
+                          name: item.name || `item-${item.id}`,
+                          value: Number(item.units) > 0,
+                          onChange: (checked: boolean) =>
+                            updateItemUnits(idx, checked ? 1 : 0),
+                          onBlur: () => {},
+                          ref: () => {},
+                        }}
+                        label={item.name ?? "Unnamed"}
+                      />
+                    )}
+                    {isAppreciation && (
+                      <span className="font-semibold text-text">
+                        {item.name}
+                      </span>
+                    )}
+                  </div>
 
-                {/* Compact details */}
-                <div className="flex justify-between items-center text-xs text-text-placeholder">
-                  <span>Price:</span>
-                  {isAppreciation ? (
-                    <FormInput
-                      type="number"
-                      placeholder="Enter amount"
-                      value={item.unit_price ?? ""}
-                      onChange={(e) =>
-                        updateAppreciationAmount(+e.target.value)
-                      }
-                      className="w-20 text-right"
-                    />
-                  ) : (
-                    <span className="font-medium text-text">
-                      ₦{(Number(item.unit_price) || 0).toLocaleString()}
-                    </span>
-                  )}
-                </div>
-
-                {!isAppreciation && (
-                  <div className="flex justify-between items-center text-xs text-text-placeholder mt-1">
-                    <span>Units:</span>
-                    <div className="flex items-center gap-2">
+                  {!isAppreciation && (
+                    <div className="flex items-center gap-1">
                       <Button
                         variant="outline"
                         size="sm"
@@ -299,14 +286,34 @@ export function PaymentForm({
                         +
                       </Button>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
 
-                <div className="flex justify-between text-xs text-text-placeholder mt-1">
-                  <span>Total:</span>
-                  <span className="font-bold text-accent">
-                    ₦{itemTotal.toLocaleString()}
-                  </span>
+                {/* Row 2: price / accumulated */}
+                <div className="flex justify-between items-center text-xs text-text-placeholder mt-1">
+                  {!isAppreciation ? (
+                    <>
+                      <span>
+                        ₦{(Number(item.unit_price) || 0).toLocaleString()}
+                      </span>
+                      <span>
+                        Accumulated:{" "}
+                        <span className="font-bold text-red-500">
+                          ₦{itemTotal.toLocaleString()}
+                        </span>
+                      </span>
+                    </>
+                  ) : (
+                    <FormInput
+                      type="number"
+                      placeholder="Enter amount"
+                      value={item.unit_price ?? ""}
+                      onChange={(e) =>
+                        updateAppreciationAmount(+e.target.value)
+                      }
+                      className="w-full text-right"
+                    />
+                  )}
                 </div>
               </div>
             );
@@ -436,10 +443,11 @@ export function PaymentForm({
       </div>
 
       {/* Footer */}
-      <div className="sticky bottom-0 bg-surface border-t border-border py-2 space-y-4">
-        <div className="flex flex-col sm:flex-row gap-3">
+      <div className="sticky bg-surface bottom-0 border-t border-border p-3 space-y-2">
+        {/* Dropdowns */}
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <Dropdown
-            label="Associated Event"
+            label="Event"
             items={events}
             displayValueKey="name"
             value={selectedEvent}
@@ -449,13 +457,14 @@ export function PaymentForm({
               setSelectedEvent(item);
               setEventError(null);
             }}
-            placeholder={loadingEvents ? "Loading events..." : "Select event"}
+            placeholder={loadingEvents ? "Loading..." : "Select event"}
             disabled={loadingEvents}
             className="flex-1"
+            size="small"
           />
 
           <Dropdown
-            label="Payment Method"
+            label="Payment"
             items={[
               { id: "cash", name: "Cash" },
               { id: "online", name: "Online (Coming Soon)", disabled: true },
@@ -474,25 +483,20 @@ export function PaymentForm({
             }
             placeholder="Choose method"
             className="flex-1"
+            size="small"
           />
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <span className="text-lg sm:text-xl font-bold text-text">
-            Total to Pay: ₦{totalAmount.toLocaleString()}
-          </span>
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={handlePay}
-            disabled={isPending || totalAmount <= 0}
-            className="w-full sm:w-auto"
-          >
-            {isPending
-              ? "Processing..."
-              : `Pay ₦${totalAmount.toLocaleString()}`}
-          </Button>
-        </div>
+        {/* Pay Button */}
+        <Button
+          variant="primary"
+          size="md"
+          onClick={handlePay}
+          disabled={isPending || totalAmount <= 0}
+          className="w-full sm:w-auto py-2"
+        >
+          {isPending ? "Processing..." : `Pay ₦${totalAmount.toLocaleString()}`}
+        </Button>
       </div>
     </div>
   );
