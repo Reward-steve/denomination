@@ -5,7 +5,7 @@ import { useInitPayment } from "../../../hook/useFinance";
 import type { InitPaymentRequest } from "../../../types";
 import { BaseModal } from "../../../../../components/ui/BaseModal";
 import { useDebounce } from "../../../hook/useDebounce";
-import { fetchUsersForAttendance } from "../../../services/home";
+// import { fetchUsersForAttendance } from "../../../services/home";
 import { PaymentForm } from "./PaymentForm";
 import { UserList } from "./UserList";
 import { fetchUsers } from "../../Users/services";

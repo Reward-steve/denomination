@@ -1,13 +1,13 @@
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import DashboardLayout from "../../components/Layout";
 import { TbTransactionDollar } from "react-icons/tb";
 import { EmptyState } from "../../../../components/ui/EmptyState";
-import { useFetchUserTransactions } from "../../hook/useFinance";
+// import { useFetchUserTransactions } from "../../hook/useFinance";
 import { PaymentModal } from "./components/PaymentModal";
 import { BaseModal } from "../../../../components/ui/BaseModal";
 import moment from "moment";
 import { useAuth } from "../../../../hooks/useAuth";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { fetchUserTransactions } from "../../services/finance";
 
 /* -------------------- Types -------------------- */
