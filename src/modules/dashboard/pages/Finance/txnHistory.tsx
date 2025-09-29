@@ -1,335 +1,486 @@
-import { useEffect, useRef, useState } from "react";
-import DashboardLayout from "../../components/Layout";
-import { TbTransactionDollar } from "react-icons/tb";
-import { EmptyState } from "../../../../components/ui/EmptyState";
-import { PaymentModal } from "./components/PaymentModal";
-import { BaseModal } from "../../../../components/ui/BaseModal";
-import moment from "moment";
-import { useAuth } from "../../../../hooks/useAuth";
+import { useCallback, useEffect, useMemo, useState, type FC } from "react";
 import { useLocation } from "react-router-dom";
-import { fetchUserTransactions } from "../../services/finance";
+import moment from "moment";
+import { TbTransactionDollar } from "react-icons/tb";
+import { IoIosSearch } from "react-icons/io";
+import { FaSlidersH } from "react-icons/fa";
 
-/* -------------------- Types -------------------- */
-interface Transaction {
-  id: number;
-  status: "failed" | "successful" | "pending";
-  username: string;
-  amount: number;
-  date: string;
-  reference?: string;
-  from_date?: string;
-  to_date?: string;
-  payment_method?: string;
-  payment_gateway?: string | null;
-  event_name?: string;
-  event_id?: number | null;
-  created_at?: string;
-  updated_at?: string;
-  descr: string | null;
-  recurring: number;
-  item_name?: string;
+import DashboardLayout from "../../components/Layout";
+import { useAuth } from "../../../../hooks/useAuth";
+import {
+  fetchUserTransactions,
+  fetchAllTransactions,
+} from "../../services/finance";
+
+import { Dropdown } from "../../../../components/ui/Dropdown";
+import { EmptyState } from "../../../../components/ui/EmptyState";
+import { BaseModal } from "../../../../components/ui/BaseModal";
+import FormInput from "../../../../components/ui/FormInput";
+import { Button } from "../../../../components/ui/Button";
+import { DashboardHeader } from "../../components/Header";
+import {
+  DateFormInput,
+  ReceiptContent,
+  TransactionList,
+  TransactionListSkeleton,
+  type Transaction,
+  type TransactionStatus,
+} from "./components/FinanceCom";
+
+interface DropdownOption {
+  id: string | number;
+  name: string;
 }
 
-const determineStatusColor = (status: string, withBG = true) => {
-  switch (status) {
-    case "successful":
-      return withBG ? "bg-green-100" : "text-green-800";
-    case "pending":
-      return withBG ? "bg-yellow-100" : "text-yellow-800";
-    case "failed":
-      return withBG ? "bg-red-100" : "text-red-800";
-    default:
-      return withBG ? "bg-gray-100" : "text-gray-800";
-  }
+export const MapApiToTransactions = (apiData: any[] = []): Transaction[] =>
+  apiData.map((txn) => ({
+    id: Number(txn?.id) || 0,
+    status: (txn?.status as TransactionStatus) || "pending",
+    username:
+      [txn?.first_name, txn?.last_name].filter(Boolean).join(" ") ||
+      txn?.username ||
+      "Unknown",
+    amount: Number(txn?.amount) || 0,
+    date: txn?.created_at ? txn.created_at.split(" ")[0] : undefined,
+    payment_method: txn?.payment_method ?? null,
+    payment_gateway: txn?.payment_gateway ?? null,
+    event_id: txn?.event_id ?? null,
+    event_name: txn?.event_name ?? null,
+    reference: txn?.reference ?? null,
+    descr: txn?.descr ?? null,
+    recurring: Number(txn?.recurring) || 0,
+    created_at: txn?.created_at ?? null,
+    updated_at: txn?.updated_at ?? null,
+    from_date: txn?.from_date ?? null,
+    to_date: txn?.to_date ?? null,
+    item_name: txn?.item_name ?? null,
+  }));
+
+/* Constants */
+const STATUS_OPTIONS: DropdownOption[] = [
+  { id: "all", name: "All" },
+  { id: "successful", name: "Successful" },
+  { id: "pending", name: "Pending" },
+  { id: "failed", name: "Failed" },
+];
+
+const PAYMENT_METHOD_OPTIONS: DropdownOption[] = [
+  { id: "all", name: "All" },
+  { id: "cash", name: "Cash" },
+  { id: "card", name: "Card" },
+  { id: "transfer", name: "Transfer" },
+  { id: "mobile", name: "Mobile" },
+];
+
+const currentYear = new Date().getFullYear();
+const YEAR_OPTIONS: DropdownOption[] = Array.from({ length: 6 }).map((_, i) => {
+  const y = String(currentYear + i);
+  return { id: y, name: y };
+});
+
+const MONTH_OPTIONS: DropdownOption[] = moment.months().map((m, i) => ({
+  id: String(i + 1).padStart(2, "0"),
+  name: m,
+}));
+
+/* Filter modal */
+interface FilterModalProps {
+  setClose: () => void;
+  filters: {
+    filterStatus: DropdownOption;
+    filterPaymentMethod: DropdownOption;
+    filterYear: DropdownOption | null;
+    filterMonth: DropdownOption | null;
+    filterDate: string;
+  };
+  setFilters: (key: string, value: any) => void;
+  onApply: () => void;
+  onReset: () => void;
+  loading: boolean;
+}
+
+const FilterModal: FC<FilterModalProps> = ({
+  setClose,
+  filters,
+  setFilters,
+  onApply,
+  onReset,
+  loading,
+}) => {
+  return (
+    <BaseModal title="Advanced Filters" setClose={setClose} size="md">
+      <div className="p-4 sm:p-6 space-y-4 bg-background">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Dropdown<DropdownOption>
+            label="Status"
+            items={STATUS_OPTIONS}
+            displayValueKey="name"
+            value={filters.filterStatus}
+            onSelect={(v) => v && setFilters("filterStatus", v)}
+          />
+          <Dropdown<DropdownOption>
+            label="Payment Method"
+            items={PAYMENT_METHOD_OPTIONS}
+            displayValueKey="name"
+            value={filters.filterPaymentMethod}
+            onSelect={(v) => v && setFilters("filterPaymentMethod", v)}
+          />
+          <Dropdown<DropdownOption>
+            label="Year"
+            items={YEAR_OPTIONS}
+            displayValueKey="name"
+            value={filters.filterYear}
+            onSelect={(v) => v && setFilters("filterYear", v)}
+          />
+          <Dropdown<DropdownOption>
+            label="Month"
+            items={MONTH_OPTIONS}
+            displayValueKey="name"
+            value={filters.filterMonth}
+            onSelect={(v) => setFilters("filterMonth", v)}
+            optional
+          />
+          <div className="col-span-1 sm:col-span-2">
+            <DateFormInput
+              label="Specific Date"
+              value={filters.filterDate}
+              onChange={(value) => setFilters("filterDate", value)}
+            />
+          </div>
+        </div>
+
+        <div className="pt-4 border-t border-border">
+          <div className="flex flex-col gap-3 md:flex-row md:justify-end">
+            <Button
+              onClick={() => {
+                onReset();
+                setClose();
+              }}
+              disabled={loading}
+              variant="outline"
+              className="w-full md:w-auto"
+            >
+              Reset All
+            </Button>
+
+            <Button
+              onClick={() => {
+                onApply();
+                setClose();
+              }}
+              disabled={loading}
+              className="w-full md:w-auto"
+            >
+              {loading ? "Applying..." : "Apply Filters"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </BaseModal>
+  );
 };
 
-function TransactionListSkeleton() {
-  return (
-    <ul
-      className="divide-y divide-border rounded-xl bg-surface shadow"
-      role="list"
-    >
-      {Array.from({ length: 5 }).map((_, index) => (
-        <li
-          key={index}
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-4 animate-pulse"
-        >
-          <div className="flex-1 min-w-0 space-y-2">
-            <div className="h-4 bg-border rounded w-3/4" />
-            <div className="h-3 bg-border rounded w-1/2" />
-          </div>
-          <div className="h-4 bg-border rounded w-16 shrink-0" />
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-/* -------------------- Helpers -------------------- */
-function mapApiToTransactions(apiData: any[]): Transaction[] {
-  return apiData.map((txn) => ({
-    id: txn.id,
-    status: txn.status,
-    username: `${txn.first_name} ${txn.last_name}`,
-    amount: Number(txn.amount),
-    date: txn.created_at.split(" ")[0],
-    payment_method: txn.payment_method,
-    payment_gateway: txn.payment_gateway,
-    event_id: txn.event_id,
-    event_name: txn.event_name,
-    reference: txn.reference,
-    descr: txn.descr,
-    recurring: txn.recurring,
-    created_at: txn.created_at,
-    updated_at: txn.updated_at,
-    from_date: txn.from_date,
-    to_date: txn.to_date,
-    item_name: txn.item_name,
-  }));
-}
-
-/* -------------------- Main Component -------------------- */
+/* Main component */
 export default function TransactionHistory() {
-  const [showPayment, setShowPayment] = useState(false);
-  const [showReceipt, setShowReceipt] = useState(false);
-  const [txDetails, setTxDetails] = useState<Transaction>();
-
   const { user } = useAuth();
   const loc = useLocation();
-  // const param = useParams();
+
   const searchParams = new URLSearchParams(loc.search);
   const fromFinance = !!searchParams.get("fromfinance");
-  const forAdmins = (user?.is_admin && fromFinance) || false;
-  const df = useRef(false);
-  // const { data: transactionData, isLoading: transactionsLoading, isError: transactionsError } = useFetchUserTransactions(forAdmins);
-  const [transactionData, setTransactionData] = useState<any>(null);
-  const [transactionsLoading, setTransactionsLoading] = useState(true);
-  const [transactionsError, setTransactionsError] = useState(false);
-  useEffect(() => {
-    df.current = forAdmins;
+  const isAdmin = Boolean(user?.is_admin && fromFinance) || false;
 
-    fetchUserTransactions(df.current)
-      .then((res) => {
-        setTransactionData({ ...res });
-      })
-      .catch(() => {
-        setTransactionsError(true);
-      })
-      .finally(() => {
-        setTransactionsLoading(false);
-      });
+  const [filterStatus, setFilterStatus] = useState<DropdownOption>(
+    STATUS_OPTIONS[0]
+  );
+  const [filterPaymentMethod, setFilterPaymentMethod] =
+    useState<DropdownOption>(PAYMENT_METHOD_OPTIONS[0]);
+  const [filterYear, setFilterYear] = useState<DropdownOption | null>(
+    YEAR_OPTIONS[0]
+  );
+  const [filterMonth, setFilterMonth] = useState<DropdownOption | null>(null);
+  const [filterDate, setFilterDate] = useState<string>("");
+  const [filterSearch, setFilterSearch] = useState<string>("");
+
+  const [showFiltersModal, setShowFiltersModal] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [txDetails, setTxDetails] = useState<Transaction | undefined>(
+    undefined
+  );
+
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [masterTransactions, setMasterTransactions] = useState<Transaction[]>(
+    []
+  );
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<boolean>(false);
+
+  const setFilterValue = useCallback((key: string, value: any) => {
+    switch (key) {
+      case "filterStatus":
+        setFilterStatus(value);
+        break;
+      case "filterPaymentMethod":
+        setFilterPaymentMethod(value);
+        break;
+      case "filterYear":
+        setFilterYear(value);
+        break;
+      case "filterMonth":
+        setFilterMonth(value);
+        break;
+      case "filterDate":
+        setFilterDate(value);
+        break;
+      case "filterSearch":
+        setFilterSearch(value);
+        break;
+      default:
+        break;
+    }
   }, []);
 
-  const transactions: Transaction[] = transactionData?.data
-    ? mapApiToTransactions(transactionData.data)
-    : [];
+  const buildApiFilters = useCallback(() => {
+    const out: Record<string, string> = {};
+    if (filterStatus?.id && String(filterStatus.id) !== "all")
+      out.status = String(filterStatus.id);
+    if (filterPaymentMethod?.id && String(filterPaymentMethod.id) !== "all")
+      out.payment_method = String(filterPaymentMethod.id);
+    if (filterYear?.id) out.year = String(filterYear.id);
+    if (filterMonth?.id) out.month = String(filterMonth.id).padStart(2, "0");
+    if (filterDate) out.date = filterDate;
+    if (filterSearch && filterSearch.trim() !== "")
+      out.search = filterSearch.trim();
+    return out;
+  }, [
+    filterStatus,
+    filterPaymentMethod,
+    filterYear,
+    filterMonth,
+    filterDate,
+    filterSearch,
+  ]);
+
+  const applyClientSideFilter = useCallback(
+    (items: Transaction[], filters: ReturnType<typeof buildApiFilters>) => {
+      return items.filter((t) => {
+        if (filters.status && t.status !== filters.status) return false;
+        if (
+          filters.payment_method &&
+          t.payment_method !== filters.payment_method
+        )
+          return false;
+
+        const createdDate = t.created_at ? new Date(t.created_at) : null;
+        if (createdDate) {
+          if (
+            filters.year &&
+            createdDate.getFullYear().toString() !== filters.year
+          )
+            return false;
+          if (filters.month) {
+            const createdMonth = String(createdDate.getMonth() + 1).padStart(
+              2,
+              "0"
+            );
+            if (createdMonth !== filters.month) return false;
+          }
+          if (filters.date) {
+            const createdDay = moment(createdDate).format("YYYY-MM-DD");
+            if (createdDay !== filters.date) return false;
+          }
+        }
+
+        if (filters.search) {
+          const s = filters.search.toLowerCase();
+          const name = (t.username || "").toLowerCase();
+          const ref = (t.reference || "").toLowerCase();
+          const itemName = (t.item_name || "").toLowerCase();
+          const eventName = (t.event_name || "").toLowerCase();
+
+          if (
+            !name.includes(s) &&
+            !ref.includes(s) &&
+            !itemName.includes(s) &&
+            !eventName.includes(s)
+          )
+            return false;
+        }
+
+        return true;
+      });
+    },
+    []
+  );
 
   useEffect(() => {
-    console.log(transactionData); // Access like an object property
-  }, [transactionData]);
+    let mounted = true;
+    const loadInitial = async () => {
+      setLoading(true);
+      setError(false);
+      try {
+        const res = await (isAdmin
+          ? fetchAllTransactions({})
+          : fetchUserTransactions(false));
+
+        const mapped = MapApiToTransactions(res?.data || []);
+
+        if (!mounted) return;
+
+        if (isAdmin) {
+          setTransactions(mapped);
+        } else {
+          setMasterTransactions(mapped);
+          setTransactions(mapped);
+        }
+      } catch (err) {
+        console.error(err);
+        if (!mounted) return;
+        setError(true);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+    loadInitial();
+    return () => {
+      mounted = false;
+    };
+  }, [isAdmin]);
+
+  const applyFilters = useCallback(async () => {
+    setLoading(true);
+    setError(false);
+    const filtersToSend = buildApiFilters();
+
+    try {
+      if (isAdmin) {
+        const res = await fetchAllTransactions(filtersToSend);
+        setTransactions(MapApiToTransactions(res?.data || []));
+      } else {
+        const filtered = applyClientSideFilter(
+          masterTransactions,
+          filtersToSend
+        );
+        setTransactions(filtered);
+      }
+    } catch (err) {
+      console.error(err);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [isAdmin, buildApiFilters, applyClientSideFilter, masterTransactions]);
+
+  const resetFilters = useCallback(() => {
+    setFilterStatus(STATUS_OPTIONS[0]);
+    setFilterPaymentMethod(PAYMENT_METHOD_OPTIONS[0]);
+    setFilterYear(YEAR_OPTIONS[0]);
+    setFilterMonth(null);
+    setFilterDate("");
+    setFilterSearch("");
+
+    if (isAdmin) {
+      applyFilters(); // refetch from API
+    } else {
+      setTransactions(masterTransactions); // restore from cache
+    }
+  }, [isAdmin, masterTransactions, applyFilters]);
+
+  const filterProps = useMemo(
+    () => ({
+      filterStatus,
+      filterPaymentMethod,
+      filterYear,
+      filterMonth,
+      filterDate,
+    }),
+    [filterStatus, filterPaymentMethod, filterYear, filterMonth, filterDate]
+  );
 
   return (
     <DashboardLayout>
-      <div className="sticky top-6 text-text my-4 text-lg font-semibold">
-        Transactions
-      </div>
-      <section className="space-y-8 animate-fade">
-        {/* Transactions */}
-        <section>
-          {transactionsLoading ? (
+      <DashboardHeader
+        title="Transactions History"
+        description="view all transactions"
+      >
+        <div className="sticky top-0 bg-background pb-4 z-10 border-b border-border/50 -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="flex w-full flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="w-full md:max-w-xs">
+              <FormInput
+                id="search-filter"
+                placeholder="Search by Username, Reference, or Item"
+                value={filterSearch}
+                onChange={(e) => setFilterValue("filterSearch", e.target.value)}
+                icon={IoIosSearch}
+              />
+            </div>
+
+            <div className="flex w-full flex-row gap-3 md:w-auto md:flex-row md:items-center">
+              <Button
+                onClick={() => setShowFiltersModal(true)}
+                variant="outline"
+                className="flex-1 justify-center md:flex-none"
+              >
+                <FaSlidersH className="h-5 w-5 text-accent" />
+                <span className="ml-2">Filters</span>
+              </Button>
+
+              {/* Apply Button */}
+              <Button
+                onClick={applyFilters}
+                disabled={loading}
+                variant="primary"
+                className="flex-1 justify-center md:flex-none"
+              >
+                {loading ? <span className="animate-spin">⚙️</span> : "Apply"}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <section className="space-y-8 animate-fade mt-4">
+          {loading ? (
             <TransactionListSkeleton />
-          ) : transactionsError ? (
+          ) : error ? (
             <p className="text-center text-error py-8">
-              Failed to load transactions.
+              Failed to load transactions. Please try again.
             </p>
-          ) : transactions.length > 0 ? (
+          ) : transactions.length ? (
             <TransactionList
               transactions={transactions}
-              showDetails={setShowReceipt}
-              _setTxDetails={setTxDetails}
+              onSelect={(t) => {
+                setTxDetails(t);
+                setShowReceipt(true);
+              }}
             />
           ) : (
             <EmptyState
-              title="No Transactions"
-              description="No transactions yet. Click “Make Payment” above to get started."
+              title="No Transactions Found"
+              description="Try changing your filter criteria or resetting them."
               icon={<TbTransactionDollar className="w-8 h-8 text-accent" />}
             />
           )}
         </section>
+      </DashboardHeader>
 
-        {/* Payment Modal */}
-        {showPayment && <PaymentModal onClose={() => setShowPayment(false)} />}
-      </section>
+      {showFiltersModal && (
+        <FilterModal
+          setClose={() => setShowFiltersModal(false)}
+          filters={filterProps}
+          setFilters={setFilterValue}
+          onApply={applyFilters}
+          onReset={resetFilters}
+          loading={loading}
+        />
+      )}
 
-      {/* reciept modal */}
-      {showReceipt && (
+      {showReceipt && txDetails && (
         <BaseModal
-          title="Payment receipt"
+          title="Transaction Receipt"
           setClose={() => setShowReceipt(false)}
         >
-          <div className="flex justify-center items-center w-full mb-4">
-            <ul
-              className="divide-y divide-border bg-background rounded-xl max-w-[600px] w-full my-4 shadow"
-              role="list"
-              aria-label="Receipt details"
-            >
-              <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
-                <p className="text-text-placeholder text-sm">Name</p>
-                <p className="font-medium text-text truncate">
-                  {txDetails?.username}
-                </p>
-              </li>
-              <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
-                <p className="text-text-placeholder text-sm">
-                  Associated event
-                </p>
-                <p className="font-medium text-text truncate">
-                  {txDetails?.event_name}
-                </p>
-              </li>
-              <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
-                <p className="text-text-placeholder text-sm">Amount</p>
-                <p className="font-medium text-text truncate">
-                  ₦{Number(txDetails?.amount).toLocaleString()}
-                </p>
-              </li>
-              <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
-                <p className="text-text-placeholder text-sm">Payment item</p>
-                <p className="font-medium text-text truncate">
-                  {txDetails?.item_name}
-                </p>
-              </li>
-              {txDetails?.descr && txDetails.descr.trim().length > 0 && (
-                <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
-                  <p className="text-text-placeholder text-sm">Description</p>
-                  <p className="font-medium text-text truncate">
-                    {txDetails?.descr}
-                  </p>
-                </li>
-              )}
-              <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
-                <p className="text-text-placeholder text-sm">Payment method</p>
-                <p className="font-medium text-text truncate">
-                  {txDetails?.payment_method}
-                </p>
-              </li>
-              <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
-                <p className="text-text-placeholder text-sm">Status</p>
-                <p
-                  className={`font-medium text-text truncate px-1 rounded ${determineStatusColor(
-                    txDetails?.status || "",
-                    false
-                  )}`}
-                >
-                  {txDetails?.status}
-                </p>
-              </li>
-
-              {txDetails?.recurring && (
-                <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
-                  <p className="text-text-placeholder text-sm">
-                    Period paid for
-                  </p>
-                  <p className="font-medium text-text truncate">
-                    {new Date(txDetails?.from_date || "").getFullYear() ===
-                    new Date().getFullYear()
-                      ? moment(txDetails?.from_date || "").format("MMM")
-                      : moment(txDetails?.from_date).format("MMM YYYY")}{" "}
-                    - {moment(txDetails?.to_date).format("MMM YYYY")}{" "}
-                  </p>
-                </li>
-              )}
-
-              <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
-                <p className="text-text-placeholder text-sm">Date</p>
-                <p className="font-medium text-text truncate">
-                  {moment(txDetails?.created_at).format("MMM D, YYYY")}
-                </p>
-              </li>
-              <li className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4">
-                <p className="text-text-placeholder text-sm">Reference</p>
-                <p className="font-medium text-text truncate">
-                  {txDetails?.reference}
-                </p>
-              </li>
-            </ul>
-          </div>
+          <ReceiptContent txDetails={txDetails} />
         </BaseModal>
       )}
     </DashboardLayout>
-  );
-}
-
-function TransactionList({
-  transactions,
-  showDetails,
-  _setTxDetails,
-}: {
-  transactions: Transaction[];
-  showDetails: any;
-  _setTxDetails: (x: Transaction) => void;
-}) {
-  const { user } = useAuth();
-  const loc = useLocation();
-  // const param = useParams();
-  const searchParams = new URLSearchParams(loc.search);
-  const fromFinance = searchParams.get("fromfinance");
-
-  return (
-    <ul
-      className="divide-y divide-border rounded-xl bg-surface shadow"
-      role="list"
-      aria-label="transactions"
-    >
-      {transactions.map((t) => {
-        const statusStyles =
-          t.status === "successful"
-            ? "bg-green-100 text-green-800"
-            : t.status === "pending"
-            ? "bg-yellow-100 text-yellow-800"
-            : "bg-red-100 text-red-800";
-        return (
-          <li
-            key={t.id}
-            role="button"
-            tabIndex={-1}
-            onClick={() => {
-              showDetails(true);
-              _setTxDetails(t);
-            }}
-            className="flex cursor-pointer overflow-hidden flex-row justify-between gap-2 p-4 hover:bg-background/60 transition"
-          >
-            <div className="min-w-0">
-              <p className="font-medium text-text truncate">
-                {user?.is_admin && fromFinance ? t.username : t.item_name}
-              </p>
-              <p className="text-sm text-text-placeholder">{t.date}</p>
-
-              <small className={`text-xs ${statusStyles} px-1 rounded`}>
-                {t.status}
-              </small>
-            </div>
-
-            <div className=" min-w-0 text-end">
-              <p className="text-text text-sm">{t.payment_method}</p>
-
-              <p
-                className={`font-semibold shrink-0 
-            ${
-              t.status === "successful"
-                ? "text-green-500"
-                : t.status === "pending"
-                ? "text-text-placeholder"
-                : "text-red-500"
-            }`}
-              >
-                {t.status === "successful" ? "+" : ""}₦
-                {t.amount.toLocaleString()}
-              </p>
-            </div>
-          </li>
-        );
-      })}
-    </ul>
   );
 }
