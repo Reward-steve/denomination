@@ -6,7 +6,7 @@ import {
   TbHome2,
   TbTransactionDollar,
 } from "react-icons/tb";
-import { MdAnnouncement } from "react-icons/md";
+import { MdAnnouncement, MdChat } from "react-icons/md";
 
 // Interfaces
 export interface AuthSidebarProps {
@@ -32,11 +32,11 @@ export const ROUTES = {
     EVENTS: "events",
     FINANCE: "finance",
     TRANSACTION: "transaction-history",
+    CHAT: "chats",
     USERS: "users",
     DOCUMENTS: "documents",
     SONGS: "songs",
     SERMON: "sermon",
-
     ANNOUNCEMENT: "announcements",
   },
   AUTH: {
@@ -151,5 +151,11 @@ export const dashboardMenu: DashboardSidebarProps[] = [
     path: validatePath(ROUTES.DASHBOARD.ANNOUNCEMENT),
     Icon: MdAnnouncement,
     admin: true,
+  },
+  {
+    label: "Chat",
+    path: validatePath(ROUTES.DASHBOARD.CHAT),
+    Icon: MdChat,
+    admin: false,
   },
 ];
