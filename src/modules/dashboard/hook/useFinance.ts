@@ -78,17 +78,17 @@ export function useFetchTransaction(txnId: number, enabled = true) {
 export function useFetchAllTransactions() {
   return useQuery({
     queryKey: ["allTransactions"],
-    queryFn: fetchAllTransactions,
+    queryFn: () => fetchAllTransactions(),
   });
 }
 
 /**
  * Fetch all user transactions for the system.
  */
-export function useFetchUserTransactions(forAdmins:boolean) {
+export function useFetchUserTransactions(forAdmins: boolean) {
   return useQuery({
     queryKey: ["userTransactions"],
-    queryFn: ()=>fetchUserTransactions(forAdmins),
+    queryFn: () => fetchUserTransactions(forAdmins),
   });
 }
 

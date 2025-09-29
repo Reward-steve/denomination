@@ -6,6 +6,7 @@ import RegistrationSuccess from "../modules/auth/pages/RegistrationSuccess";
 import UCCAInfo from "../modules/auth/pages/UCCAInfo";
 
 import Announcements from "../modules/dashboard/pages/Announcements";
+import Chats from "../modules/dashboard/pages/Chats";
 import Document from "../modules/dashboard/pages/Documents";
 import Events from "../modules/dashboard/pages/Events";
 import { EventView } from "../modules/dashboard/pages/Events/EventView";
@@ -39,4 +40,5 @@ export const dashboard = [
   { path: "Songs", element: Songs },
   { path: "sermon", element: Sermon },
   { path: "announcements", element: Announcements },
+  { path: "chats", element: Chats },
 ];
