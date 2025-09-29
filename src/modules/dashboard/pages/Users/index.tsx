@@ -16,6 +16,7 @@ import { DashboardHeader } from "../../components/Header";
 import { MdGroupOff } from "react-icons/md";
 import FormInput from "../../../../components/ui/FormInput";
 import { useDebounce } from "../../hook/useDebounce";
+import { useNavigate } from "react-router-dom";
 
 /* ==============================
    🔹 Types
@@ -29,6 +30,7 @@ interface FetchOptions {
 export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUser, setLoadingUser] = useState(true);
+  const navigate = useNavigate();
 
   const menu_items: Record<string, any>[] = [
     { label: "Make admin", key: "make_admin" },
@@ -112,7 +114,9 @@ export default function Users() {
       case "exco":
         return users.filter((u) => u.is_exco);
       case "priest_status":
-        return users.filter((u) => u.priest_status === "posted");
+        return users.filter(
+          (u) => u.priest_status === "Posted" || u.priest_status === "posted"
+        );
       default:
         return users;
     }
@@ -205,6 +209,7 @@ export default function Users() {
               <article
                 key={idx}
                 className={`relative flex flex-col bg-surface rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-border ${_styles}`}
+                onClick={() => navigate(`/dashboard/users/${user.id}/profile`)} // ✅ card navigation
               >
                 {/* Actions */}
                 <Dropper

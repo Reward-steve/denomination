@@ -5,7 +5,6 @@ import { useInitPayment } from "../../../hook/useFinance";
 import type { InitPaymentRequest } from "../../../types";
 import { BaseModal } from "../../../../../components/ui/BaseModal";
 import { useDebounce } from "../../../hook/useDebounce";
-// import { fetchUsersForAttendance } from "../../../services/home";
 import { PaymentForm } from "./PaymentForm";
 import { UserList } from "./UserList";
 import { fetchUsers } from "../../Users/services";
@@ -91,8 +90,8 @@ export function PaymentModal({ onClose, user }: PaymentModalProps) {
         step === "select-user"
           ? "Choose a Member"
           : selectedUser
-            ? `Payment for ${selectedUser.first_name} ${selectedUser.last_name}`
-            : "Payment"
+          ? `Payment for ${selectedUser.first_name} ${selectedUser.last_name}`
+          : "Payment"
       }
       isOpen
       setClose={onClose}

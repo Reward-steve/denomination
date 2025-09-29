@@ -16,6 +16,7 @@ import Home from "../modules/dashboard/pages/Home";
 import Sermon from "../modules/dashboard/pages/Sermon";
 import Songs from "../modules/dashboard/pages/Songs";
 import Users from "../modules/dashboard/pages/Users";
+import UserProfile from "../modules/dashboard/pages/Users/UserProfile";
 
 export const auth = [
   { path: "personal-info", element: PersonalInfo },
@@ -31,8 +32,9 @@ export const dashboard = [
   { path: "events", element: Events },
   { path: "events/:eventId/view", element: EventView },
   { path: "finance", element: Finance },
-  { path: "transaction-history", element:TransactionHistory},
+  { path: "transaction-history", element: TransactionHistory },
   { path: "users", element: Users },
+  { path: "users/:userId/profile", element: UserProfile },
 
   { path: "documents", element: Document },
   { path: "Songs", element: Songs },
