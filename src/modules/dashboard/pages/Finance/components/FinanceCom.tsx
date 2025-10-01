@@ -4,6 +4,11 @@ import { FaCalendarAlt } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../../../../../hooks/useAuth";
 import moment from "moment";
+import { useRef } from "react";
+import { useReactToPrint } from "react-to-print";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import { Button } from "../../../../../components/ui/Button";
 
 /* Types */
 export type TransactionStatus = "successful" | "pending" | "failed";
@@ -36,7 +41,7 @@ export const DetermineStatusColor = (status?: string, withBG = true) => {
   };
   return (
     map[status || ""] ||
-    (withBG ? "bg-gray-500 2ext-gray-800" : "text-gray-800")
+    (withBG ? "bg-text-ptext-text-placeholder 2ext-text" : "text-text")
   );
 };
 
@@ -148,21 +153,29 @@ export const TransactionList: FC<{
   );
 };
 
-export const ReceiptDetail: FC<{
+const DashedSeparator: FC = () => (
+  <div className="relative h-1 my-4">
+    <div className="absolute top-0 left-0 right-0 border-t border-dashed border-border"></div>
+  </div>
+);
+
+const ReceiptDetail: FC<{
   label: string;
-  value?: any;
-  valueClass?: string;
-}> = ({ label, value, valueClass }) => {
-  if (value === undefined || value === null) return null;
-  return (
-    <div className="flex justify-between py-2 text-sm">
-      <p className="text-text-placeholder">{label}</p>
-      <p className={`font-semibold text-text text-end ${valueClass || ""}`}>
-        {value}
-      </p>
-    </div>
-  );
-};
+  value: string | null | undefined;
+  strongValue?: boolean;
+  isMonospace?: boolean;
+}> = ({ label, value, strongValue = false, isMonospace = false }) => (
+  <div className="flex justify-between items-start text-sm">
+    <span className="text-text-secondary font-medium">{label}</span>
+    <span
+      className={`text-right text-text 
+        ${strongValue ? "font-bold" : "font-semibold"} 
+        ${isMonospace ? "font-mono text-xs sm:text-sm" : ""}`}
+    >
+      {value || "N/A"}
+    </span>
+  </div>
+);
 
 export const ReceiptContent: FC<{ txDetails: Transaction }> = ({
   txDetails,
@@ -170,35 +183,54 @@ export const ReceiptContent: FC<{ txDetails: Transaction }> = ({
   const statusBGClass = DetermineStatusColor(txDetails.status, true);
 
   return (
-    <div className="p-4 sm:p-6 max-w-[400px] mx-auto rounded-xl bg-background shadow-2xl border border-border">
-      <div className="text-center pb-4 border-b border-dashed border-border/50">
+    <div className="p-6 sm:p-8 max-w-sm w-full mx-auto rounded-2xl bg-background shadow-xl border border-border text-text receipt-paper">
+      <div className="text-center pb-4">
+        <h1 className="text-xl font-bold text-accent mb-1">
+          UCCA Transaction Receipt
+        </h1>
         <div
-          className={`inline-flex items-center px-3 py-1 rounded-full font-medium text-sm ${statusBGClass} mb-3`}
+          className={`inline-flex items-center px-3 py-1 rounded-full font-semibold text-xs tracking-wider ${statusBGClass} mb-3`}
         >
-          {txDetails.status?.charAt(0).toUpperCase() +
-            (txDetails.status?.slice(1) ?? "")}
+          {txDetails.status?.toUpperCase() || "PENDING"}
         </div>
-        <p className="text-4xl font-extrabold text-text">
-          ₦{txDetails.amount.toLocaleString()}
+      </div>
+
+      <DashedSeparator />
+
+      {/* --- Amount & Description (The focus) --- */}
+      <div className="text-center py-4">
+        <p className="text-sm font-medium text-text-placeholder">
+          {txDetails.item_name || txDetails.event_name || "Payment Successful"}
         </p>
-        <p className="text-sm text-text-placeholder mt-1">
-          {txDetails.item_name || txDetails.event_name || "Payment"}
+        <p className="text-5xl font-extrabold text-text mt-2">
+          ₦{txDetails.amount.toLocaleString()}
         </p>
       </div>
 
-      <div className="pt-4 space-y-2">
+      <DashedSeparator />
+
+      {/* --- Transaction Details --- */}
+      <div className="py-4 space-y-4 text-sm">
+        {/* Key Detail Highlighted */}
         <ReceiptDetail
           label="Date & Time"
           value={
             txDetails.created_at
-              ? moment(txDetails.created_at).format("MMM D, YYYY | hh:mm A")
-              : undefined
+              ? moment(txDetails.created_at).format("MMM D, YYYY | h:mm:ss A")
+              : "N/A"
           }
+          strongValue={true}
         />
-        <ReceiptDetail label="Payment Item" value={txDetails.item_name} />
-        <ReceiptDetail label="Event Name" value={txDetails.event_name} />
-        <ReceiptDetail label="Description" value={txDetails.descr} />
         <ReceiptDetail label="Payer/Recipient" value={txDetails.username} />
+        <ReceiptDetail label="Description" value={txDetails.descr} />
+
+        <DashedSeparator />
+
+        <ReceiptDetail
+          label="Transaction Reference"
+          value={txDetails.reference ?? "N/A"}
+          isMonospace={true}
+        />
         <ReceiptDetail
           label="Payment Method"
           value={txDetails.payment_method}
@@ -207,6 +239,7 @@ export const ReceiptContent: FC<{ txDetails: Transaction }> = ({
           label="Payment Gateway"
           value={txDetails.payment_gateway}
         />
+
         {txDetails?.recurring &&
           txDetails.recurring > 0 &&
           txDetails.from_date &&
@@ -220,11 +253,109 @@ export const ReceiptContent: FC<{ txDetails: Transaction }> = ({
           )}
       </div>
 
-      <div className="mt-6 pt-4 border-t border-dashed border-border/50 text-center">
-        <p className="text-xs text-text-placeholder">Transaction Reference</p>
-        <p className="font-mono text-sm font-bold text-text mt-1">
-          {txDetails.reference ?? "N/A"}
+      <DashedSeparator />
+
+      {/* --- Footer Message --- */}
+      <div className="mt-4 text-center">
+        <p className="text-xs text-text-placeholder italic">
+          Thank you for using our service. This is a computer-generated receipt.
         </p>
+      </div>
+    </div>
+  );
+};
+
+export const ReceiptActions: FC<{ txDetails: Transaction }> = ({
+  txDetails,
+}) => {
+  const receiptRef = useRef<HTMLDivElement>(null);
+
+  /* ----------- PRINT STYLES & HANDLER ----------- */
+  // Use a string template for clean print-specific CSS
+  const printStyles = `
+    @page { margin: 10mm; }
+    .print-hide { display: none !important; } 
+    
+    @media print {
+      /* Hide everything except the receipt when printing */
+      body > * { visibility: hidden !important; }
+      .receipt-paper, .receipt-paper * { visibility: visible !important; }
+      .receipt-paper {
+        position: absolute;
+        left: 0;
+        top: 0;
+        box-shadow: none !important;
+        border: none !important;
+        background: white !important;
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 0; 
+      }
+    }
+  `;
+
+  const handlePrint = useReactToPrint({
+    contentRef: receiptRef,
+    documentTitle: `Receipt-${txDetails.reference || txDetails.id}`,
+    pageStyle: printStyles,
+  });
+
+  /* ----------- DOWNLOAD PDF HANDLER (High Quality) ----------- */
+  const handleDownloadPDF = async () => {
+    if (!receiptRef.current) return;
+
+    // Temporarily remove component styling for cleaner canvas capture
+    const originalStyles = receiptRef.current.style.cssText;
+    receiptRef.current.style.boxShadow = "none";
+    receiptRef.current.style.border = "none";
+    receiptRef.current.style.background = "background";
+
+    // Scroll to top for reliable capture
+    const initialScrollY = window.scrollY;
+    window.scrollTo(0, 0);
+
+    try {
+      // Use scale=3 for high-resolution canvas capture
+      const canvas = await html2canvas(receiptRef.current, {
+        scale: 3,
+        logging: false,
+      });
+      const imgData = canvas.toDataURL("image/jpeg", 1.0);
+
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const imgWidth = pageWidth - 20; // 10mm margins on both sides
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, "JPEG", 10, 10, imgWidth, imgHeight);
+      pdf.save(`Receipt-${txDetails.reference || txDetails.id}.pdf`);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    } finally {
+      window.scrollTo(0, initialScrollY);
+      receiptRef.current.style.cssText = originalStyles;
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <style>{printStyles}</style>
+      <div ref={receiptRef}>
+        <ReceiptContent txDetails={txDetails} />
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-sm mx-auto ">
+        <Button onClick={handlePrint} variant="primary" className="w-full">
+          Print Receipt
+        </Button>
+        <Button
+          onClick={handleDownloadPDF}
+          variant="primary"
+          className="w-full"
+        >
+          Download PDF
+        </Button>
       </div>
     </div>
   );

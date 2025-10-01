@@ -20,12 +20,24 @@ import { Button } from "../../../../components/ui/Button";
 import { DashboardHeader } from "../../components/Header";
 import {
   DateFormInput,
-  ReceiptContent,
+  ReceiptActions,
   TransactionList,
   TransactionListSkeleton,
   type Transaction,
   type TransactionStatus,
 } from "./components/FinanceCom";
+
+/* ---------- Utilities ---------- */
+function useDebounce<T>(value: T, delay = 500): T {
+  const [debounced, setDebounced] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return debounced;
+}
 
 interface DropdownOption {
   id: string | number;
@@ -56,7 +68,7 @@ export const MapApiToTransactions = (apiData: any[] = []): Transaction[] =>
     item_name: txn?.item_name ?? null,
   }));
 
-/* Constants */
+/* ---------- Constants ---------- */
 const STATUS_OPTIONS: DropdownOption[] = [
   { id: "all", name: "All" },
   { id: "successful", name: "Successful" },
@@ -83,7 +95,7 @@ const MONTH_OPTIONS: DropdownOption[] = moment.months().map((m, i) => ({
   name: m,
 }));
 
-/* Filter modal */
+/* ---------- Filter Modal ---------- */
 interface FilterModalProps {
   setClose: () => void;
   filters: {
@@ -103,36 +115,36 @@ const FilterModal: FC<FilterModalProps> = ({
   setClose,
   filters,
   setFilters,
-  onApply,
   onReset,
+  onApply,
   loading,
 }) => {
   return (
     <BaseModal title="Advanced Filters" setClose={setClose} size="md">
       <div className="p-4 sm:p-6 space-y-4 bg-background">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Dropdown<DropdownOption>
+          <Dropdown
             label="Status"
             items={STATUS_OPTIONS}
             displayValueKey="name"
             value={filters.filterStatus}
             onSelect={(v) => v && setFilters("filterStatus", v)}
           />
-          <Dropdown<DropdownOption>
+          <Dropdown
             label="Payment Method"
             items={PAYMENT_METHOD_OPTIONS}
             displayValueKey="name"
             value={filters.filterPaymentMethod}
             onSelect={(v) => v && setFilters("filterPaymentMethod", v)}
           />
-          <Dropdown<DropdownOption>
+          <Dropdown
             label="Year"
             items={YEAR_OPTIONS}
             displayValueKey="name"
             value={filters.filterYear}
             onSelect={(v) => v && setFilters("filterYear", v)}
           />
-          <Dropdown<DropdownOption>
+          <Dropdown
             label="Month"
             items={MONTH_OPTIONS}
             displayValueKey="name"
@@ -180,7 +192,7 @@ const FilterModal: FC<FilterModalProps> = ({
   );
 };
 
-/* Main component */
+/* ---------- Main Component ---------- */
 export default function TransactionHistory() {
   const { user } = useAuth();
   const loc = useLocation();
@@ -201,11 +213,11 @@ export default function TransactionHistory() {
   const [filterDate, setFilterDate] = useState<string>("");
   const [filterSearch, setFilterSearch] = useState<string>("");
 
+  const debouncedSearch = useDebounce(filterSearch, 500);
+
   const [showFiltersModal, setShowFiltersModal] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
-  const [txDetails, setTxDetails] = useState<Transaction | undefined>(
-    undefined
-  );
+  const [txDetails, setTxDetails] = useState<Transaction>();
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [masterTransactions, setMasterTransactions] = useState<Transaction[]>(
@@ -234,8 +246,6 @@ export default function TransactionHistory() {
       case "filterSearch":
         setFilterSearch(value);
         break;
-      default:
-        break;
     }
   }, []);
 
@@ -248,8 +258,8 @@ export default function TransactionHistory() {
     if (filterYear?.id) out.year = String(filterYear.id);
     if (filterMonth?.id) out.month = String(filterMonth.id).padStart(2, "0");
     if (filterDate) out.date = filterDate;
-    if (filterSearch && filterSearch.trim() !== "")
-      out.search = filterSearch.trim();
+    if (debouncedSearch && debouncedSearch.trim() !== "")
+      out.search = debouncedSearch.trim();
     return out;
   }, [
     filterStatus,
@@ -257,7 +267,7 @@ export default function TransactionHistory() {
     filterYear,
     filterMonth,
     filterDate,
-    filterSearch,
+    debouncedSearch,
   ]);
 
   const applyClientSideFilter = useCallback(
@@ -312,55 +322,25 @@ export default function TransactionHistory() {
     []
   );
 
-  useEffect(() => {
-    let mounted = true;
-    const loadInitial = async () => {
-      setLoading(true);
-      setError(false);
-      try {
-        const res = await (isAdmin
-          ? fetchAllTransactions({})
-          : fetchUserTransactions(false));
-
-        const mapped = MapApiToTransactions(res?.data || []);
-
-        if (!mounted) return;
-
-        if (isAdmin) {
-          setTransactions(mapped);
-        } else {
-          setMasterTransactions(mapped);
-          setTransactions(mapped);
-        }
-      } catch (err) {
-        console.error(err);
-        if (!mounted) return;
-        setError(true);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-    loadInitial();
-    return () => {
-      mounted = false;
-    };
-  }, [isAdmin]);
-
-  const applyFilters = useCallback(async () => {
+  const loadTransactions = useCallback(async () => {
     setLoading(true);
     setError(false);
-    const filtersToSend = buildApiFilters();
 
     try {
       if (isAdmin) {
-        const res = await fetchAllTransactions(filtersToSend);
+        const res = await fetchAllTransactions(buildApiFilters());
         setTransactions(MapApiToTransactions(res?.data || []));
       } else {
-        const filtered = applyClientSideFilter(
-          masterTransactions,
-          filtersToSend
-        );
-        setTransactions(filtered);
+        if (masterTransactions.length === 0) {
+          const res = await fetchUserTransactions(false);
+          const mapped = MapApiToTransactions(res?.data || []);
+          setMasterTransactions(mapped);
+          setTransactions(applyClientSideFilter(mapped, buildApiFilters()));
+        } else {
+          setTransactions(
+            applyClientSideFilter(masterTransactions, buildApiFilters())
+          );
+        }
       }
     } catch (err) {
       console.error(err);
@@ -368,7 +348,20 @@ export default function TransactionHistory() {
     } finally {
       setLoading(false);
     }
-  }, [isAdmin, buildApiFilters, applyClientSideFilter, masterTransactions]);
+  }, [isAdmin, buildApiFilters, masterTransactions, applyClientSideFilter]);
+
+  useEffect(() => {
+    loadTransactions();
+  }, [
+    debouncedSearch,
+    filterStatus,
+    filterPaymentMethod,
+    filterYear,
+    filterMonth,
+    filterDate,
+    isAdmin,
+    loadTransactions,
+  ]);
 
   const resetFilters = useCallback(() => {
     setFilterStatus(STATUS_OPTIONS[0]);
@@ -377,13 +370,7 @@ export default function TransactionHistory() {
     setFilterMonth(null);
     setFilterDate("");
     setFilterSearch("");
-
-    if (isAdmin) {
-      applyFilters(); // refetch from API
-    } else {
-      setTransactions(masterTransactions); // restore from cache
-    }
-  }, [isAdmin, masterTransactions, applyFilters]);
+  }, []);
 
   const filterProps = useMemo(
     () => ({
@@ -400,7 +387,7 @@ export default function TransactionHistory() {
     <DashboardLayout>
       <DashboardHeader
         title="Transactions History"
-        description="view all transactions"
+        description="View all transactions"
       >
         <div className="sticky top-0 bg-background pb-4 z-10 border-b border-border/50 -mx-4 px-4 sm:mx-0 sm:px-0">
           <div className="flex w-full flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -414,7 +401,7 @@ export default function TransactionHistory() {
               />
             </div>
 
-            <div className="flex w-full flex-row gap-3 md:w-auto md:flex-row md:items-center">
+            <div className="flex w-full gap-3 md:w-auto md:items-center">
               <Button
                 onClick={() => setShowFiltersModal(true)}
                 variant="outline"
@@ -422,16 +409,6 @@ export default function TransactionHistory() {
               >
                 <FaSlidersH className="h-5 w-5 text-accent" />
                 <span className="ml-2">Filters</span>
-              </Button>
-
-              {/* Apply Button */}
-              <Button
-                onClick={applyFilters}
-                disabled={loading}
-                variant="primary"
-                className="flex-1 justify-center md:flex-none"
-              >
-                {loading ? <span className="animate-spin">⚙️</span> : "Apply"}
               </Button>
             </div>
           </div>
@@ -455,7 +432,7 @@ export default function TransactionHistory() {
           ) : (
             <EmptyState
               title="No Transactions Found"
-              description="Try changing your filter criteria or resetting them."
+              description="Try adjusting your filters or search."
               icon={<TbTransactionDollar className="w-8 h-8 text-accent" />}
             />
           )}
@@ -467,9 +444,9 @@ export default function TransactionHistory() {
           setClose={() => setShowFiltersModal(false)}
           filters={filterProps}
           setFilters={setFilterValue}
-          onApply={applyFilters}
           onReset={resetFilters}
           loading={loading}
+          onApply={loadTransactions}
         />
       )}
 
@@ -478,7 +455,7 @@ export default function TransactionHistory() {
           title="Transaction Receipt"
           setClose={() => setShowReceipt(false)}
         >
-          <ReceiptContent txDetails={txDetails} />
+          <ReceiptActions txDetails={txDetails} />
         </BaseModal>
       )}
     </DashboardLayout>

@@ -11,7 +11,7 @@ import { FaArrowRight } from "react-icons/fa6";
 import { BaseModal } from "../../../../components/ui/BaseModal";
 import { Link } from "react-router-dom";
 import {
-  ReceiptContent,
+  ReceiptActions,
   TransactionList,
   TransactionListSkeleton,
 } from "./components/FinanceCom";
@@ -174,7 +174,6 @@ export default function Finance() {
         </section>
 
         {/* Transactions */}
-        {/* Transactions */}
         <section>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
             <h3 className="text-lg font-semibold text-text">
@@ -235,7 +234,7 @@ export default function Finance() {
             title="Payment receipt"
             setClose={() => setShowReceipt(false)}
           >
-            <ReceiptContent txDetails={txDetails} />
+            <ReceiptActions txDetails={txDetails} />
           </BaseModal>
         ))}
     </DashboardLayout>

@@ -1,22 +1,22 @@
-import { useRegisterSW } from 'virtual:pwa-register/react'
-import { useState } from 'react'
+import { useRegisterSW } from "virtual:pwa-register/react";
+import { useState } from "react";
 
 export default function PwaUpdater() {
-  const [offlineReady, setOfflineReady] = useState(false)
-  const [needRefresh, setNeedRefresh] = useState(false)
-  const {updateServiceWorker} = useRegisterSW({
+  const [offlineReady, setOfflineReady] = useState(false);
+  const [needRefresh, setNeedRefresh] = useState(false);
+  const { updateServiceWorker } = useRegisterSW({
     onOfflineReady() {
-      setOfflineReady(true)
+      setOfflineReady(true);
     },
     onNeedRefresh() {
-      setNeedRefresh(true)
+      setNeedRefresh(true);
     },
-  })
+  });
 
   const close = () => {
-    setOfflineReady(false)
-    setNeedRefresh(false)
-  }
+    setOfflineReady(false);
+    setNeedRefresh(false);
+  };
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
@@ -44,5 +44,5 @@ export default function PwaUpdater() {
         </div>
       )}
     </div>
-  )
+  );
 }
