@@ -1,10 +1,9 @@
 // src/features/dashboard/pages/UserProfile.tsx
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-// 🚨 NEW IMPORT: React Hook Form
-import { useForm, type SubmitHandler } from "react-hook-form";
+import { Controller, useForm, type SubmitHandler } from "react-hook-form";
 import DashboardLayout from "../../components/Layout";
-import { fetchUserById } from "./services";
+import { fetchUserById, updateProfile, updatePassword } from "./services";
 import defaultAvatar from "../../../../assets/images/avater.jpg";
 import {
   MdGroupOff,
@@ -15,7 +14,7 @@ import {
   MdCheck,
   MdClose,
   MdSave,
-  MdOutlineCloudUpload, // Keeping the nice icon from the previous response
+  MdLock,
 } from "react-icons/md";
 import {
   FaMapMarkerAlt,
@@ -26,93 +25,103 @@ import {
 } from "react-icons/fa";
 import { Button } from "../../../../components/ui/Button";
 import { DashboardHeader } from "../../components/Header";
-
-import type { PersonalInfoFormData, User } from "../../../../types/auth.types";
 import { useAuth } from "../../../../hooks/useAuth";
 import FormInput from "../../../../components/ui/FormInput";
-import { createUCCAUser } from "../../../auth/services/auth";
+import {
+  type PersonalInfoFormData,
+  type User,
+} from "../../../../types/auth.types";
+import { toast } from "react-toastify";
+import ImageUploader from "../../../auth/components/ImageUploader";
 
-// -----------------------------------------------------------
-// 🔹 Utility: Get user photo safely
-// -----------------------------------------------------------
-const getUserPhotoUrl = (photoPath: string | undefined | null) => {
+/* ------------------------------------------
+ * Utility: Safe user photo
+ * ------------------------------------------ */
+/**
+ * Constructs the full URL for the user's photo, falling back to a default.
+ * @param photoPath The relative path to the user's photo.
+ * @returns The full photo URL.
+ */
+const getUserPhotoUrl = (photoPath?: string | null) => {
   if (!photoPath) return defaultAvatar;
-  const baseUrl = import.meta.env.VITE_BASE_URL.split("/api/")[0];
-  return `${baseUrl}/${photoPath}`;
+  // Ensure we handle environment variables safely and construct the URL correctly
+  const baseUrl = import.meta.env.VITE_BASE_URL?.split("/api/")?.[0] || "";
+  return photoPath.startsWith("http") ? photoPath : `${baseUrl}/${photoPath}`;
 };
 
-// -----------------------------------------------------------
-// ⚛️ TYPES for RHF
-// -----------------------------------------------------------
-type UserFormFields = {
-  first_name: string;
-  middle_name: string;
-  last_name: string;
-  email: string; // Disabled
-  primary_phone: string; // Disabled
-  secondary_phone: string;
-  dob: string;
-  gender: string;
-  occupation: string;
-  residential_address: string;
-};
+/* ------------------------------------------
+ * Types
+ * ------------------------------------------ */
+interface PasswordFormFields {
+  password: string; // Current password
+  new_password: string;
+  confirm_password: string;
+}
 
-// -----------------------------------------------------------
-// 🚀 MAIN COMPONENT: UserProfile (View/Edit Toggler)
-// -----------------------------------------------------------
+/* ------------------------------------------
+ * Main Component: UserProfile
+ * ------------------------------------------ */
 export default function UserProfile() {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
-  const { user: authUser } = useAuth(); // logged-in user
-  console.log(authUser);
+  const { user: authUser } = useAuth();
 
-  const [profileUser, setProfileUser] = useState<User | null>(null); // 👈 renamed
+  const [profileUser, setProfileUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
 
-  // Compare logged-in user vs profile
+  // Memoize ownership check
   const isOwner = useMemo(
     () =>
       authUser && profileUser && String(authUser.id) === String(profileUser.id),
     [authUser, profileUser]
   );
 
+  // Function to load user data - memoized with useCallback
   const loadUser = useCallback(async () => {
+    if (!userId) {
+      setError("User ID is missing.");
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
+    setError(null);
     try {
       const {
         data: { data },
-      } = await fetchUserById(userId!);
-      if (data) setProfileUser(data);
-      else setError("User not found 😔");
-    } catch (err) {
-      console.error(err);
+      } = await fetchUserById(userId);
+      if (data) {
+        setProfileUser(data);
+      } else {
+        setError("User not found 😔");
+      }
+    } catch (e) {
+      console.error("Error loading user profile:", e);
       setError("Unable to load profile. Try again later.");
     } finally {
       setLoading(false);
     }
   }, [userId]);
 
+  // Initial data fetch and re-fetch on userId change
   useEffect(() => {
-    if (userId) loadUser();
-  }, [userId, loadUser]);
+    loadUser();
+  }, [loadUser]); // Dependency is loadUser itself
 
+  // Memoize full name calculation
   const fullName = useMemo(
     () =>
       profileUser
         ? `${profileUser.first_name} ${profileUser.middle_name || ""} ${
             profileUser.last_name
-          }`
+          }`.trim()
         : "",
     [profileUser]
   );
 
-  const handleSave = (updatedUser: User) => {
-    setIsEditing(false);
-    setProfileUser(updatedUser); // 👈 update profileUser, not auth user
-  };
+  // --- Render Handlers ---
 
   if (loading) {
     return (
@@ -142,65 +151,69 @@ export default function UserProfile() {
     );
   }
 
-  if (!isEditing) {
-    return (
-      <DashboardLayout>
-        <DashboardHeader
-          title={`${profileUser.first_name}'s Profile`}
-          description={`Detailed information about ${fullName}`}
-        >
-          <UserProfileView
-            user={profileUser}
-            fullName={fullName}
-            navigate={navigate}
-            onEdit={() => setIsEditing(true)}
-            isOwner={isOwner!} // clean prop
-          />
-        </DashboardHeader>
-      </DashboardLayout>
-    );
-  }
-
   return (
     <DashboardLayout>
       <DashboardHeader
-        title={`Editing ${profileUser.first_name}'s Profile`}
-        description={`Modify details for ${fullName}`}
+        title={`${profileUser.first_name}'s Profile`}
+        description={`Detailed information about ${fullName}`}
       >
-        <UserProfileEdit
-          user={profileUser}
-          onCancel={() => setIsEditing(false)}
-          onSave={handleSave}
-          isSaving={isSaving}
-          setIsSaving={setIsSaving}
-        />
+        <div className="max-w-6xl mx-auto">
+          {isEditing ? (
+            <UserProfileEdit
+              user={profileUser}
+              onCancel={() => {
+                setIsEditing(false);
+                // Optionally reset the form to initial state on cancel
+              }}
+              onSuccess={() => {
+                setIsEditing(false); // Close edit mode
+                loadUser(); // Crucial: reload the updated user data
+              }}
+            />
+          ) : (
+            <UserProfileView
+              user={profileUser}
+              fullName={fullName}
+              navigate={navigate}
+              onEdit={() => setIsEditing(true)}
+              isOwner={!!isOwner}
+            />
+          )}
+        </div>
       </DashboardHeader>
     </DashboardLayout>
   );
 }
 
-// -----------------------------------------------------------
-// ✨ Component: UserProfileView (The beautiful display mode)
-// -----------------------------------------------------------
-
-interface UserProfileViewProps {
-  user: User;
-  fullName: string;
-  navigate: ReturnType<typeof useNavigate>;
-  onEdit: () => void;
-  isOwner: boolean; // 3. Added isOwner prop
-}
-
+/* ------------------------------------------
+ * View Component
+ * ------------------------------------------ */
+/**
+ * Renders the read-only view of the user's profile.
+ */
 function UserProfileView({
   user,
   fullName,
   navigate,
   onEdit,
-  isOwner, // Destructure isOwner
-}: UserProfileViewProps) {
+  isOwner,
+}: {
+  user: User;
+  fullName: string;
+  navigate: ReturnType<typeof useNavigate>;
+  onEdit: () => void;
+  isOwner: boolean;
+}) {
+  const handleCopy = (value: string | null | undefined, label: string) => {
+    if (value) {
+      navigator.clipboard.writeText(value);
+      toast.info(`${label} copied!`);
+    }
+  };
+
   return (
-    <div className="max-w-6xl mx-auto p-6 md:p-10 bg-surface rounded-3xl shadow-lg border border-border space-y-10">
-      {/* 🔹 Profile Overview */}
+    <div className="p-6 md:p-10 bg-background rounded-3xl shadow-xl border border-border space-y-10">
+      {/* Overview */}
       <div className="flex flex-col md:flex-row items-center md:items-start gap-6 pb-8 border-b border-border">
         <img
           src={getUserPhotoUrl(user.photo)}
@@ -209,7 +222,7 @@ function UserProfileView({
         />
         <div className="flex flex-col text-center md:text-left flex-1">
           <h2 className="text-3xl font-extrabold text-text">{fullName}</h2>
-          <p className="text-lg font-medium text-primary mt-1">
+          <p className="text-lg font-medium text-accent mt-1">
             {user.occupation || "UCCA Member"}
           </p>
           <p className="flex items-center justify-center md:justify-start text-text-secondary mt-2">
@@ -219,11 +232,8 @@ function UserProfileView({
           </p>
         </div>
         <div className="flex gap-3 flex-wrap justify-center md:justify-end">
-          {isOwner && ( // 4. Conditionally render Edit Button
-            <Button
-              onClick={onEdit}
-              className="bg-success hover:bg-success/90 text-white shadow-md transition-all duration-300"
-            >
+          {isOwner && (
+            <Button onClick={onEdit} variant="primary">
               <MdEdit className="mr-2" /> Edit Profile
             </Button>
           )}
@@ -233,13 +243,13 @@ function UserProfileView({
         </div>
       </div>
 
-      {/* 🔹 Details Grid (VIEW MODE) - Remains the same */}
+      {/* Details Sections */}
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Left (Main info) */}
         <div className="lg:col-span-2 space-y-8">
           <Section
             title="Personal Details"
-            icon={<FaHeart className="text-primary" />}
+            icon={<FaHeart className="text-accent" />}
           >
             <GridInfo
               items={[
@@ -256,12 +266,13 @@ function UserProfileView({
                   fullRow: true,
                 },
               ]}
+              handleCopy={handleCopy}
             />
           </Section>
 
           <Section
             title="Community Affiliation"
-            icon={<FaHandsHelping className="text-success" />}
+            icon={<FaHandsHelping className="text-green-500" />}
           >
             <GridInfo
               items={[
@@ -269,14 +280,20 @@ function UserProfileView({
                 { label: "Zone", value: user.zone },
                 { label: "Area", value: user.area },
                 { label: "Priest Status", value: user.priest_status },
-                { label: "Previous Pew", value: user.previous_pew },
                 { label: "Joined UCCA", value: user.date_ucca },
+                { label: "Promotion Method", value: user.promotion_method },
+                { label: "BCS Position", value: user.bcs_position },
+                { label: "Previous Pew", value: user.previous_pew },
                 {
-                  label: "Promotion Method",
-                  value: user.promotion_method,
-                  fullRow: true,
+                  label: "Inducted",
+                  value: user.inducted === 1 ? "Yes" : "No",
                 },
+                { label: "Induction Date", value: user.induction_date },
+                // Use optional chaining for nested objects
+                { label: "Education", value: user.education?.certificate },
+                { label: "Field of Study", value: user.education?.study },
               ]}
+              handleCopy={handleCopy}
             />
           </Section>
         </div>
@@ -285,40 +302,65 @@ function UserProfileView({
         <div className="lg:col-span-1 space-y-8">
           <Section
             title="Contact"
-            icon={<MdOutlineMessage className="text-info" />}
+            icon={<MdOutlineMessage className="text-primary" />}
           >
             <GridInfo
+              cols={1}
               items={[
                 { label: "Phone", value: user.primary_phone, copyable: true },
-                user.secondary_phone
-                  ? {
-                      label: "Alt Phone",
-                      value: user.secondary_phone,
-                      copyable: true,
-                    }
-                  : false,
-
+                {
+                  label: "Alt Phone",
+                  value: user.secondary_phone,
+                  copyable: true,
+                },
                 { label: "Email", value: user.email, copyable: true },
               ]}
-              cols={1}
+              handleCopy={handleCopy}
             />
           </Section>
 
-          {user.skills?.length > 0 && (
+          {user.skills && user.skills.length > 0 && (
             <Section
               title="Skills"
-              icon={<FaBriefcase className="text-warning" />}
+              icon={<FaBriefcase className="text-secondary" />}
             >
               <div className="flex flex-wrap gap-2">
                 {user.skills.map((s) => (
                   <span
                     key={s.id}
-                    className="px-3 py-1 rounded-full text-sm bg-primary/10 text-primary font-medium"
+                    className="px-3 py-1 rounded-full text-sm bg-primary/10 text-accent font-medium"
                   >
                     {s.skill_name}
                   </span>
                 ))}
               </div>
+            </Section>
+          )}
+
+          {user.nok && user.nok.length > 0 && (
+            <Section
+              title="Next of Kin (NOK)"
+              icon={<FaUserCog className="text-red-500" />}
+            >
+              {user.nok.map((kin, index) => (
+                <div
+                  key={index}
+                  className="space-y-2 mb-4 p-3 border-b border-border last:border-b-0"
+                >
+                  <p className="text-base font-bold text-text">
+                    {kin.full_name}
+                  </p>
+                  <GridInfo
+                    cols={1}
+                    items={[
+                      { label: "Relationship", value: kin.relationship },
+                      { label: "Phone", value: kin.phone, copyable: true },
+                      { label: "Address", value: kin.address, fullRow: true },
+                    ]}
+                    handleCopy={handleCopy}
+                  />
+                </div>
+              ))}
             </Section>
           )}
         </div>
@@ -327,173 +369,199 @@ function UserProfileView({
   );
 }
 
-// -----------------------------------------------------------
-// ✏️ Component: UserProfileEdit (RHF - Optimized)
-// -----------------------------------------------------------
-
+/* ------------------------------------------
+ * Edit Component
+ * ------------------------------------------ */
+/**
+ * Renders the forms for editing profile information and password.
+ */
 function UserProfileEdit({
   user,
   onCancel,
-  onSave,
-  isSaving,
-  setIsSaving,
-}: any) {
-  const { register, handleSubmit, reset } = useForm<UserFormFields>({
+  onSuccess,
+}: {
+  user: User;
+  onCancel: () => void;
+  onSuccess: () => void;
+}) {
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  // Initialize form with current user data
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { isDirty: isProfileDirty },
+  } = useForm<PersonalInfoFormData>({
     defaultValues: {
-      first_name: user.first_name,
-      middle_name: user.middle_name,
-      last_name: user.last_name,
-      email: user.email,
-      primary_phone: user.primary_phone,
-      secondary_phone: user.secondary_phone || "",
-      dob: user.dob || "",
-      gender: user.gender || "",
-      occupation: user.occupation || "",
-      residential_address: user.residential_address || "",
+      bio: {
+        first_name: user.first_name,
+        middle_name: user.middle_name || "",
+        last_name: user.last_name,
+        dob: user.dob || "",
+        gender: user.gender || "",
+        occupation: user.occupation || "",
+        residential_address: user.residential_address || "",
+      },
+      user_id: String(user.id),
     },
   });
 
-  const [photo, setPhoto] = useState<File | null>(null);
+  const {
+    register: registerPwd,
+    handleSubmit: handleSubmitPwd,
+    watch,
+    formState: { errors: errorsPwd, isDirty: isPasswordDirty },
+    reset: resetPwd,
+  } = useForm<PasswordFormFields>();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setPhoto(e.target.files[0]);
-    }
-  };
+  const newPassword = watch("new_password");
 
-  const onSubmit: SubmitHandler<UserFormFields> = async (data) => {
-    setIsSaving(true);
+  const onSubmitProfile: SubmitHandler<PersonalInfoFormData> = async (data) => {
+    setIsSavingProfile(true);
     try {
-      // 🚀 Build the full PersonalInfoFormData payload
-      const payload: PersonalInfoFormData = {
-        bio: {
-          first_name: data.first_name,
-          middle_name: data.middle_name,
-          last_name: data.last_name,
-          email: user.email, // locked
-          phone: user.primary_phone, // locked
-          dob: data.dob,
-          gender: data.gender,
-          occupation: data.occupation,
-          residential_address: data.residential_address,
-          // Preserve non-editable values so backend doesn't overwrite them
-          marital_status: user.marital_status,
-          lga: user.lga,
-          city: user.city,
-          bethel: user.bethel,
-          zone: user.zone,
-          area: user.area,
-          origin_state: user.origin_state,
-          residence_state: user.residence_state,
-          priest_status: user.priest_status,
-          previous_pew: user.previous_pew,
-          date_ucca: user.date_ucca,
-          promotion_method: user.promotion_method,
-          promotion_letter: user.promotion_letter,
-          inducted: user.inducted,
-          induction_date: user.induction_date,
-          bcs_position: user.bcs_position,
-          hobbies: user.hobbies,
-        },
-        education: user.education || { certificate: "", study: "" },
-        prev_positions: user.prev_positions || [],
-        nok: user.nok || [],
-        skills: user.skills?.map((s: any) => s.skill_name) || [],
-        ucca_position: user.ucca_position || [],
-        user_id: user.id, // important for update
-        photo: photo || undefined,
-      };
+      let payload: FormData | Omit<PersonalInfoFormData, "photo">;
 
-      const { data: updatedUser } = await createUCCAUser(payload);
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append("photo", imageFile);
+        formData.append("user_id", String(user.id));
+        Object.entries(data.bio).forEach(([key, value]) =>
+          formData.append(`bio[${key}]`, value)
+        );
+        payload = formData;
+      } else {
+        const { ...rest } = data;
+        payload = rest;
+      }
 
-      onSave(updatedUser.data); // Update parent state
-      reset(); // reset form to updated values
-    } catch (err) {
-      console.error("Save failed:", err);
-      alert("Something went wrong saving your profile. Please try again.");
+      const { data: response } = await updateProfile(payload);
+
+      // Reset form to update isDirty state and call parent success handler
+      reset(data, { keepValues: true }); // Keep new values for continuity
+      setImageFile(null);
+      toast.success(response || "Profile updated successfully! 🎉");
+      onSuccess();
+    } catch (err: any) {
+      console.error("Profile update failed:", err);
+      toast.error("Failed to update profile. Try again.");
     } finally {
-      setIsSaving(false);
+      setIsSavingProfile(false);
     }
   };
+
+  // Password Update Handler
+  const onSubmitPassword: SubmitHandler<PasswordFormFields> = async (data) => {
+    setIsSavingPassword(true);
+    try {
+      // API expects { user_id, password } for the *new* password
+      const payload = { user_id: String(user.id), password: data.new_password };
+      await updatePassword(payload);
+
+      toast.success("Password updated successfully! 🔒");
+      resetPwd(); // Clear password fields
+      // No need to call onSuccess here as it doesn't affect the visible profile data
+    } catch (err: any) {
+      console.error("Password update failed:", err);
+      // Display specific error if available
+      toast.error(
+        err?.response?.data?.message ||
+          "Failed to update password. Check your current password."
+      );
+    } finally {
+      setIsSavingPassword(false);
+    }
+  };
+
+  const currentPhotoUrl = useMemo(
+    () => getUserPhotoUrl(user.photo),
+    [user.photo]
+  );
 
   return (
-    <div className="max-w-6xl mx-auto p-6 md:p-10 bg-surface rounded-3xl shadow-xl border-2 border-primary/50 space-y-8">
-      <h3 className="text-2xl font-bold flex items-center text-primary">
-        <FaUserCog className="mr-3" /> Edit Mode: Profile Owner Access
-      </h3>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Profile Picture */}
-        <div className="flex items-center space-x-6 pb-4 border-b border-border">
-          <img
-            src={
-              photo ? URL.createObjectURL(photo) : getUserPhotoUrl(user.photo)
-            }
-            alt="Profile Preview"
-            className="w-24 h-24 rounded-full object-cover shadow-lg border-2 border-primary/40"
-          />
-          <label className="block cursor-pointer">
-            <span className="text-sm font-semibold text-text-secondary flex items-center mb-1">
-              <MdOutlineCloudUpload className="mr-2 text-lg text-primary" />
-              Update Photo
-            </span>
-            <input
-              type="file"
-              onChange={handleFileChange}
-              accept="image/*"
-              className="hidden"
+    <div className="bg-background rounded-3xl shadow-xl space-y-8 p-6">
+      {/* Profile Information Update Form */}
+      <form onSubmit={handleSubmit(onSubmitProfile)} className="space-y-6">
+        <Section
+          title="Profile Information"
+          icon={<MdEdit className="text-accent" />}
+        >
+          <div className="flex items-center space-x-6 pb-4 border-b border-border">
+            <Controller
+              name="photo"
+              control={control}
+              render={({ field }) => (
+                <ImageUploader
+                  message="Change profile picture"
+                  imagePreview={
+                    imageFile ? URL.createObjectURL(imageFile) : currentPhotoUrl
+                  }
+                  setImagePreview={() => {
+                    /* Not needed here as we use local state or default */
+                  }}
+                  setImageFile={(file) => {
+                    field.onChange(file);
+                    setImageFile(file);
+                  }}
+                  error={undefined} // Error handling for photo is typically simple validation, can be added to state if needed
+                />
+              )}
             />
-          </label>
-        </div>
+            {/* Display current image preview or the newly selected one */}
+            <p className="text-sm text-text-secondary">
+              Upload a new photo to replace the current one.
+            </p>
+          </div>
 
-        {/* Editable Fields */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <FormInput label="First Name" {...register("first_name")} />
-          <FormInput label="Middle Name" {...register("middle_name")} />
-          <FormInput label="Last Name" {...register("last_name")} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormInput
+              label="First Name"
+              {...register("bio.first_name", {
+                required: "First name is required",
+              })}
+            />
+            <FormInput label="Middle Name" {...register("bio.middle_name")} />
+            <FormInput
+              label="Last Name"
+              {...register("bio.last_name", {
+                required: "Last name is required",
+              })}
+            />
+            {/* Consider making 'gender' a select input for better data quality */}
+            <FormInput label="Gender" {...register("bio.gender")} />
+            <FormInput
+              type="date"
+              label="Date of Birth"
+              {...register("bio.dob")}
+            />
+            <FormInput label="Occupation" {...register("bio.occupation")} />
+            <div className="md:col-span-2">
+              <FormInput
+                label="Residential Address"
+                {...register("bio.residential_address")}
+              />
+            </div>
+          </div>
+        </Section>
 
-          <FormInput
-            label="Email"
-            disabled
-            {...register("email")}
-            placeholder="Locked by Admin"
-          />
-          <FormInput
-            label="Primary Phone"
-            disabled
-            {...register("primary_phone")}
-            placeholder="Locked by Admin"
-          />
-          <FormInput label="Alt Phone" {...register("secondary_phone")} />
-
-          <FormInput type="date" label="Date of Birth" {...register("dob")} />
-          <FormInput label="Gender" {...register("gender")} />
-          <FormInput label="Occupation" {...register("occupation")} />
-        </div>
-
-        {/* Full-width field */}
-        <FormInput
-          label="Residential Address"
-          {...register("residential_address")}
-        />
-
-        {/* Actions */}
-        <div className="flex justify-end gap-4 pt-4 border-t border-border">
+        <div className="flex justify-end gap-4">
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
-            disabled={isSaving}
+            disabled={isSavingProfile}
             className="border-danger text-danger hover:bg-danger/10"
           >
             <MdClose className="mr-2" /> Cancel
           </Button>
           <Button
             type="submit"
-            disabled={isSaving}
-            className="bg-primary text-white hover:bg-primary/90"
+            disabled={isSavingProfile || (!isProfileDirty && !imageFile)}
           >
-            {isSaving ? (
+            {isSavingProfile ? (
               <>
                 <MdSave className="mr-2 animate-spin" /> Saving...
               </>
@@ -505,15 +573,66 @@ function UserProfileEdit({
           </Button>
         </div>
       </form>
+
+      <hr className="border-border" />
+
+      {/* Password Update Form */}
+      <form onSubmit={handleSubmitPwd(onSubmitPassword)} className="space-y-6">
+        <Section title="Security" icon={<MdLock className="text-primary" />}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <FormInput
+              label="Current Password"
+              type="password"
+              {...registerPwd("password", {
+                required: "Current password is required",
+              })}
+              error={errorsPwd.password}
+            />
+            <FormInput
+              label="New Password"
+              type="password"
+              {...registerPwd("new_password", {
+                required: "New password is required",
+                minLength: {
+                  value: 8,
+                  message: "Password must be at least 8 characters",
+                },
+              })}
+              error={errorsPwd.new_password}
+            />
+            <FormInput
+              label="Confirm New Password"
+              type="password"
+              {...registerPwd("confirm_password", {
+                required: "Confirmation is required",
+                validate: (val) =>
+                  val === newPassword || "Passwords must match",
+              })}
+              error={errorsPwd.confirm_password}
+            />
+          </div>
+        </Section>
+
+        <div className="flex justify-end">
+          <Button
+            type="submit"
+            disabled={isSavingPassword || !isPasswordDirty}
+            variant="secondary"
+          >
+            {isSavingPassword ? "Updating..." : "Update Password"}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }
 
-/* ---------------------------------------
- * REUSABLE COMPONENTS (Kept the same)
- * ---------------------------------------
+/* ------------------------------------------
+ * Reusable Components
+ * ------------------------------------------ */
+/**
+ * A reusable container for a section of content.
  */
-
 function Section({
   title,
   children,
@@ -542,12 +661,17 @@ interface GridInfoItem {
   fullRow?: boolean;
 }
 
+/**
+ * Renders a grid of label-value pairs for displaying information.
+ */
 function GridInfo({
   items,
   cols = 2,
+  handleCopy,
 }: {
   items: (GridInfoItem | false)[];
   cols?: number;
+  handleCopy: (value: string | null | undefined, label: string) => void;
 }) {
   const filtered = items.filter((i): i is GridInfoItem => !!i && !!i.value);
   const colClasses = cols === 2 ? "sm:grid-cols-2" : "sm:grid-cols-1";
@@ -561,16 +685,18 @@ function GridInfo({
             item.fullRow && cols === 2 ? "sm:col-span-2" : ""
           }`}
         >
-          <span className="text-xs uppercase text-text-secondary">
+          <span className="text-xs uppercase text-text-placeholder">
             {item.label}
           </span>
           <p
             className={`text-base font-medium text-text ${
-              item.copyable ? "cursor-pointer hover:text-primary" : ""
+              item.copyable
+                ? "cursor-pointer hover:text-primary transition-colors"
+                : ""
             }`}
             onClick={
               item.copyable
-                ? () => navigator.clipboard.writeText(item.value!)
+                ? () => handleCopy(item.value, item.label)
                 : undefined
             }
           >

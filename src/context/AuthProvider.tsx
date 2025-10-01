@@ -23,12 +23,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAuthenticated = !!token;
 
   // ✅ Login: only updates state & storage (no redirect here)
-  const login = useCallback((newToken: string, newUser: User) => {
-    setToken(newToken);
-    setUser(newUser); 
-    saveInStore(TOKEN_KEY, newToken, "local");
-    saveInStore(USER_KEY, newUser, "local");
-  }, []);
+  const login = useCallback(
+    (newToken: string, newUser: User) => {
+      setToken(newToken);
+      setUser(newUser);
+      saveInStore(TOKEN_KEY, newToken, "local");
+      saveInStore(USER_KEY, newUser, "local");
+    },
+    [TOKEN_KEY, USER_KEY]
+  );
 
   // ✅ Logout: clears storage, saves last route, redirects home
   const logout = useCallback(() => {
@@ -43,11 +46,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem(USER_KEY);
 
     navigate("/", { replace: true });
-  }, [isAuthenticated, location.pathname, navigate]);
+  }, [
+    isAuthenticated,
+    location.pathname,
+    navigate,
+    TOKEN_KEY,
+    USER_KEY,
+    PREV_ROUTE_KEY,
+  ]);
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, token, user, login, logout }}
+      value={{ isAuthenticated, token, user, login, logout, setUser }}
     >
       {children}
     </AuthContext.Provider>

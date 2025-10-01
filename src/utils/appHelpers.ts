@@ -9,6 +9,7 @@ import { saveAs } from "file-saver";
  * - Generates preview URL
  * - Stores the File object
  */
+
 export const uploadImage = (
   e: React.ChangeEvent<HTMLInputElement>,
   setImagePreview: (url: string) => void,
@@ -17,16 +18,17 @@ export const uploadImage = (
   const file = e.target.files?.[0];
   if (!file) return;
 
-  // Limit: 2MB
-  const maxSize = 2 * 1024 * 1024;
+  // Limit: 300KB
+  const maxSize = 300 * 1024; // 300KB
   if (file.size > maxSize) {
-    toast.error("Image must be smaller than 2MB");
+    toast.error("Photo must be smaller than 300KB");
     return;
   }
 
-  const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/gif"];
+  // Allowed formats
+  const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
   if (!allowedTypes.includes(file.type)) {
-    toast.error("Only JPEG, PNG, JPG, or GIF files are allowed");
+    toast.error("Photo must be an image (jpeg, png, jpg, webp)");
     return;
   }
 
@@ -200,14 +202,16 @@ export const handleDownload = async (paths: Array<string>, name: string) => {
   saveAs(content, "ucca-files.zip");
 };
 
-export function objectToQueryParam<T extends Record<string, any>>(obj: T): string {
+export function objectToQueryParam<T extends Record<string, any>>(
+  obj: T
+): string {
   // Filter out properties that are undefined, null, or empty strings.
-  const filteredEntries = Object.entries(obj).filter(([_, value]) =>
-    value !== undefined && value !== null && value !== ''
+  const filteredEntries = Object.entries(obj).filter(
+    ([_, value]) => value !== undefined && value !== null && value !== ""
   );
 
   // Map each entry to a URL-encoded key-value pair.
   const queryString = new URLSearchParams(filteredEntries as any).toString();
 
-  return (queryString.length > 0) ? '?' + queryString : queryString;
+  return queryString.length > 0 ? "?" + queryString : queryString;
 }
