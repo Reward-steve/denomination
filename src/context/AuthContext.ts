@@ -5,7 +5,7 @@ type AuthContextType = {
   isAuthenticated: boolean;
   token: string | null;
   user: User | null;
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  updateAuthUser: React.Dispatch<React.SetStateAction<User | null>>;
   login: (newToken: string, newUser: User) => void;
   logout: () => void;
 };
@@ -14,7 +14,7 @@ export const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   token: null,
   user: null,
-  setUser: () => {},
+  updateAuthUser: () => {},
   login: () => {},
   logout: () => {},
 });

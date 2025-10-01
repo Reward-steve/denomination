@@ -61,7 +61,7 @@ interface PasswordFormFields {
 export default function UserProfile() {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
-  const { user: authUser } = useAuth();
+  const { user: authUser, updateAuthUser } = useAuth();
 
   const [profileUser, setProfileUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -158,13 +158,13 @@ export default function UserProfile() {
           {isEditing ? (
             <UserProfileEdit
               user={profileUser}
-              onCancel={() => {
+              onCancel={() => setIsEditing(false)}
+              onSuccess={(updatedUser) => {
                 setIsEditing(false);
-                // Optionally reset the form to initial state on cancel
-              }}
-              onSuccess={() => {
-                setIsEditing(false); // Close edit mode
-                loadUser(); // Crucial: reload the updated user data
+                setProfileUser(updatedUser); // update local state immediately
+                if (isOwner) {
+                  updateAuthUser(updatedUser);
+                }
               }}
             />
           ) : (
@@ -209,20 +209,20 @@ function UserProfileView({
   };
 
   return (
-    <div className="p-6 md:p-10 bg-background rounded-3xl shadow-xl border border-border space-y-10">
+    <div className="bg-background space-y-10">
       {/* Overview */}
-      <div className="flex flex-col md:flex-row items-center md:items-start gap-6 pb-8 border-b border-border">
+      <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
         <img
           src={getUserPhotoUrl(user.photo)}
           alt={user.first_name}
-          className="w-36 h-36 rounded-full object-cover shadow-md border-4 border-primary/30 hover:scale-105 transition-transform"
+          className="w-36 h-36 rounded-full object-cover shadow-md border-4 border-primary hover:scale-105 transition-transform"
         />
         <div className="flex flex-col text-center md:text-left flex-1">
           <h2 className="text-3xl font-extrabold text-text">{fullName}</h2>
           <p className="text-lg font-medium text-accent mt-1">
             {user.occupation || "UCCA Member"}
           </p>
-          <p className="flex items-center justify-center md:justify-start text-text-secondary mt-2">
+          <p className="flex items-center text-sm justify-center md:justify-start text-text-secondary mt-2">
             <FaMapMarkerAlt className="mr-2 text-sm" />
             {user.city || "Unknown City"},{" "}
             {user.residence_state || "Unknown State"}
@@ -230,18 +230,30 @@ function UserProfileView({
         </div>
         <div className="flex gap-3 flex-wrap justify-center md:justify-end">
           {isOwner && (
-            <Button onClick={onEdit} variant="primary">
+            <Button
+              onClick={onEdit}
+              variant="primary"
+              textSize="xs"
+              size="sm"
+              className="w-full sm:w-auto"
+            >
               <MdEdit className="mr-2" /> Edit Profile
             </Button>
           )}
-          <Button variant="outline" onClick={() => navigate(-1)}>
+          <Button
+            variant="outline"
+            onClick={() => navigate(-1)}
+            textSize="xs"
+            size="sm"
+            className="w-full sm:w-auto"
+          >
             <MdArrowBack className="mr-2" /> Back
           </Button>
         </div>
       </div>
 
       {/* Details Sections */}
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid lg:grid-cols-3 gap-6">
         {/* Left (Main info) */}
         <div className="lg:col-span-2 space-y-8">
           <Section
@@ -379,7 +391,7 @@ function UserProfileEdit({
 }: {
   user: User;
   onCancel: () => void;
-  onSuccess: () => void;
+  onSuccess: (updatedUser: User) => void;
 }) {
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isSavingPassword, setIsSavingPassword] = useState(false);
@@ -431,17 +443,16 @@ function UserProfileEdit({
         );
         payload = formData;
       } else {
-        const { ...rest } = data;
-        payload = rest;
+        payload = data;
       }
 
-      const { data: response } = await updateProfile(payload);
+      const { data: updatedUser } = await updateProfile(payload);
 
-      // Reset form to update isDirty state and call parent success handler
-      reset(data, { keepValues: true }); // Keep new values for continuity
+      reset(data, { keepValues: true });
       setImageFile(null);
-      toast.success(response || "Profile updated successfully! 🎉");
-      onSuccess();
+
+      toast.success("Profile updated successfully! 🎉");
+      onSuccess(updatedUser); // return updated user back to parent
     } catch (err: any) {
       console.error("Profile update failed:", err);
       toast.error("Failed to update profile. Try again.");
