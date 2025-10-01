@@ -11,10 +11,7 @@ import {
   MdOutlineMessage,
   MdArrowBack,
   MdEdit,
-  MdCheck,
-  MdClose,
   MdSave,
-  MdLock,
 } from "react-icons/md";
 import {
   FaMapMarkerAlt,
@@ -482,80 +479,71 @@ function UserProfileEdit({
   );
 
   return (
-    <div className="bg-background rounded-3xl shadow-xl space-y-8 p-6">
+    <div className="bg-background space-y-8">
       {/* Profile Information Update Form */}
       <form onSubmit={handleSubmit(onSubmitProfile)} className="space-y-6">
-        <Section
-          title="Profile Information"
-          icon={<MdEdit className="text-accent" />}
-        >
-          <div className="flex items-center space-x-6 pb-4 border-b border-border">
-            <Controller
-              name="photo"
-              control={control}
-              render={({ field }) => (
-                <ImageUploader
-                  message="Change profile picture"
-                  imagePreview={
-                    imageFile ? URL.createObjectURL(imageFile) : currentPhotoUrl
-                  }
-                  setImagePreview={() => {
-                    /* Not needed here as we use local state or default */
-                  }}
-                  setImageFile={(file) => {
-                    field.onChange(file);
-                    setImageFile(file);
-                  }}
-                  error={undefined} // Error handling for photo is typically simple validation, can be added to state if needed
-                />
-              )}
-            />
-            {/* Display current image preview or the newly selected one */}
-            <p className="text-sm text-text-secondary">
-              Upload a new photo to replace the current one.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormInput
-              label="First Name"
-              {...register("bio.first_name", {
-                required: "First name is required",
-              })}
-            />
-            <FormInput label="Middle Name" {...register("bio.middle_name")} />
-            <FormInput
-              label="Last Name"
-              {...register("bio.last_name", {
-                required: "Last name is required",
-              })}
-            />
-            {/* Consider making 'gender' a select input for better data quality */}
-            <FormInput label="Gender" {...register("bio.gender")} />
-            <FormInput
-              type="date"
-              label="Date of Birth"
-              {...register("bio.dob")}
-            />
-            <FormInput label="Occupation" {...register("bio.occupation")} />
-            <div className="md:col-span-2">
-              <FormInput
-                label="Residential Address"
-                {...register("bio.residential_address")}
+        <div className="flex items-center justify-center space-x-6 pb-4 border-b border-border">
+          <Controller
+            name="photo"
+            control={control}
+            render={({ field }) => (
+              <ImageUploader
+                message="Upload a new photo to replace the current one."
+                imagePreview={
+                  imageFile ? URL.createObjectURL(imageFile) : currentPhotoUrl
+                }
+                setImagePreview={() => {
+                  /* Not needed here as we use local state or default */
+                }}
+                setImageFile={(file) => {
+                  field.onChange(file);
+                  setImageFile(file);
+                }}
+                error={undefined}
               />
-            </div>
-          </div>
-        </Section>
+            )}
+          />
+        </div>
 
-        <div className="flex justify-end gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormInput
+            label="First Name"
+            {...register("bio.first_name", {
+              required: "First name is required",
+            })}
+          />
+          <FormInput label="Middle Name" {...register("bio.middle_name")} />
+          <FormInput
+            label="Last Name"
+            {...register("bio.last_name", {
+              required: "Last name is required",
+            })}
+          />
+          {/* Consider making 'gender' a select input for better data quality */}
+          <FormInput label="Gender" {...register("bio.gender")} />
+          <FormInput
+            type="date"
+            label="Date of Birth"
+            {...register("bio.dob")}
+          />
+          <FormInput label="Occupation" {...register("bio.occupation")} />
+          <div className="md:col-span-2">
+            <FormInput
+              label="Residential Address"
+              {...register("bio.residential_address")}
+            />
+          </div>
+        </div>
+
+        <div className="flex sm:justify-end justify-center flex-col sm:flex-row gap-4">
           <Button
             type="button"
-            variant="outline"
+            variant="danger"
             onClick={onCancel}
             disabled={isSavingProfile}
-            className="border-danger text-danger hover:bg-danger/10"
+            className="text-white"
           >
-            <MdClose className="mr-2" /> Cancel
+            Cancel
           </Button>
           <Button
             type="submit"
@@ -566,9 +554,7 @@ function UserProfileEdit({
                 <MdSave className="mr-2 animate-spin" /> Saving...
               </>
             ) : (
-              <>
-                <MdCheck className="mr-2" /> Save Changes
-              </>
+              <>Save Changes</>
             )}
           </Button>
         </div>
@@ -578,46 +564,44 @@ function UserProfileEdit({
 
       {/* Password Update Form */}
       <form onSubmit={handleSubmitPwd(onSubmitPassword)} className="space-y-6">
-        <Section title="Security" icon={<MdLock className="text-primary" />}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <FormInput
-              label="Current Password"
-              type="password"
-              {...registerPwd("password", {
-                required: "Current password is required",
-              })}
-              error={errorsPwd.password}
-            />
-            <FormInput
-              label="New Password"
-              type="password"
-              {...registerPwd("new_password", {
-                required: "New password is required",
-                minLength: {
-                  value: 8,
-                  message: "Password must be at least 8 characters",
-                },
-              })}
-              error={errorsPwd.new_password}
-            />
-            <FormInput
-              label="Confirm New Password"
-              type="password"
-              {...registerPwd("confirm_password", {
-                required: "Confirmation is required",
-                validate: (val) =>
-                  val === newPassword || "Passwords must match",
-              })}
-              error={errorsPwd.confirm_password}
-            />
-          </div>
-        </Section>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FormInput
+            label="Current Password"
+            type="password"
+            {...registerPwd("password", {
+              required: "Current password is required",
+            })}
+            error={errorsPwd.password}
+          />
+          <FormInput
+            label="New Password"
+            type="password"
+            {...registerPwd("new_password", {
+              required: "New password is required",
+              minLength: {
+                value: 8,
+                message: "Password must be at least 8 characters",
+              },
+            })}
+            error={errorsPwd.new_password}
+          />
+          <FormInput
+            label="Confirm New Password"
+            type="password"
+            {...registerPwd("confirm_password", {
+              required: "Confirmation is required",
+              validate: (val) => val === newPassword || "Passwords must match",
+            })}
+            error={errorsPwd.confirm_password}
+          />
+        </div>
 
-        <div className="flex justify-end">
+        <div className="flex sm:justify-end justify-center w-full">
           <Button
             type="submit"
             disabled={isSavingPassword || !isPasswordDirty}
             variant="secondary"
+            className="text-background w-full sm:w-auto"
           >
             {isSavingPassword ? "Updating..." : "Update Password"}
           </Button>
